@@ -101,7 +101,7 @@ export default {
       ],
       profileEditor: {
         name: 'Edit Profile', icon: 'edit', path: '/editprofile'
-      }
+      },
     }
   },
   methods: {
@@ -109,6 +109,8 @@ export default {
       const store = this.$store
       this.$store.dispatch("signOutUserFromApi", this.$router)
     }
+  },
+  watch: {
   }
 }
 </script>

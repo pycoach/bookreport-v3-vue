@@ -39,14 +39,14 @@ import { mapGetters } from 'vuex'
 export default {
   name: 'Project',
   computed: {
-    ...mapGetters(['projects'])
+    ...mapGetters(['projects', 'user'])
   },
   data() {
     return {}
   },
   
-  created() {
-    this.$store.dispatch('loadProjects');
+  created() {    
+    this.$store.dispatch('loadProjects', this.user.entity_id);
   },
   
   methods: {

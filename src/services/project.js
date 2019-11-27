@@ -82,12 +82,12 @@ function addIfPresent(source, destination, propertyName) {
 }
 
 const actions = {
-  loadProjects(context) {
+  loadProjects(context, id) {
     if (status.projectsLoading) {
       return
     }
     status.projectsLoading = true
-    get(context, URL, handleProjectLoad)
+    get(context, URL + '/user_id/' + id, handleProjectLoad)
   },
   saveProject(context, payload) {
     const projectData = {

@@ -9,41 +9,22 @@
           </v-card-title>
         </v-toolbar>
         <v-container grid-list-xl fluid pt-0>
-          <v-layout row wrap>
-            
-            
+          <v-layout row wrap>   
             <v-flex xs12 md12>
               <v-text-field label="Name"
                 clearable
                 v-model="name">
               </v-text-field>
             </v-flex>
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
             <v-flex xs12 md12>
-              <v-text-field label="segment_id"
-                v-model="segment_id"
-                @input="segment_idMaintainer"
-                maxlength="35">
-              </v-text-field>
-            </v-flex>
-            
-            
+              <v-textarea label="Description"
+                v-model="description"
+                outlined
+                auto-grow
+                rows="4"
+                row-height="30">
+              </v-textarea>
+            </v-flex>    
           </v-layout>
         </v-container>
         <v-card-actions>
@@ -68,126 +49,46 @@ export default {
   props: ['id'],
   data() {
     return {
-      editMode: 'Create',
-      
-      
+      editMode: 'Create',    
       name: '',
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      segment_id: null,
-      
-      
+      user_id: null,
+      description: '',
     }
   },
   mounted() {
+    this.user_id = this.user.entity_id
     if (this.id !== 'new') {
       this.editMode = 'Edit'
-      this.$store.commit('setActiveProject', {})
+      this.$store.commit('setActiveProject', {user_id: this.user_id})
       this.$store.dispatch('getProject', this.id)
     } else {
-      this.$store.commit('setActiveProject', {})
+      this.$store.commit('setActiveProject', {user_id: this.user_id})
     }
   },
   computed: {
     ...mapGetters(['activeProject', 'user']),
   },
   methods: {
-    saveProject() {
+    saveProject() {      
       this.setValues(this, this.activeProject)
+      console.log(this.activeProject)
       this.$store.dispatch('saveProject', this.activeProject)
     },
-    
-    
-    
-    
-    
-    segment_idMaintainer() {
-      if (this.segment_id.length == 8 ||
-        this.segment_id.length == 13 ||
-        this.segment_id.length == 18 ||
-        this.segment_id.length == 23) {
-          this.segment_id = this.segment_id + '-'
-        }
-    },
-    
-    
-    
-    setValues(source, destination) {
+    setValues(source, destination) {      
       destination['version'] = source['version']
       if (source['id'] !== 'new') {
         destination['entity_id'] = source['id']
-      }
-      
-      
+      }     
       destination['name'] = source['name']
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      destination['segment_id'] = source['segment_id']
-      let id = destination['segment_id']
-      if (id) {
-        for (let i = 0; i < 5; i++) {
-          id = id.replace('-', '')
-        }
-        destination['segment_id'] = id
-      }
-      
-      
+      destination['user_id'] = source['user_id']
+      destination['description'] = source['description']
     }
   },
   watch: {
     activeProject() {
-      if(this.activeProject) {
-        
-        
+      if(this.activeProject) {   
         this.name = this.activeProject.name
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        this.segment_id = this.activeProject.segment_id
-        
-        
+        this.user_id = this.activeProject.user_id
       }
     }
   }
