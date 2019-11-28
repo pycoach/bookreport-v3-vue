@@ -89,6 +89,7 @@ export default {
       if(this.activeProject) {   
         this.name = this.activeProject.name
         this.user_id = this.activeProject.user_id
+        this.description = this.activeProject.description
       }
     }
   }

@@ -94,8 +94,10 @@ const actions = {
       'version': payload['version'],
       'user_id': payload['user_id'],
       'name': payload['name'],
+      'description': payload['description'],
     }
     addIfPresent(payload, projectData, 'entity_id')
+
     if (payload['entity_id']) {
       put(context, projectData, handleProjectSave)
     } else {
