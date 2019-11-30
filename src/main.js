@@ -6,6 +6,7 @@ import vuetify from './plugins/vuetify'
 import Notifications from 'vue-notification'
 import velocity from 'velocity-animate'
 import AuthService from './auth/AuthService'
+import 'material-design-icons-iconfont/dist/material-design-icons.css'
 
 router.beforeEach((to, from, next) => {
   const auth = new AuthService()
