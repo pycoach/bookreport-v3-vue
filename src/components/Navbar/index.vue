@@ -4,50 +4,53 @@
     v-model="drawer"
     class="primary
     darken-1">
-    <v-list-item>
-      <v-list-item-content class="white--text">
-        <v-list-item-title class="title">
-          Book Report
-        </v-list-item-title>
-      </v-list-item-content>
-    </v-list-item>
-    <v-list-item two-line>
-      <v-list-item-avatar>
-        <img :src="user.picture">
-      </v-list-item-avatar>
-      <v-list-item-content>
-        <v-list-item-title class="white--text">{{ user.name }}</v-list-item-title>
-      </v-list-item-content>
-      <v-menu
-        :offset-y="true"
-        transition="slide-y-transition"
-        bottom
-        left>
-        <template v-slot:activator="{ on }">
-          <v-btn icon depressed v-on="on">
-            <v-icon class="white--text">arrow_drop_down</v-icon>
-          </v-btn>
-        </template>
-        <v-list>
-          <v-list-item
-            @click="$router.push(`${profileEditor.path}`).catch(err => {})">
-            <v-list-item-icon>
-              <v-icon right>{{ profileEditor.icon }}</v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>{{ profileEditor.name }}</v-list-item-title>
-          </v-list-item>
-          <v-list-item
-            @click="logoutUser()">
-            <v-list-item-icon>
-              <v-icon right>exit_to_app</v-icon>
-            </v-list-item-icon>
-            <v-list-item-title>Log Out</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-    </v-list-item>
+    <template v-slot:prepend v-if="user!=null">
+      <v-list>
+        <v-list-item>
+          <v-list-item-avatar size="50">
+            <v-img :src="user.picture"></v-img>
+          </v-list-item-avatar>
+        </v-list-item>
+        <v-list-item
+          two-line>
+          <v-list-item-content>
+            <v-list-item-title class="white--text title">{{ user.name }}</v-list-item-title>
+            <v-list-item-subtitle class="white--text">{{ user.email }}</v-list-item-subtitle>
+          </v-list-item-content>
+          <v-menu
+            :offset-y="true"
+            transition="slide-y-transition"
+            bottom
+            left>
+            <template v-slot:activator="{ on }">
+              <v-btn icon depressed v-on="on">
+                <v-icon class="white--text">arrow_drop_down</v-icon>
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item
+                @click="$router.push(`${profileEditor.path}`).catch(err => {})">
+                <v-list-item-icon>
+                  <v-icon right>{{ profileEditor.icon }}</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>{{ profileEditor.name }}</v-list-item-title>
+              </v-list-item>
+              <v-list-item
+                @click="logoutUser()">
+                <v-list-item-icon>
+                  <v-icon right>exit_to_app</v-icon>
+                </v-list-item-icon>
+                <v-list-item-title>Log Out</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </v-list-item>
+      </v-list>
+    </template>
     <v-divider></v-divider>
-    <v-list dense nav>
+    <v-list
+      nav
+      dense>
       <v-list-item v-for="link in links"
         :key="link.name"
         link
@@ -98,7 +101,7 @@ export default {
       ],
       profileEditor: {
         name: 'Edit Profile', icon: 'edit', path: '/editprofile'
-      }
+      },
     }
   },
   methods: {
@@ -106,6 +109,8 @@ export default {
       const store = this.$store
       this.$store.dispatch("signOutUserFromApi", this.$router)
     }
+  },
+  watch: {
   }
 }
 </script>
