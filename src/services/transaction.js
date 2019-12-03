@@ -82,18 +82,21 @@ function addIfPresent(source, destination, propertyName) {
 }
 
 const actions = {
-  loadTransactions(context) {
+  loadTransactions(context, id) {
     if (status.transactionsLoading) {
       return
     }
     status.transactionsLoading = true
-    get(context, URL, handleTransactionLoad)
+    get(context, URL + '/project/' + id, handleTransactionLoad)
   },
   saveTransaction(context, payload) {
     const transactionData = {
       'version': payload['version'],
       'user_id': payload['user_id'],
       'name': payload['name'],
+      'description': payload['description'],
+      'project_id': payload['project_id'],      
+      'trade_id': payload['trade_id']
     }
     addIfPresent(payload, transactionData, 'entity_id')
     if (payload['entity_id']) {

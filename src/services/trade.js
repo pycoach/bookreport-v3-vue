@@ -82,18 +82,20 @@ function addIfPresent(source, destination, propertyName) {
 }
 
 const actions = {
-  loadTrades(context) {
+  loadTrades(context, id) {
     if (status.tradesLoading) {
       return
     }
     status.tradesLoading = true
-    get(context, URL, handleTradeLoad)
+    get(context, URL + '/project/' + id, handleTradeLoad)
   },
   saveTrade(context, payload) {
     const tradeData = {
       'version': payload['version'],
       'user_id': payload['user_id'],
       'name': payload['name'],
+      'description': payload['description'],
+      'project_id': payload['project_id'],
     }
     addIfPresent(payload, tradeData, 'entity_id')
     if (payload['entity_id']) {
