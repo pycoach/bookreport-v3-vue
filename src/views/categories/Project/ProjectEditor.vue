@@ -192,6 +192,8 @@ export default {
       editMode: 'Create',    
       name: '',
       user_id: null,
+      users: [],
+      user_ids: [],
       description: '',
       tradeName: '',
       tradeDescription: '',
@@ -215,15 +217,27 @@ export default {
       this.$store.dispatch('loadTrades', this.id)
       this.$store.dispatch('loadTransactions', this.id)
     } else {
-      this.$store.commit('setActiveProject', {user_id: this.user_id})      
+      this.$store.commit('setActiveProject', {user_id: this.user_id})
     }
   },
   computed: {
     ...mapGetters(['activeProject', 'user', 'trades', 'transactions']),
   },
   methods: {
-    saveProject() {      
+    saveProject() {   
+      if (this.users.length == 0){
+        this.users = [{
+          'user_id': this.user_id,
+          'name': this.user.name,
+          'role': 'provider admin'
+        },]
+      }
+
+      if (this.user_ids.length == 0) {
+        this.user_ids = [this.user_id,]
+      }
       this.setValues(this, this.activeProject)
+      console.log(this.activeProject)
       this.$store.dispatch('saveProject', this.activeProject)
     },
     setValues(source, destination) {      
@@ -233,6 +247,8 @@ export default {
       }     
       destination['name'] = source['name']
       destination['user_id'] = source['user_id']
+      destination['users'] = source['users']
+      destination['user_ids'] = source['user_ids']
       destination['description'] = source['description']
     },
     addTrade() {
@@ -298,7 +314,16 @@ export default {
       if(this.activeProject) {   
         this.name = this.activeProject.name
         this.user_id = this.activeProject.user_id
-        this.description = this.activeProject.description
+        this.description = this.activeProject.description        
+        if(this.activeProject.users == undefined ){
+          this.activeProject.users = []
+          this.users = []
+        }
+        if(this.activeProject.user_ids == undefined ){
+          this.activeProject.user_ids = []
+          this.user_ids = []
+        }
+
       }
     },
     trades() {

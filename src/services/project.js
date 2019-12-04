@@ -95,6 +95,8 @@ const actions = {
       'user_id': payload['user_id'],
       'name': payload['name'],
       'description': payload['description'],
+      'users': payload['users'],
+      'user_ids': payload['user_ids'],
     }
     addIfPresent(payload, projectData, 'entity_id')
 
