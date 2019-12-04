@@ -1,7 +1,8 @@
 <template>
   <v-navigation-drawer
     app
-    v-model="drawer"
+    expand-on-hover
+    permanent
     class="primary
     darken-1">
     <template v-slot:prepend v-if="user!=null">
@@ -72,7 +73,6 @@ import { mapGetters } from 'vuex'
 
 export default {
   name: 'Navbar',
-  props: ['drawer'],
   computed: {
     ...mapGetters(['user']),
   },
