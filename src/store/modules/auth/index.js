@@ -79,8 +79,7 @@ const actions = {
     })
   },
   getUserLogin(context, user) {
-    const redirect = user.redirect
-
+    const redirect = user.redirect    
     delete user.redirect
     delete user.password
     localStorage.setItem('user', JSON.stringify(user))
