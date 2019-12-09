@@ -27,11 +27,13 @@ function get(context, URL, handler) {
 }
 
 function post(context, URL, data, handler) {
-  api().post(URL, data).then(response => handler(context, response))
+  const project = api().post(URL, data).then(response => handler(context, response))
+  return project
 }
 
 function put(context, data, handler) {
-  api().put(URL, data).then(response => handler(context, response))
+  const project = api().put(URL, data).then(response => handler(context, response))
+  return project
 }
 
 function apiDelete(context, URL, id, handler) {
@@ -45,7 +47,7 @@ function handleProjectLoad(context, response) {
     context.commit('apiError', projects['error'])
   } else {
     context.commit('projectsLoaded', projects)
-  }
+  }  
 }
 
 function handleProjectSave(context, response) {
@@ -54,7 +56,9 @@ function handleProjectSave(context, response) {
     context.commit('apiError', project['error'])
   } else {
     context.commit('projectSuccess', project)
+    context.commit('setActiveProject', project)
   }
+  return project
 }
 
 function handleProjectDelete(context, id, response) {
@@ -89,7 +93,7 @@ const actions = {
     status.projectsLoading = true
     get(context, URL + '/user_id/' + id, handleProjectLoad)
   },
-  saveProject(context, payload) {
+  async saveProject(context, payload) {
     const projectData = {
       'version': payload['version'],
       'user_id': payload['user_id'],
@@ -100,11 +104,13 @@ const actions = {
     }
     addIfPresent(payload, projectData, 'entity_id')
 
+    let project = {}
     if (payload['entity_id']) {
-      put(context, projectData, handleProjectSave)
+      project = put(context, projectData, handleProjectSave)
     } else {
-      post(context, URL, payload, handleProjectSave)
+      project = post(context, URL, payload, handleProjectSave)
     }
+    return project
   },
   deleteProject(context, id) {
     apiDelete(context, URL, id, handleProjectDelete)
