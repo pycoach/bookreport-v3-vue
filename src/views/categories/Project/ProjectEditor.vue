@@ -311,7 +311,7 @@ export default {
     ...mapGetters(['activeProject', 'user', 'trades', 'transactions']),
   },
   methods: {
-    saveProject() {
+    async saveProject() {
       if (this.users.length == 0){
         this.users = [{
           'user_id': this.user_id,
@@ -324,7 +324,13 @@ export default {
         this.user_ids = [this.user_id,]
       }
       this.setValues(this, this.activeProject)
-      this.$store.dispatch('saveProject', this.activeProject)
+
+      await this.$store.dispatch('saveProject', this.activeProject).then(function (project) {
+        if (!project['error']) {
+          window.location = '/Projecteditor/' + project.entity_id
+        }
+      })
+
     },
     setValues(source, destination) {      
       destination['version'] = source['version']
