@@ -2,6 +2,7 @@
 import Vue from 'vue'
 import api from 'Api'
 
+import jwtDecode from 'jwt-decode'
 import router from '../../../router'
 
 const state = {
@@ -86,7 +87,9 @@ const actions = {
     api(false).get('/user').then(function (response) {
       let userData = response['data']
       setUserLocalStorage(state, userData)
-      let expires_at = new Date().setSeconds(new Date().getSeconds() + user['expires_in'] - 60)
+      let token = user['id_token']
+      let decoded = jwtDecode(token);
+      let expires_at = decoded.exp * 1000;
       localStorage.setItem('expires_at', expires_at)
       window.location = redirect
       setTimeout(function () {
