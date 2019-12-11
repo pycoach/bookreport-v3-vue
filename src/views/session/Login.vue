@@ -58,14 +58,21 @@ export default {
           min: v => v.length >= 8 || 'Min 8 characters',
         },
       showPassword: false,
+      redirect: '/dashboard',
     }
+  },
+  mounted() {  
+    if(this.$route.query['redirect'] !== undefined) {
+      this.redirect = this.$route.query.redirect        
+      }
   },
   methods: {
     async submit() {
+      
       const user = {
         username: this.email,
         password: this.password,
-        redirect: '/dashboard',
+        redirect: this.redirect,
         refresh: true
       }
       this.$store.dispatch('signInUserApi', user)

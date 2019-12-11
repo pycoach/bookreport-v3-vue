@@ -1,5 +1,17 @@
 import axios from 'axios'
 
+function responseSuccess(response) {
+  return response;
+}
+
+function responseFailure(error) {
+  if (window.location.pathname !== "/session/login") {
+      window.location = "/session/login";
+  }
+
+  return Promise.reject(error);
+}
+
 export default () => {
   const headers = { 'content-type': 'application/json' }
   const userString = localStorage.getItem('user')
@@ -12,5 +24,10 @@ export default () => {
     headers: headers,
     crossdomain: true
   })
+
+  axiosInstance.interceptors.response.use(
+    response => responseSuccess(response), error =>
+    responseFailure(error));
+
   return axiosInstance
 }

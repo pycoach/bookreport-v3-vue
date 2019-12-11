@@ -5,11 +5,6 @@
       flat
       fixed
       class="primary white--text">
-      <v-app-bar-nav-icon
-        v-if="!$route.meta.hideNavigation"
-        @click="drawer = !drawer"
-        class="white--text">
-      </v-app-bar-nav-icon>
       <v-toolbar-title
         class="text-uppercase">
         <span class="font-weight-light">Book</span>

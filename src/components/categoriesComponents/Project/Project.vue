@@ -23,8 +23,7 @@
                 <v-icon>delete</v-icon>
               </v-btn>
             </v-list-item>
-            <v-divider
-              v-if="index < projects.length - 1">
+            <v-divider v-if="index < projects.length - 1">
             </v-divider>
           </template>
         </v-list>
