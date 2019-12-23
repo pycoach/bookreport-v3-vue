@@ -528,13 +528,14 @@ export default {
       })        
     },
     onRequestInformation(){
-      this.informationSubject = this.name
+      this.informationSubject = this.name + ' Information Request'
       this.informationDialog = true
     },
     async onSaveInformation() {
       const payload = {
         'subject': this.informationSubject,
         'project_id': this.activeProject.entity_id,
+        'project_name': this.activeProject.name,
         'body': this.informationBody,
         'user_id': this.informationClient.user_id,
         'user_name': this.informationClient.name
