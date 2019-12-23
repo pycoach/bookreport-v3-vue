@@ -124,8 +124,51 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog persistent v-model="informationDialog" max-width="500">
+      <v-card>
+        <v-card-title class="headline">Request Information</v-card-title>
+        <v-container grid-list-xl fluid pt-0>
+          <v-layout row wrap>
+            <v-flex xs12 md12>
+              <v-text-field label="Subject"
+                clearable
+                v-model="informationSubject">
+              </v-text-field>
+            </v-flex>
+            <v-flex xs12 md12>
+              <v-textarea label="Body"
+                v-model="informationBody"
+                outlined
+                auto-grow
+                rows="4"
+                row-height="30">
+              </v-textarea>
+            </v-flex>
+            <v-flex xs12 md12>
+              <v-select
+                :items="clients"
+                item-text="name"
+                v-model="informationClient"
+                label="To"
+                return-object
+              ></v-select>
+            </v-flex>
+          </v-layout>
+        </v-container>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" text @click="informationDialog=false">
+            Cancel
+          </v-btn>
+          <v-btn color="green darken-1" text @click="onSaveInformation">
+            Save
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-layout row wrap>
-      <v-flex xs12 md3 class="pa-5">
+      <v-flex xs12 md6 class="pa-5">
+      <v-container grid-list-xl fluid>
         <v-card>
           <v-toolbar color="primary" dark>
             <v-card-title
@@ -133,7 +176,7 @@
               {{ editMode }} Project
             </v-card-title>
           </v-toolbar>
-          <v-container grid-list-xl fluid pt-0>
+          <v-container grid-list-xl fluid>
             <v-layout row wrap>   
               <v-flex xs12 md12>
                 <v-text-field label="Name"
@@ -153,6 +196,12 @@
             </v-layout>
           </v-container>
           <v-card-actions>
+          <v-btn color="primary" @click="onRequestInformation">
+              Request Information
+            </v-btn>
+            <v-btn color="primary" @click="$router.push('/Project')">
+              Request Document
+            </v-btn>
             <v-spacer></v-spacer>
             <v-btn color="red darken-1" text @click="$router.push('/Project')">
               Cancel
@@ -162,8 +211,10 @@
             </v-btn>
           </v-card-actions>
         </v-card>
+      </v-container>
       </v-flex>
       <v-flex v-show="editMode == 'Edit'" xs12 md3 class="pa-5">
+      <v-container grid-list-xl fluid>
         <v-hover>
           <v-card max-width="600" slot-scope="{ hover }"
             :class="`elevation-${hover ? 12 : 2}`">
@@ -193,8 +244,8 @@
             </v-list>
           </v-card>
         </v-hover>
-      </v-flex>
-      <v-flex v-show="editMode == 'Edit'" xs12 md3 class="pa-5">
+      </v-container>
+      <v-container grid-list-xl fluid>
         <v-hover>
           <v-card max-width="600" slot-scope="{ hover }"
             :class="`elevation-${hover ? 12 : 2}`">
@@ -224,8 +275,10 @@
             </v-list>
           </v-card>
         </v-hover>
+      </v-container>
       </v-flex>
       <v-flex v-show="editMode == 'Edit'" xs12 md3 class="pa-5">
+      <v-container grid-list-xl fluid>
         <v-hover>
           <v-card max-width="600" slot-scope="{ hover }"
             :class="`elevation-${hover ? 12 : 2}`">
@@ -255,6 +308,7 @@
             </v-list>
           </v-card>
         </v-hover>
+      </v-container>
       </v-flex>
     </v-layout>
   </div>
@@ -293,6 +347,15 @@ export default {
       userRole: 'provider admin',
       userRoles: ['provider admin', 'provider analyst', 'client manager', 'client analyst', 'participant'],
       activeUser: null,
+
+      informationDialog: false,
+      informationSubject: '',
+      informationBody: '',
+      clients: [],
+      informationClient: null,
+
+
+
     }
   },
   mounted() {
@@ -463,7 +526,28 @@ export default {
           window.location = '/Projecteditor/' + project.entity_id
         }
       })        
-    }
+    },
+    onRequestInformation(){
+      this.informationSubject = this.name
+      this.informationDialog = true
+    },
+    async onSaveInformation() {
+      const payload = {
+        'subject': this.informationSubject,
+        'project_id': this.activeProject.entity_id,
+        'body': this.informationBody,
+        'user_id': this.informationClient.user_id,
+        'user_name': this.informationClient.name
+      }
+
+      await this.$store.dispatch('saveRequestInformation', payload).then(function (data) {
+        if (!data['error']) {
+          window.location = '/Projecteditor/' + data.project_id
+        }
+      })
+      this.informationDialog = false
+    },
+
   },
   watch: {
     activeProject() {      
@@ -477,6 +561,14 @@ export default {
         }
         else {
           this.users = this.activeProject.users
+        }
+
+        this.clients = []
+        for( let i = 0; i < this.activeProject.users.length; i ++) {
+          const user = this.activeProject.users[i]    
+          if(user.role == 'client manager' || user.role == 'client analyst' || user.role == 'participant'){
+            this.clients.push(user)
+          }
         }
 
         if(this.activeProject.user_ids == undefined ){
