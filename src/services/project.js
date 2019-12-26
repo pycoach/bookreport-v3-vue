@@ -3,7 +3,7 @@ import Vue from 'vue'
 import api from 'Api'
 
 const URL = '/project'
-
+const REQUEST_INFORMATION_URL = '/request-information'
 const state = {
   projects: [],
   activeProject: {}
@@ -61,6 +61,20 @@ function handleProjectSave(context, response) {
   return project
 }
 
+function handleRequestInformationSave(context, response) {
+  const  data = response['data']
+  if (data['error']) {
+    context.commit('apiError', data['error'])
+  } else {
+    Vue.notify({
+      group: 'loggedIn',
+      type: 'success',
+      text: 'Request Information Success'
+    })
+  }
+  return data
+}
+
 function handleProjectDelete(context, id, response) {
   const project = response['data']
   if (project['error']) {
@@ -111,6 +125,9 @@ const actions = {
       project = post(context, URL, payload, handleProjectSave)
     }
     return project
+  },
+  saveRequestInformation(context, payload){
+    return post(context, REQUEST_INFORMATION_URL, payload, handleRequestInformationSave)
   },
   deleteProject(context, id) {
     apiDelete(context, URL, id, handleProjectDelete)
