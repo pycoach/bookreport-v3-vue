@@ -136,15 +136,6 @@
               </v-text-field>
             </v-flex>
             <v-flex xs12 md12>
-              <v-textarea label="Body"
-                v-model="informationBody"
-                outlined
-                auto-grow
-                rows="4"
-                row-height="30">
-              </v-textarea>
-            </v-flex>
-            <v-flex xs12 md12>
               <v-select
                 :items="clients"
                 item-text="name"
@@ -153,6 +144,15 @@
                 return-object
               ></v-select>
             </v-flex>
+            <v-flex xs12 md12>
+              <v-textarea label="Body"
+                v-model="informationBody"
+                outlined
+                auto-grow
+                rows="4"
+                row-height="30">
+              </v-textarea>
+            </v-flex>            
           </v-layout>
         </v-container>
         <v-card-actions>
@@ -178,6 +178,15 @@
               </v-text-field>
             </v-flex>
             <v-flex xs12 md12>
+              <v-select
+                :items="clients"
+                item-text="name"
+                v-model="documentClient"
+                label="To"
+                return-object
+              ></v-select>
+            </v-flex>
+            <v-flex xs12 md12>
               <v-combobox
                 v-model="documents"
                 :items="[]"
@@ -194,16 +203,7 @@
                 rows="4"
                 row-height="30">
               </v-textarea>
-            </v-flex>
-            <v-flex xs12 md12>
-              <v-select
-                :items="clients"
-                item-text="name"
-                v-model="documentClient"
-                label="To"
-                return-object
-              ></v-select>
-            </v-flex>
+            </v-flex>            
           </v-layout>
         </v-container>
         <v-card-actions>
@@ -608,12 +608,16 @@ export default {
       this.documentDialog = true
     },
     async onSaveDocument() {
+      let document_list = {}
+      for(let i = 0; i < this.documents.length; i ++){
+        document_list[this.documents[i]] = 'requested'
+      }
       const payload = {
         'subject': this.documentSubject,
         'project_id': this.activeProject.entity_id,
         'project_name': this.activeProject.name,
         'body': this.documentBody,
-        'documents': this.documents,
+        'documents': document_list,
         'user_id': this.documentClient.user_id,
         'user_name': this.documentClient.name
       }
