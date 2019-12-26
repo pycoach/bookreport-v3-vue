@@ -136,15 +136,6 @@
               </v-text-field>
             </v-flex>
             <v-flex xs12 md12>
-              <v-textarea label="Body"
-                v-model="informationBody"
-                outlined
-                auto-grow
-                rows="4"
-                row-height="30">
-              </v-textarea>
-            </v-flex>
-            <v-flex xs12 md12>
               <v-select
                 :items="clients"
                 item-text="name"
@@ -153,6 +144,15 @@
                 return-object
               ></v-select>
             </v-flex>
+            <v-flex xs12 md12>
+              <v-textarea label="Body"
+                v-model="informationBody"
+                outlined
+                auto-grow
+                rows="4"
+                row-height="30">
+              </v-textarea>
+            </v-flex>            
           </v-layout>
         </v-container>
         <v-card-actions>
@@ -161,6 +161,57 @@
             Cancel
           </v-btn>
           <v-btn color="green darken-1" text @click="onSaveInformation">
+            Save
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog persistent v-model="documentDialog" max-width="500">
+      <v-card>
+        <v-card-title class="headline">Request Document</v-card-title>
+        <v-container grid-list-xl fluid pt-0>
+          <v-layout row wrap>
+            <v-flex xs12 md12>
+              <v-text-field label="Subject"
+                clearable
+                v-model="documentSubject">
+              </v-text-field>
+            </v-flex>
+            <v-flex xs12 md12>
+              <v-select
+                :items="clients"
+                item-text="name"
+                v-model="documentClient"
+                label="To"
+                return-object
+              ></v-select>
+            </v-flex>
+            <v-flex xs12 md12>
+              <v-combobox
+                v-model="documents"
+                :items="[]"
+                label="Documents"
+                multiple
+                chips
+              ></v-combobox>
+            </v-flex>
+            <v-flex xs12 md12>
+              <v-textarea label="Body"
+                v-model="documentBody"
+                outlined
+                auto-grow
+                rows="4"
+                row-height="30">
+              </v-textarea>
+            </v-flex>            
+          </v-layout>
+        </v-container>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="red darken-1" text @click="documentDialog=false">
+            Cancel
+          </v-btn>
+          <v-btn color="green darken-1" text @click="onSaveDocument">
             Save
           </v-btn>
         </v-card-actions>
@@ -199,7 +250,7 @@
           <v-btn color="primary" @click="onRequestInformation">
               Request Information
             </v-btn>
-            <v-btn color="primary" @click="$router.push('/Project')">
+            <v-btn color="primary" @click="onRequestDocument">
               Request Document
             </v-btn>
             <v-spacer></v-spacer>
@@ -354,8 +405,11 @@ export default {
       clients: [],
       informationClient: null,
 
-
-
+      documentDialog: false,
+      documentSubject: '',
+      documentBody: '',
+      documents: [],
+      documentClient: null,
     }
   },
   mounted() {
@@ -548,6 +602,33 @@ export default {
       })
       this.informationDialog = false
     },
+    onRequestDocument(){
+      this.documents = []
+      this.documentSubject = this.name + ' Document Request'
+      this.documentDialog = true
+    },
+    async onSaveDocument() {
+      let document_list = {}
+      for(let i = 0; i < this.documents.length; i ++){
+        document_list[this.documents[i]] = 'requested'
+      }
+      const payload = {
+        'subject': this.documentSubject,
+        'project_id': this.activeProject.entity_id,
+        'project_name': this.activeProject.name,
+        'body': this.documentBody,
+        'documents': document_list,
+        'user_id': this.documentClient.user_id,
+        'user_name': this.documentClient.name
+      }
+
+      await this.$store.dispatch('saveRequestDocument', payload).then(function (data) {
+        if (!data['error']) {
+          window.location = '/Projecteditor/' + data.project_id
+        }
+      })
+      this.documentDialog = false
+    },
 
   },
   watch: {
@@ -601,6 +682,10 @@ export default {
     },
     userRole() {
       this.activeUser.role = this.userRole
+    },
+    documents() {
+      this.documentBody = 'Please provide the following documents:' + this.documents.join(',')
+
     }
   }
 }
