@@ -4,6 +4,7 @@ import api from 'Api'
 
 const URL = '/project'
 const REQUEST_INFORMATION_URL = '/request-information'
+const REQUEST_DOCUMENT_URL = '/request-document'
 const state = {
   projects: [],
   activeProject: {}
@@ -75,6 +76,20 @@ function handleRequestInformationSave(context, response) {
   return data
 }
 
+function handleRequestDocumentSave(context, response) {
+  const  data = response['data']
+  if (data['error']) {
+    context.commit('apiError', data['error'])
+  } else {
+    Vue.notify({
+      group: 'loggedIn',
+      type: 'success',
+      text: 'Request Document Success'
+    })
+  }
+  return data
+}
+
 function handleProjectDelete(context, id, response) {
   const project = response['data']
   if (project['error']) {
@@ -128,6 +143,9 @@ const actions = {
   },
   saveRequestInformation(context, payload){
     return post(context, REQUEST_INFORMATION_URL, payload, handleRequestInformationSave)
+  },
+  saveRequestDocument(context, payload){
+    return post(context, REQUEST_DOCUMENT_URL, payload, handleRequestDocumentSave)
   },
   deleteProject(context, id) {
     apiDelete(context, URL, id, handleProjectDelete)
