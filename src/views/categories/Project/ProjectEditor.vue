@@ -193,6 +193,7 @@
                 label="Documents"
                 multiple
                 chips
+                :delimiters="[' ', ',']"
               ></v-combobox>
             </v-flex>
             <v-flex xs12 md12>
