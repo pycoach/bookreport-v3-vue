@@ -479,9 +479,13 @@ export default {
     deleteTrade(id) {
       this.$store.dispatch('deleteTrade', id)
     },
-    saveTrade() {      
-      this.$store.dispatch('saveTrade', this.activeTrade)
+    async saveTrade() {    
       this.tradeDialog = false
+      await this.$store.dispatch('saveTrade', this.activeTrade).then(function (trade) {
+        if (!trade['error']) {
+          window.location = '/Projecteditor/' + trade.project_id
+        }
+      })
     },
     addTransaction() {
       this.activeTransaction = {
@@ -507,9 +511,13 @@ export default {
       this.transactionEditMode = 'Edit'
       this.transactionDialog = true
     },
-    saveTransaction() {
-      this.$store.dispatch('saveTransaction', this.activeTransaction)
-      this.transactionDialog = false      
+    async saveTransaction() {
+      this.transactionDialog = false
+      await this.$store.dispatch('saveTransaction', this.activeTransaction).then(function (transaction) {
+        if (!transaction['error']) {
+          window.location = '/Projecteditor/' + transaction.project_id
+        }
+      })  
     },
     deleteTransaction(id) {
       this.$store.dispatch('deleteTransaction', id)
@@ -585,7 +593,7 @@ export default {
       this.informationSubject = this.name + ' Information Request'
       this.informationDialog = true
     },
-    async onSaveInformation() {
+    onSaveInformation() {
       const payload = {
         'subject': this.informationSubject,
         'project_id': this.activeProject.entity_id,
@@ -595,11 +603,7 @@ export default {
         'user_name': this.informationClient.name
       }
 
-      await this.$store.dispatch('saveRequestInformation', payload).then(function (data) {
-        if (!data['error']) {
-          window.location = '/Projecteditor/' + data.project_id
-        }
-      })
+      this.$store.dispatch('saveRequestInformation', payload)
       this.informationDialog = false
     },
     onRequestDocument(){
@@ -607,7 +611,7 @@ export default {
       this.documentSubject = this.name + ' Document Request'
       this.documentDialog = true
     },
-    async onSaveDocument() {
+    onSaveDocument() {
       let document_list = {}
       for(let i = 0; i < this.documents.length; i ++){
         document_list[this.documents[i]] = 'requested'
@@ -622,11 +626,7 @@ export default {
         'user_name': this.documentClient.name
       }
 
-      await this.$store.dispatch('saveRequestDocument', payload).then(function (data) {
-        if (!data['error']) {
-          window.location = '/Projecteditor/' + data.project_id
-        }
-      })
+      this.$store.dispatch('saveRequestDocument', payload)
       this.documentDialog = false
     },
 
