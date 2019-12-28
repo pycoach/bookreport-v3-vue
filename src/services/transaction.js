@@ -27,11 +27,11 @@ function get(context, URL, handler) {
 }
 
 function post(context, URL, data, handler) {
-  api().post(URL, data).then(response => handler(context, response))
+  return api().post(URL, data).then(response => handler(context, response))
 }
 
 function put(context, data, handler) {
-  api().put(URL, data).then(response => handler(context, response))
+  return api().put(URL, data).then(response => handler(context, response))
 }
 
 function apiDelete(context, URL, id, handler) {
@@ -45,7 +45,7 @@ function handleTransactionLoad(context, response) {
     context.commit('apiError', transactions['error'])
   } else {
     context.commit('transactionsLoaded', transactions)
-  }
+  }  
 }
 
 function handleTransactionSave(context, response) {
@@ -55,6 +55,7 @@ function handleTransactionSave(context, response) {
   } else {
     context.commit('transactionSuccess', transaction)
   }
+  return transaction
 }
 
 function handleTransactionDelete(context, id, response) {
@@ -100,9 +101,9 @@ const actions = {
     }
     addIfPresent(payload, transactionData, 'entity_id')
     if (payload['entity_id']) {
-      put(context, transactionData, handleTransactionSave)
+      return put(context, transactionData, handleTransactionSave)
     } else {
-      post(context, URL, payload, handleTransactionSave)
+      return post(context, URL, payload, handleTransactionSave)
     }
   },
   deleteTransaction(context, id) {

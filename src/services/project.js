@@ -3,8 +3,8 @@ import Vue from 'vue'
 import api from 'Api'
 
 const URL = '/project'
-const REQUEST_INFORMATION_URL = '/request-information'
-const REQUEST_DOCUMENT_URL = '/request-document'
+const REQUEST_INFORMATION_URL = '/info-req'
+const REQUEST_DOCUMENT_URL = '/doc-req'
 const state = {
   projects: [],
   activeProject: {}
@@ -28,13 +28,11 @@ function get(context, URL, handler) {
 }
 
 function post(context, URL, data, handler) {
-  const project = api().post(URL, data).then(response => handler(context, response))
-  return project
+  return api().post(URL, data).then(response => handler(context, response))
 }
 
 function put(context, data, handler) {
-  const project = api().put(URL, data).then(response => handler(context, response))
-  return project
+  return api().put(URL, data).then(response => handler(context, response))
 }
 
 function apiDelete(context, URL, id, handler) {

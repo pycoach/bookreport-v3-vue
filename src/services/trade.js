@@ -27,11 +27,11 @@ function get(context, URL, handler) {
 }
 
 function post(context, URL, data, handler) {
-  api().post(URL, data).then(response => handler(context, response))
+  return api().post(URL, data).then(response => handler(context, response))
 }
 
 function put(context, data, handler) {
-  api().put(URL, data).then(response => handler(context, response))
+  return api().put(URL, data).then(response => handler(context, response))
 }
 
 function apiDelete(context, URL, id, handler) {
@@ -55,6 +55,7 @@ function handleTradeSave(context, response) {
   } else {
     context.commit('tradeSuccess', trade)
   }
+  return trade
 }
 
 function handleTradeDelete(context, id, response) {
@@ -99,9 +100,9 @@ const actions = {
     }
     addIfPresent(payload, tradeData, 'entity_id')
     if (payload['entity_id']) {
-      put(context, tradeData, handleTradeSave)
+      return put(context, tradeData, handleTradeSave)
     } else {
-      post(context, URL, payload, handleTradeSave)
+      return post(context, URL, payload, handleTradeSave)
     }
   },
   deleteTrade(context, id) {
