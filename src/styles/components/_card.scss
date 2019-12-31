@@ -1,0 +1,53 @@
+
+.v-dialog > .v-card > .v-card__title {
+   letter-spacing: 0.002em !important;
+}
+
+
+.v-card {
+   box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.13);
+   
+
+   &:not(.v-sheet--tile):not(.v-card--shaped) {
+      border-radius: 6px;
+   }
+ 
+   .v-toolbar {
+      height: 71px !important;
+      box-shadow: none;
+      border-bottom: 1px solid #F0F0F0;
+
+      &__content {
+         height: 71px !important;
+      }
+
+      .headline {
+         font-style: normal;
+         font-weight: 600 !important;;
+         font-size: 20px !important;
+      }
+      .v-toolbar__content > .v-btn.v-btn--icon:last-child, .v-toolbar__extension > .v-btn.v-btn--icon:last-child {
+         margin-right: 0;
+      }
+
+      .v-card__title {
+         padding-left: 0 !important;
+      }
+   }
+
+   &__text {
+      color: $dark-grey !important;
+   }
+   .v-list--two-line .v-list-item, .v-list-item--two-line {
+      min-height: 71px;
+   }
+   
+   .v-list {
+      padding: 0;
+
+      .v-list-item--link:hover::before {
+         
+         background-color: $primary;
+      }
+   }
+}

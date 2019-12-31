@@ -1,0 +1,68 @@
+
+div.v-application {
+   background: #F5F6FA !important;
+
+   .green--text {
+      color: $primary !important;
+   }
+
+   .v-text-field > .v-input__control > .v-input__slot  {
+      font-size: 16px !important;
+      font-weight: 600;
+   }
+
+   
+
+   .line-divider {
+      border-color: #F0F0F0 !important;
+      width: 110px;
+      height: 2px;
+      margin: 0 auto;
+   }
+
+   .line-divider {
+      background: linear-gradient(270deg, #F7F7F7 -1.16%, rgba(247, 247, 247, 0) 124.54%);
+      margin-bottom: 15px;
+   }
+   
+   .primary {
+      background: $primary !important;
+   }
+   .primary-text {
+      color: $primary !important;
+      caret-color: $primary !important;
+   }
+
+   .primary--text {
+      color: $primary !important;
+      caret-color: $primary !important;
+   }
+   
+
+   // text-input fields 
+
+   .v-label--active {
+      text-transform: uppercase !important;
+   }
+   .v-textarea  {
+       .v-label--active {
+          text-transform: capitalize !important;
+       }
+   }
+
+   
+}
+
+
+
+
+
+
+
+
+
+
+//
+
+
+

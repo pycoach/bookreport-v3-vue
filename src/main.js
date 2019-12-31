@@ -8,6 +8,9 @@ import velocity from 'velocity-animate'
 import AuthService from './auth/AuthService'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
 
+// Importing all css styles
+import './lib/globalCss'
+
 router.beforeEach((to, from, next) => {
   const auth = new AuthService()
   const authenticated = auth.authenticated

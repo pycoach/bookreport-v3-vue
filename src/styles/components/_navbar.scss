@@ -1,0 +1,170 @@
+body::after{
+   position:absolute; width:0; height:0; overflow:hidden; z-index:-1; // hide images
+   content:url('../assets/navbar-icons/dark/home-purple.svg') url('../assets/navbar-icons/dark/projects-purple.svg')  url('../assets/navbar-icons/dark/charts-purple.svg')   // load images
+}
+
+.v-navigation-drawer {
+   box-shadow: 0px 4px 29px rgba(0, 0, 0, 0.15);
+
+   .v-navigation-drawer__content > .v-list-item.theme--light:first-of-type {
+         
+         margin-bottom: 45px;
+         min-height: 65px;
+      }
+
+      .user-box {
+         position: relative;
+         margin-bottom: 35px !important;
+
+         .v-avatar {
+            margin-top: 0;
+            margin-right: 0;
+            margin-bottom: 3px;
+            cursor: pointer;
+         }
+
+         .v-btn__content {
+            position: absolute !important;
+         }
+         
+         .user-name {
+            color: $light-grey-3;
+            font-size: 12px;
+            font-weight: 500;
+            text-align:  center;
+         }
+
+         .user-email {
+            margin-top: 5px;
+            color: $light-grey;
+            font-size: 11px;
+            font-weight: 400;
+            text-align:  center;
+         }
+      }
+   
+      .v-list--nav {
+         padding-left: 0px;
+         padding-right: 0px;
+     }
+
+     .linkActive {
+      color: $primary;
+   }  
+    .v-list-item.v-list-item--two-line.theme--light {
+         margin-bottom: 52px;
+    }
+
+    
+
+
+    .v-list-item.v-list-item--link.theme--light {
+      padding: 25px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin-bottom: 0px !important;
+      &.itemActive {
+         background: $primary-light-gradient; 
+      }
+       
+      .v-list-item__title {
+         color: $light-grey-3;
+         margin-top: 12px;
+         font-size: 0.9375rem;
+         font-weight:400 ;
+      }
+      .link-icon-0 {
+         background: url('../assets/navbar-icons/light/home.svg') no-repeat;
+         width: 34px;
+         height: 34px;
+      }
+
+      .link-icon-1 {
+         background: url('../assets/navbar-icons/light/charts.svg')  no-repeat;
+         width: 34px;
+         height: 34px;
+      }
+
+      .link-icon-2 {
+         background: url('../assets/navbar-icons/light/projects.svg')  no-repeat;
+         width: 34px;
+         height: 34px;
+      }
+
+      .link-icon-dark-0 {
+         background: url('../assets/navbar-icons/dark/home-purple.svg')  no-repeat !important;
+         width: 34px;
+         height: 34px;
+      }
+
+      .link-icon-dark-1 {
+         background: url('../assets/navbar-icons/dark/charts-purple.svg')  no-repeat !important;
+         width: 34px;
+         height: 34px;
+      }
+
+      .link-icon-dark-2 {
+         background: url('../assets/navbar-icons/dark/projects-purple.svg')  no-repeat !important;
+         width: 34px;
+         height: 34px;
+      }
+
+  
+
+      
+
+       &:hover  {
+         background: $primary-light-gradient;
+
+         &:before {
+            opacity: 0;
+         }
+       }
+       &:focus {
+         background: $primary-light-gradient !important;
+
+         &:before {
+            opacity: 0;
+         }
+       }
+       .v-list-item__icon {
+         color: #D1D3D5;
+         
+         margin: 0 auto;
+         img {
+            box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.06);
+         }
+         
+      }
+       
+    }
+
+    .v-list--nav.v-list--dense .v-list-item:not(:last-child):not(:only-child), .v-list--nav .v-list-item--dense:not(:last-child):not(:only-child), .v-list--rounded.v-list--dense .v-list-item:not(:last-child):not(:only-child), .v-list--rounded .v-list-item--dense:not(:last-child):not(:only-child) {
+         margin-bottom: 12px;
+
+    }
+
+   
+
+    .highlighted {
+      background: $primary-light;
+      .v-list-item__icon {
+         color: $primary !important;
+         
+      }
+      .v-list-item__title {
+         color: $primary !important;
+         font-weight: bold !important;
+      }
+   }
+}
+
+
+.v-navigation-drawer__border {
+   display: none !important;
+}
+
+.v-navigation-drawer .v-list-item.v-list-item--link.theme--light:focus {
+   background: $primary-light !important;
+ }

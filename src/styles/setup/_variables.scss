@@ -1,0 +1,39 @@
+$primary: 						      #455AF7;
+
+$primary-light: 					  lighten(#455AF7, 36%);
+$primary-light-gradient:          linear-gradient(270deg, rgba(73, 148, 236, 0.08) -2.55%, rgba(73, 128, 236, 0) 100%);
+$secondary:         			      #16AAFF;
+$success: 						      #3AC47D;
+$warning: 						      #D8CA3F;
+$danger: 						      #D83F79;
+
+$dark-grey:                      #2A2F39;
+$light-grey:                     #D1D3D5;
+$light-grey-2:                   #A9A9A9;
+$light-grey-3:                   #A2A1AF;
+
+body {
+   .v-application {
+      .primary {
+         background-color: $primary !important;
+      }
+      
+      .secondary {
+         background-color: $secondary !important;
+      }
+      
+      .success {
+         background-color: $success !important;
+      }
+      
+      .warning {
+         background-color: $warning !important;
+      }
+      
+      .danger {
+         background-color: $danger !important;
+      }
+   
+   }
+   
+}

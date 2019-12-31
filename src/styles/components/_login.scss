@@ -1,0 +1,54 @@
+
+
+
+#login, #signup, #reset {
+
+   .v-sheet#login-sheet {
+      top: -39px;
+   }
+
+   .v-sheet#reset-sheet {
+      top: -65px;
+   }
+
+   .v-sheet {
+      width: 324px;
+      position: relative;
+      top: 0px;
+      background-color: transparent !important;
+
+      .logo-large {
+         margin-bottom: 100px;
+      }
+      .login-block {
+         display: flex;
+         align-items: baseline;
+         margin-bottom: 40px;
+         
+         h1 {
+            pointer-events: none;
+         }
+         h2 {
+            margin-left: 10px;
+            font-weight: 500;
+            font-size: 20px;
+            line-height: 24px;
+            color: $light-grey-2;
+            cursor: pointer;
+            
+            transition: color 0.3s ease;
+
+            &:hover {
+               color: $primary;
+            }
+         }
+      }
+
+      a {
+         font-weight: 500;
+         font-size: 15px;
+         color: $light-grey-2 !important;
+         text-decoration-line: underline !important;
+      }
+   }
+}

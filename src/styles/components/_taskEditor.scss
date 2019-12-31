@@ -1,0 +1,70 @@
+#taskEditor {
+
+   .editor-card {
+      max-width: 1163px;
+   }
+  .v-label--active {
+     text-transform: uppercase !important;
+  }
+  .v-textarea  {
+      .v-label--active {
+         text-transform: capitalize !important;
+      }
+  }
+
+
+  .borderless.v-input--is-dirty {
+     label {
+        color: $primary;
+     }
+   .v-input__slot {
+     &::before {
+        display: none !important;
+     }
+
+     &::after {
+      display: none !important;
+   }
+    i {
+      display: none !important; 
+    }     
+   }
+}
+
+  .predecessor-card {
+      box-shadow: none;
+
+      .headline {
+         font-size: 18px !important;
+      }
+
+
+      .v-toolbar {
+         border: none !important;
+         &__content {
+            padding: 0 !important;
+         }
+      }
+
+      // v-input--is-label-active v-input--is-dirty v-input--is-readonly theme--light v-text-field 
+
+   
+     
+      .v-card__actions {
+         padding: 0 !important;
+      }
+
+      .v-list {
+         box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.11);
+         border: 1px solid #F4F4F4;
+         margin-bottom: 15px;  
+         &-item  {
+            min-height: 47px !important;
+            &__content {
+               
+            }
+         }
+      }
+    
+  }
+}

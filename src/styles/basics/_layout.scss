@@ -1,0 +1,28 @@
+.v-application--is-ltr .v-list-item__action:first-child, .v-application--is-ltr .v-list-item__icon:first-child {
+   margin-right: 20px;
+}
+
+.top-row  {
+   padding-top: 20px;
+   height: 104px;
+   background: #F7F9FA !important;
+   
+   .col {
+      padding-top: 0;
+   }
+   
+   &__icon-box {
+      width: 60px;
+      height: 60px;
+      background: #fff;
+      box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      margin-right: 28px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      
+   }
+
+}

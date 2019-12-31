@@ -1,0 +1,130 @@
+button {
+  letter-spacing: initial !important;
+}
+
+.custom-select-button.v-input {
+   flex: none;
+   padding-top: 0;
+   margin-top: 0;
+
+   .v-input__slot {
+     background: #fff !important;
+     height: 33px !important;
+     border-radius: 6px;
+     text-align: center;
+     border: 1px solid $primary;
+     padding-bottom: 0;
+     margin-bottom: 0;
+     min-width: 173px;
+     max-width: 230px;
+     width: auto !important;
+    
+    .v-select__selection {
+      width: 100%;
+      position: relative;
+      left: 15px;
+      font-weight: 400;
+    }
+
+
+     input {
+       min-width: 0;
+       text-align: center;
+       position: relative;
+       left: 5px;
+     }
+    &:after {
+        display: none
+    }
+  
+    &:before {
+       display: none
+    }
+   }
+
+   .v-text-field__details {
+      position: relative;
+      pointer-events: none;
+      top: -26px;
+      text-align: center;
+     
+     .v-messages {
+
+       font-size: 0.875rem;
+       color: $dark-grey;
+     }
+   }
+ }
+
+ .btn-outline {
+   padding: 12px 36px !important;
+   border: 1px solid $primary;
+   border-radius: 6px;
+   text-transform: none;
+   color: $primary !important;
+   
+   &--small {
+    padding: 8px 20px !important;
+    height: 33px !important;
+  }
+
+   .v-icon {
+      font-size: 20px !important;
+      color: $dark-grey !important;  
+   }
+ }
+
+ .btn-outline-square {
+  height: 33px !important;;
+  width: 33px !important;;
+  border: 1px solid $primary;
+  border-radius: 6px;
+  color: $dark-grey !important;
+
+  &:before {
+    border-radius: 6px !important;
+  }
+  .v-ripple__container {
+    display: none !important;
+  }
+  .v-btn--icon {
+        font-size: 20px !important;
+        color: $dark-grey !important;  
+        pointer-events: none;
+     
+    }
+ }
+
+ .btn-primary {
+      box-shadow: none;
+      background: $primary !important;
+      border-radius: 6px !important;
+      font-weight: normal;
+      padding: 12px 36px !important;
+      height: initial !important;
+      color: #fff !important;
+      text-transform: none !important;
+      min-width: 100px !important;
+
+      &--small {
+        padding: 8px 20px !important;
+        height: 33px !important;
+      }
+
+      &.v-btn--disabled {
+           background: lighten($primary, 40% )  !important;
+           
+      }
+ }
+
+ 
+
+
+ .delete-button {
+   color: $light-grey-2;
+   &:hover {
+     color: darken($light-grey-2, 15%);
+   }
+ }
+
+

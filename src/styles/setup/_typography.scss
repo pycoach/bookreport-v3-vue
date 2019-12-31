@@ -1,0 +1,58 @@
+@import url('https://rsms.me/inter/inter.css');
+html, body { font-family: 'Inter', sans-serif !important;  }
+@supports (font-variation-settings: normal) {
+  html, body { font-family: 'Inter var', sans-serif; }
+}
+.v-application {
+   font-family: 'Inter', sans-serif !important;
+}
+
+
+// Font Weight
+.fw-bold {
+   font-weight: bold !important;
+ }
+ .fw-semi-bold {
+   font-weight: 600 !important;
+ }
+
+ .fw-medium {
+   font-weight: 500 !important;
+ }
+
+ .fw-normal {
+   font-weight: normal !important;
+ }
+
+//--- Font size ---//
+ .fs-12 {
+   font-size: 0.75rem;
+ }
+
+ .fs-13 {
+  font-size: 0.8125rem;
+}
+
+
+ .fs-14 {
+   font-size: 0.875rem;
+ }
+ 
+ .fs-15 {
+   font-size: 0.9375rem;
+ }
+ 
+ .fs-16 {
+   font-size: 1;
+ }
+ 
+ .fs-18 {
+   font-size: 1.125rem;
+ }
+ .fs-24 {
+   font-size: 1.5rem;
+ }
+ .fs-28 {
+   font-size: 1.75rem;
+ }
+ 

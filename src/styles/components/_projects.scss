@@ -1,0 +1,55 @@
+#Projects {
+   .v-card {
+      .v-toolbar { 
+        &__content {
+            font-weight: 600;
+            font-size: 14px;
+           
+            .project-icon {
+               box-shadow: 0px 4px 7px rgba(0, 0, 0, 0.07);
+               border-radius: 6px;
+               background-color: #fff;
+               margin-right: 1rem;
+               width: 40px;
+               height: 40px;
+            }
+         }
+      }
+
+      .tasks-counter {
+         padding: 0 16px;
+         text-align: center;
+         font-weight: 600;
+         font-size: 14px;
+         color: $light-grey-2;
+         .row > div:first-child {
+            border-right: 1px solid #F0F0F0;
+         }
+         span {
+            color: $dark-grey;
+         }
+      }
+
+      .users-block {
+         padding: 3px 12px;
+         img {
+            margin-right: 0.5rem;
+         }
+
+         &__name {
+            font-weight: normal;
+            font-size: 13px;
+            line-height: 16px;   
+            color: $primary;
+         }
+
+         &__role {
+            font-weight: normal;
+            font-size: 12px;
+            line-height: 15px;
+            color: $light-grey-2;
+         }
+        
+      }
+   }
+}
