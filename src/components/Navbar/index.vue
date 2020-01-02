@@ -57,6 +57,7 @@
       <v-list-item v-for="(link, index) in links" :class="{itemActive: link.path === $route.path}"
         :key="link.name"
         link
+        :ripple="false"
         @click="$router.push(`${link.path}`).catch(err => {})">
          <v-list-item-icon>
           <div v-if="link.path != $route.path" class="navbar-icon-light"  :class="`link-icon-` + index"></div>

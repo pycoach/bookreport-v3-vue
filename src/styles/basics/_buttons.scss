@@ -1,5 +1,6 @@
 button {
   letter-spacing: initial !important;
+  border-radius: 11px;  
 }
 
 .custom-select-button.v-input {
@@ -96,15 +97,19 @@ button {
  }
 
  .btn-primary {
-      box-shadow: none;
-      background: $primary !important;
-      border-radius: 6px !important;
-      font-weight: normal;
-      padding: 12px 36px !important;
-      height: initial !important;
-      color: #fff !important;
-      text-transform: none !important;
-      min-width: 100px !important;
+   
+        background: $primary !important;
+        border-radius: 11px !important;
+        height: 40px !important;
+        font-weight: normal;
+        vertical-align: center;
+        padding: 0px 38px !important;
+        /* height: initial !important; */
+        color: #fff !important;
+        text-transform: none !important;
+        /* min-width: 100px !important; */
+        -webkit-box-shadow: 0px 7px 18px rgba(69, 90, 247, 0.32);
+        box-shadow: 0px 7px 18px rgba(69, 90, 247, 0.32);
 
       &--small {
         padding: 8px 20px !important;
@@ -117,7 +122,8 @@ button {
       }
  }
 
- 
+
+
 
 
  .delete-button {

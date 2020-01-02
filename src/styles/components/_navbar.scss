@@ -49,8 +49,8 @@ body::after{
      }
 
      .linkActive {
-      color: $primary;
-   }  
+      color: $primary !important;
+      }  
     .v-list-item.v-list-item--two-line.theme--light {
          margin-bottom: 52px;
     }
@@ -115,13 +115,20 @@ body::after{
       
 
        &:hover  {
-         background: $primary-light-gradient;
+         background: $primary-light-gradient !important;
 
          &:before {
             opacity: 0;
          }
        }
        &:focus {
+         background: $primary-light-gradient !important;
+
+         &:before {
+            opacity: 0;
+         }
+       }
+       &:active {
          background: $primary-light-gradient !important;
 
          &:before {
@@ -165,6 +172,3 @@ body::after{
    display: none !important;
 }
 
-.v-navigation-drawer .v-list-item.v-list-item--link.theme--light:focus {
-   background: $primary-light !important;
- }

@@ -1,5 +1,20 @@
 <template>
-  <div class='pa-5'>
+  <div class=''>
+     <div class="d-flex justify-space-between base-y-padding">
+      <div class="d-flex align-center">
+      <h2 class="top-header ">{{name}}</h2>
+      
+      <div class="vertical-divider"></div>
+       <img class="mr-3" src="../../../assets/search.svg" alt="">
+      <v-text-field
+          class="top-search"
+          label="Find Projects"
+          placeholder="Find Projects"
+          v-model="search"
+          >
+        </v-text-field>
+        </div>
+    </div>
     <v-dialog persistent v-model="userDialog" max-width="500">
       <v-card>
         <v-card-title class="headline">{{userEditMode}} User</v-card-title>
@@ -222,7 +237,7 @@
       <v-flex xs12 md6 class="pa-5">
       <v-container grid-list-xl fluid>
         <v-card>
-          <v-toolbar color="primary" dark>
+          <v-toolbar >
             <v-card-title
               class="headline">
               {{ editMode }} Project
@@ -270,7 +285,7 @@
         <v-hover>
           <v-card max-width="600" slot-scope="{ hover }"
             :class="`elevation-${hover ? 12 : 2}`">
-            <v-toolbar color="primary" dark>
+            <v-toolbar>
               <v-card-title>Trades</v-card-title>
               <v-spacer></v-spacer>
               <v-btn icon>
@@ -301,7 +316,7 @@
         <v-hover>
           <v-card max-width="600" slot-scope="{ hover }"
             :class="`elevation-${hover ? 12 : 2}`">
-            <v-toolbar color="primary" dark>
+            <v-toolbar>
               <v-card-title>Transactions</v-card-title>
               <v-spacer></v-spacer>
               <v-btn icon>
@@ -334,7 +349,7 @@
         <v-hover>
           <v-card max-width="600" slot-scope="{ hover }"
             :class="`elevation-${hover ? 12 : 2}`">
-            <v-toolbar color="primary" dark>
+            <v-toolbar >
               <v-card-title>Users</v-card-title>
               <v-spacer></v-spacer>
               <v-btn icon>
@@ -368,9 +383,10 @@
 
 <script>
 import { mapGetters } from 'vuex'
-
+import QuickEdit from 'vue-quick-edit';
 export default {
   name: 'ProjectEditor',
+  components: { QuickEdit },
   props: ['id'],
   data() {
     return {
