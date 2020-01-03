@@ -2,19 +2,21 @@
   <div class=''>
      <div class="d-flex justify-space-between base-y-padding">
       <div class="d-flex align-center">
-      <h2 class="top-header ">{{name}}</h2>
-      
-      <div class="vertical-divider"></div>
-       <img class="mr-3" src="../../../assets/search.svg" alt="">
-      <v-text-field
-          class="top-search"
-          label="Find Projects"
-          placeholder="Find Projects"
-          v-model="search"
-          >
-        </v-text-field>
+       <img style="cursor: pointer" class="mr-4" src="../../../assets/icons/back.svg" alt="" @click="$router.push('/Project')">
+      <quick-edit  v-on:input="saveProject" class="top-header " v-model="name" :emptyText="editMode == 'Create'  ?  'Create Project' : 'Loading'">
+        
+        <template v-slot:button-cancel >
+         <img class="close-icon" src="../../../assets/icons/close.svg" alt="">
+      </template>
+      <template v-slot:button-ok >
+         <img class="check-icon" src="../../../assets/icons/check.svg" alt="">
+      </template>
+       
+      </quick-edit>
         </div>
     </div>
+
+    <!-- Dialogs -->
     <v-dialog persistent v-model="userDialog" max-width="500">
       <v-card>
         <v-card-title class="headline">{{userEditMode}} User</v-card-title>
@@ -224,160 +226,285 @@
         </v-container>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red darken-1" text @click="documentDialog=false">
+               
+          <v-btn color="primary" text @click="documentDialog=false">
             Cancel
           </v-btn>
-          <v-btn color="green darken-1" text @click="onSaveDocument">
+          <v-btn class="ml-5 btn-primary btn-primary--small" text @click="onSaveDocument">
             Save
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-layout row wrap>
-      <v-flex xs12 md6 class="pa-5">
-      <v-container grid-list-xl fluid>
-        <v-card>
-          <v-toolbar >
-            <v-card-title
-              class="headline">
-              {{ editMode }} Project
-            </v-card-title>
-          </v-toolbar>
-          <v-container grid-list-xl fluid>
-            <v-layout row wrap>   
-              <v-flex xs12 md12>
-                <v-text-field label="Name"
-                  clearable
-                  v-model="name">
-                </v-text-field>
+
+
+
+
+  <!-- Layout -->
+  <v-tabs class="base-y-padding top-custom-tabs" >
+    <v-tab>Overview</v-tab>
+    <v-tab>Trades and transactions</v-tab>
+    <v-tab>Documents</v-tab>
+    <v-tab>Reports</v-tab>
+    <v-tab>Workesheet</v-tab>
+    <v-tab>Users</v-tab>
+
+    <v-tab-item key="1" class="overview">
+       <v-row class="mb-6" >
+             <v-col sm="12" md="5" lg="5"   >
+                <v-card>
+                  <v-toolbar>
+                    <v-card-title v-if="editMode == 'Create'"
+                      class="headline">
+                      {{ editMode }} Project
+                    </v-card-title>
+                    <v-card-title v-else 
+                      class="headline">
+                      Description
+                    </v-card-title>
+                    <v-spacer></v-spacer>
+                      <v-btn v-if="!editDescriptionMode && editMode != 'Create'"  class="ml-5 btn-grey btn-grey--square"
+                             @click="editDescription">
+                         <img  src="../../../assets/icons/edit-pencil.svg" alt="">
+                      </v-btn>
+                  </v-toolbar>
+                  <v-container grid-list-xl fluid>
+                    <v-layout row wrap>   
+                      <v-flex xs12 md12 v-if="editMode == 'Create' || editDescriptionMode">
+                        <v-text-field label="Name"
+                          
+                          clearable
+                          class="px-3 mt-4"
+                          v-model="name">
+                        </v-text-field>
+                      </v-flex>
+                      <v-flex xs12 md12>
+                        <v-textarea ref="description" class="description px-3" :class="{'no-edit-mode': !editDescriptionMode && editMode == 'Edit'}" label="Description"
+                          v-model="description"
+                          outlined
+                          auto-grow
+
+                          rows="4"
+                          row-height="30">
+                        </v-textarea>
+                      </v-flex>    
+                    </v-layout>
+                  </v-container>
+                  <v-card-actions v-if="editMode == 'Create' || editDescriptionMode">
+                    <v-spacer></v-spacer>
+                    <v-btn v-if="editMode == 'Create'" color="primary" text @click="$router.push('/Project')">
+                      CANCEL
+                    </v-btn>
+                    <v-btn v-if="editMode == 'Edit'" color="primary" text @click="editDescriptionOff(true)">
+                      CANCEL
+                    </v-btn>
+                    <v-btn class="ml-5 btn-primary btn-primary--small" text @click="saveProject(); editDescriptionOff(false)">
+                      SAVE
+                    </v-btn>
+                  </v-card-actions>
+                </v-card>
+             </v-col>
+            <v-col sm="12" md="7" lg="7"   >
+                    <v-card >
+                      <v-toolbar>
+                        <v-card-title>Info Requests</v-card-title>
+                        <v-spacer></v-spacer>
+                           <v-btn  class="ml-5 btn-primary btn-primary--small"
+                            @click="onRequestInformation">
+                              Request Info
+                            </v-btn>
+                             <v-btn  class="ml-5 btn-primary btn-primary--small"
+                             @click="onRequestDocument">
+                              Request Doc.
+                            </v-btn>
+                      </v-toolbar>
+                      <v-list two-line >
+                        <template v-for="(trade, index) in trades">
+                          <v-list-item
+                            :key="trade.entity_id"
+                            @click="editTrade(trade)">
+                            <v-list-item-content>
+                              <v-list-item-title v-html="trade.name"></v-list-item-title>
+                            </v-list-item-content>
+                            <v-btn icon @click.stop="deleteTrade(trade.entity_id)">
+                              <v-icon>delete</v-icon>
+                            </v-btn>
+                          </v-list-item>
+                          <v-divider
+                            v-if="index < trades.length - 1">
+                          </v-divider>
+                        </template>
+                      </v-list>
+                    </v-card>
+            </v-col>
+       </v-row>
+     </v-tab-item>
+     <v-tab-item key="2" class="trades-transactions">
+            <v-row class="mb-6" v-show="editMode == 'Edit'">
+                <v-col sm="12" md="6" lg="6"   >
+                    <v-card >
+                      <v-toolbar style="border: none">
+                        <v-card-title>Trades
+                           <div class="vertical-divider vertical-divider--small"></div>
+                          <img class="mr-3" src="../../../assets/search.svg" height="17px" alt="">
+                          <v-text-field
+                              class="card-search"
+                              label="Find Projects"
+                              placeholder="Find Trades"
+                              v-model="tradeSearch"
+                              >
+                            </v-text-field>
+                        </v-card-title>
+                        <v-spacer></v-spacer>
+                           <v-btn  class="ml-5 btn-primary btn-primary--small  "
+                            @click="addTrade">
+                              + Add
+                            </v-btn>
+                      </v-toolbar>
+                         <v-simple-table >
+                          <template  >
+                            <thead  >
+                              <tr>
+                                <th class="text-left">Name</th>
+                                <th class="text-left">Description</th>
+                                <th class="text-left">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody >
+                              <tr v-for="(trade, index) in filteredTrades"  @click="editTrade(trade)" :key="trade.entity_id" >
+                                <td style="width: 40%">{{ trade.name }}</td>
+                                <td style="width: 60%">{{ trade.description.length > 25 ? trade.description.slice(0, 25) + '...' : trade.description }}</td>
+                                 <td>
+                                    <v-btn icon @click.stop="deleteTrade(trade.entity_id)">
+                                           <img class="close-icon" src="../../../assets/icons/trash.svg" alt="">
+                                    </v-btn></td>
+                              </tr>
+                            </tbody>
+                          </template>
+                        </v-simple-table>
+                    </v-card>
+                </v-col>
+
+                 <v-col sm="12" md="6" lg="6"   >
+                  <v-card>
+                    <v-toolbar style="border: none">
+                      <v-card-title>Transactions
+                          <div class="vertical-divider vertical-divider--small"></div>
+                          <img class="mr-3" src="../../../assets/search.svg" height="17px" alt="">
+                          <v-text-field
+                            class="card-search"
+                            label="Find Projects"
+                            placeholder="Find Transactions"
+                            v-model="transactionSearch"
+                            >
+                            </v-text-field>
+                      </v-card-title>
+                      <v-btn  class="ml-5 btn-primary btn-primary--small  "
+                            @click="addTransaction">
+                              + Add
+                       </v-btn>
+                    </v-toolbar>
+                      <v-simple-table >
+                          <template  >
+                            <thead  >
+                              <tr>
+                                <th class="text-left">Name</th>
+                                <th class="text-left">Description</th>
+                                <th class="text-left">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody >
+                              <tr v-for="(transaction, index) in filteredTransactions"  @click="editTransaction(transaction)" :key="transaction.entity_id" >
+                                <td style="width: 40%">{{ transaction.name }}</td>
+                                <td style="width: 60%">{{ transaction.description.length > 25 ? transaction.description.slice(0, 25) + '...' : transaction.description }}</td>
+                                 <td>
+                                    <v-btn icon @click.stop="deleteTransaction(transaction.entity_id)">
+                                           <img class="close-icon" src="../../../assets/icons/trash.svg" alt="">
+                                    </v-btn></td>
+                              </tr>
+                            </tbody>
+                          </template>
+                        </v-simple-table>
+                    <!-- <v-list two-line>
+                      <template v-for="(transaction, index) in transactions">
+                        <v-list-item
+                          :key="transaction.entity_id"
+                          @click="editTransaction(transaction)">
+                          <v-list-item-content>
+                            <v-list-item-title v-html="transaction.name"></v-list-item-title>
+                          </v-list-item-content>
+                          <v-btn icon @click.stop="deleteTransaction(transaction.entity_id)">
+                            <v-icon>delete</v-icon>
+                          </v-btn>
+                        </v-list-item>
+                        <v-divider
+                          v-if="index < transactions.length - 1">
+                        </v-divider>
+                      </template>
+                    </v-list> -->
+                  </v-card>
+              </v-col>
+              </v-row>
+      
+     </v-tab-item>
+
+     <v-tab-item key="3">
+         <v-layout row wrap class="">
+
+         </v-layout>
+     </v-tab-item>
+
+     <v-tab-item key="4">
+         <v-layout row wrap class="">
+
+         </v-layout>
+     </v-tab-item>
+     <v-tab-item key="5">
+         <v-layout row wrap class="">
+
+         </v-layout>
+     </v-tab-item>
+
+     <v-tab-item key="6">
+         <v-layout row wrap class="">
+              <v-flex v-show="editMode == 'Edit'" xs12 md3 class="pa-5">
+              <v-container grid-list-xl fluid>
+                <v-hover>
+                  <v-card max-width="600" slot-scope="{ hover }"
+                    :class="`elevation-${hover ? 12 : 2}`">
+                    <v-toolbar >
+                      <v-card-title>Users</v-card-title>
+                      <v-spacer></v-spacer>
+                      <v-btn icon>
+                        <v-icon @click="addUser">add</v-icon>
+                      </v-btn>
+                    </v-toolbar>
+                    <v-list two-line>
+                      <template v-for="(user, index) in users">
+                        <v-list-item
+                          :key="user.user_id"
+                          @click="editUser(user)">
+                          <v-list-item-content>
+                            <v-list-item-title v-html="user.name"></v-list-item-title>
+                          </v-list-item-content>
+                          <v-btn icon @click.stop="deleteUser(user.user_id)">
+                            <v-icon>delete</v-icon>
+                          </v-btn>
+                        </v-list-item>
+                        <v-divider
+                          v-if="index < users.length - 1">
+                        </v-divider>
+                      </template>
+                    </v-list>
+                  </v-card>
+                </v-hover>
+              </v-container>
               </v-flex>
-              <v-flex xs12 md12>
-                <v-textarea label="Description"
-                  v-model="description"
-                  outlined
-                  auto-grow
-                  rows="4"
-                  row-height="30">
-                </v-textarea>
-              </v-flex>    
-            </v-layout>
-          </v-container>
-          <v-card-actions>
-          <v-btn color="primary" @click="onRequestInformation">
-              Request Information
-            </v-btn>
-            <v-btn color="primary" @click="onRequestDocument">
-              Request Document
-            </v-btn>
-            <v-spacer></v-spacer>
-            <v-btn color="red darken-1" text @click="$router.push('/Project')">
-              Cancel
-            </v-btn>
-            <v-btn color="green darken-1" text @click="saveProject()">
-              Save
-            </v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-container>
-      </v-flex>
-      <v-flex v-show="editMode == 'Edit'" xs12 md3 class="pa-5">
-      <v-container grid-list-xl fluid>
-        <v-hover>
-          <v-card max-width="600" slot-scope="{ hover }"
-            :class="`elevation-${hover ? 12 : 2}`">
-            <v-toolbar>
-              <v-card-title>Trades</v-card-title>
-              <v-spacer></v-spacer>
-              <v-btn icon>
-                <v-icon @click="addTrade">add</v-icon>
-              </v-btn>
-            </v-toolbar>
-            <v-list two-line>
-              <template v-for="(trade, index) in trades">
-                <v-list-item
-                  :key="trade.entity_id"
-                  @click="editTrade(trade)">
-                  <v-list-item-content>
-                    <v-list-item-title v-html="trade.name"></v-list-item-title>
-                  </v-list-item-content>
-                  <v-btn icon @click.stop="deleteTrade(trade.entity_id)">
-                    <v-icon>delete</v-icon>
-                  </v-btn>
-                </v-list-item>
-                <v-divider
-                  v-if="index < trades.length - 1">
-                </v-divider>
-              </template>
-            </v-list>
-          </v-card>
-        </v-hover>
-      </v-container>
-      <v-container grid-list-xl fluid>
-        <v-hover>
-          <v-card max-width="600" slot-scope="{ hover }"
-            :class="`elevation-${hover ? 12 : 2}`">
-            <v-toolbar>
-              <v-card-title>Transactions</v-card-title>
-              <v-spacer></v-spacer>
-              <v-btn icon>
-                <v-icon @click="addTransaction">add</v-icon>
-              </v-btn>
-            </v-toolbar>
-            <v-list two-line>
-              <template v-for="(transaction, index) in transactions">
-                <v-list-item
-                  :key="transaction.entity_id"
-                  @click="editTransaction(transaction)">
-                  <v-list-item-content>
-                    <v-list-item-title v-html="transaction.name"></v-list-item-title>
-                  </v-list-item-content>
-                  <v-btn icon @click.stop="deleteTransaction(transaction.entity_id)">
-                    <v-icon>delete</v-icon>
-                  </v-btn>
-                </v-list-item>
-                <v-divider
-                  v-if="index < transactions.length - 1">
-                </v-divider>
-              </template>
-            </v-list>
-          </v-card>
-        </v-hover>
-      </v-container>
-      </v-flex>
-      <v-flex v-show="editMode == 'Edit'" xs12 md3 class="pa-5">
-      <v-container grid-list-xl fluid>
-        <v-hover>
-          <v-card max-width="600" slot-scope="{ hover }"
-            :class="`elevation-${hover ? 12 : 2}`">
-            <v-toolbar >
-              <v-card-title>Users</v-card-title>
-              <v-spacer></v-spacer>
-              <v-btn icon>
-                <v-icon @click="addUser">add</v-icon>
-              </v-btn>
-            </v-toolbar>
-            <v-list two-line>
-              <template v-for="(user, index) in users">
-                <v-list-item
-                  :key="user.user_id"
-                  @click="editUser(user)">
-                  <v-list-item-content>
-                    <v-list-item-title v-html="user.name"></v-list-item-title>
-                  </v-list-item-content>
-                  <v-btn icon @click.stop="deleteUser(user.user_id)">
-                    <v-icon>delete</v-icon>
-                  </v-btn>
-                </v-list-item>
-                <v-divider
-                  v-if="index < users.length - 1">
-                </v-divider>
-              </template>
-            </v-list>
-          </v-card>
-        </v-hover>
-      </v-container>
-      </v-flex>
-    </v-layout>
+         </v-layout>
+     </v-tab-item>
+
+  </v-tabs>
+
   </div>
 </template>
 
@@ -392,20 +519,25 @@ export default {
     return {
       editMode: 'Create',    
       name: '',
+      preservedName: '',
       user_id: null,
       users: [],
       user_ids: [],
+      editDescriptionMode: false,
       description: '',
+      preservedDescription: '',
       tradeName: '',
       tradeDescription: '',
       tradeDialog: false,
       tradeEditMode: 'Create',
+      tradeSearch: '',
       activeTrade: {},
       transactionName: '',
       transactionDescription: '',
       transactionTrade: null,
       transactionDialog: false,
       transactionEditMode: 'Create',
+      transactionSearch: '',
       activeTransaction: {},
       userDialog: false,
       userEditMode: 'Add',
@@ -421,7 +553,8 @@ export default {
       informationBody: '',
       clients: [],
       informationClient: null,
-
+      
+     
       documentDialog: false,
       documentSubject: '',
       documentBody: '',
@@ -443,9 +576,23 @@ export default {
   },
   computed: {
     ...mapGetters(['activeProject', 'user', 'trades', 'transactions']),
+      filteredTrades() {
+        return this.trades.filter(trade => {
+              
+             return trade.name.toLowerCase().indexOf(this.tradeSearch.toLowerCase()) > -1
+        })
+      },
+
+       filteredTransactions() {
+        return this.transactions.filter(transaction => {
+              
+             return transaction.name.toLowerCase().indexOf(this.transactionSearch.toLowerCase()) > -1
+        })
+      },
   },
   methods: {
     async saveProject() {
+      var _this = this;
       if (this.users.length == 0){
         this.users = [{
           'user_id': this.user_id,
@@ -460,8 +607,11 @@ export default {
       this.setValues(this, this.activeProject)
 
       await this.$store.dispatch('saveProject', this.activeProject).then(function (project) {
-        if (!project['error']) {
-          window.location = '/Projecteditor/' + project.entity_id
+        
+        if (!project['error'] && window.location.pathname != '/Projecteditor/' + project.entity_id ) {
+          _this.$router.push('/Projecteditor/' + project.entity_id)
+          _this.editMode = 'Edit'
+          
         }
       })
 
@@ -500,7 +650,8 @@ export default {
       this.tradeDialog = false
       await this.$store.dispatch('saveTrade', this.activeTrade).then(function (trade) {
         if (!trade['error']) {
-          window.location = '/Projecteditor/' + trade.project_id
+           // Why do we redirecting to the same page on trade save? 
+          // window.location = '/Projecteditor/' + trade.project_id
         }
       })
     },
@@ -532,7 +683,9 @@ export default {
       this.transactionDialog = false
       await this.$store.dispatch('saveTransaction', this.activeTransaction).then(function (transaction) {
         if (!transaction['error']) {
-          window.location = '/Projecteditor/' + transaction.project_id
+          // Why do we redirecting to the same page on transaction save? 
+
+          // window.location = '/Projecteditor/' + transaction.project_id
         }
       })  
     },
@@ -556,6 +709,26 @@ export default {
       this.userRole = user.role
       this.userEditMode = 'Edit'
     },
+    editDescription() {
+      this.editDescriptionMode = true;
+      const theElement = this.$refs.description.$el
+      this.preservedName = this.name
+      this.preservedDescription = this.description
+      const input = theElement.querySelector('input:not([type=hidden]),textarea:not([type=hidden])')
+       if (input) {
+            setTimeout(() => {
+              input.focus()
+            }, 0)
+          }
+    },
+    editDescriptionOff(revert) {
+      if (revert) {
+        this.description = this.preservedDescription
+        this.name =  this.preservedName
+      }
+      this.editDescriptionMode = false;
+    },
+    
     async deleteUser(user_id) {
       
       for(let i=0; i < this.activeProject.users.length; i++){

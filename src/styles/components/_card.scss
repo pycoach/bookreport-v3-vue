@@ -6,9 +6,48 @@
 .v-dialog > .v-card::after {
    display: none;
 }
+
+.v-select-list.v-card {
+   &::after {
+      display: none !important;
+   }
+}
 .v-card {
    box-shadow: 3px 4px 41px rgba(0, 0, 0, 0.06);
+   &__title {
+      flex-wrap: nowrap;
+      width: 100%;
+      word-break: keep-all;
+   }
+
+
+   .card-search {
    
+  
+      color: #808080;
+   
+      .v-label--active {
+         display: none;
+      }
+      
+      .v-input__slot {
+         padding-top: 10px;
+         margin-bottom: 0px; 
+         font-weight: 400 !important;
+   
+         .v-text-field__slot {
+            font-size: 14px;
+         }
+         &:before {
+            display: none;
+         }
+   
+         &:after {
+            display: none;
+         }
+      }
+   }
+
    &::after {
       z-index: 0;
       content: "";
@@ -45,6 +84,8 @@
       }
 
       .v-card__title {
+         font-weight: bold;
+         font-size: 19px;
          padding-left: 0 !important;
       }
    }
@@ -63,5 +104,13 @@
          
          background-color: $primary;
       }
+   }
+}
+
+// trades and transactions cards 
+
+.overview, .trades-transactions {
+   .v-list {
+      min-height: 40vh;
    }
 }
