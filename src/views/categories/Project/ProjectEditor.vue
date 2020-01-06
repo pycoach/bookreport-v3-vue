@@ -20,7 +20,7 @@
     <v-dialog persistent v-model="userDialog" max-width="500">
       <v-card>
         <v-card-title class="headline">{{userEditMode}} User</v-card-title>
-        <v-container grid-list-xl fluid pt-0>
+        <v-container grid-list-xl fluid >
             <v-layout row wrap>
               <v-flex md12>
                 <v-text-field v-if="userEditMode == 'Add'"
@@ -68,7 +68,7 @@
     <v-dialog persistent v-model="tradeDialog" max-width="500">
       <v-card>
         <v-card-title class="headline">{{tradeEditMode}} Trade</v-card-title>
-        <v-container grid-list-xl fluid pt-0>
+        <v-container grid-list-xl fluid >
           <v-layout row wrap>
             <v-flex xs12 md12>
               <v-text-field label="Name"
@@ -89,10 +89,10 @@
         </v-container>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red darken-1" text @click="tradeDialog=false">
+          <v-btn  color="primary" text @click="tradeDialog=false">
             Cancel
           </v-btn>
-          <v-btn color="green darken-1" text @click="saveTrade">
+          <v-btn  class="ml-5 btn-primary btn-primary--small"  text @click="saveTrade">
             Save
           </v-btn>
         </v-card-actions>
@@ -101,7 +101,7 @@
     <v-dialog persistent v-model="transactionDialog" max-width="500">
       <v-card>
         <v-card-title class="headline">{{transactionEditMode}} Transaction</v-card-title>
-        <v-container grid-list-xl fluid pt-0>
+        <v-container grid-list-xl fluid >
           <v-layout row wrap>
             <v-flex xs12 md12>
               <v-text-field label="Name"
@@ -132,11 +132,11 @@
         </v-container>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red darken-1" text @click="transactionDialog=false">
-            Cancel
+          <v-btn color="primary" text @click="transactionDialog=false">
+            CANCEL
           </v-btn>
-          <v-btn color="green darken-1" text @click="saveTransaction">
-            Save
+          <v-btn  class="ml-5 btn-primary btn-primary--small" text @click="saveTransaction">
+            SAVE
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -144,7 +144,7 @@
     <v-dialog persistent v-model="informationDialog" max-width="500">
       <v-card>
         <v-card-title class="headline">Request Information</v-card-title>
-        <v-container grid-list-xl fluid pt-0>
+        <v-container grid-list-xl fluid >
           <v-layout row wrap>
             <v-flex xs12 md12>
               <v-text-field label="Subject"
@@ -174,11 +174,11 @@
         </v-container>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red darken-1" text @click="informationDialog=false">
-            Cancel
+          <v-btn color="primary" text @click="informationDialog=false">
+            CANCEL
           </v-btn>
-          <v-btn color="green darken-1" text @click="onSaveInformation">
-            Save
+          <v-btn class="ml-5 btn-primary btn-primary--small" text @click="onSaveInformation">
+            SAVE
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -186,7 +186,7 @@
     <v-dialog persistent v-model="documentDialog" max-width="500">
       <v-card>
         <v-card-title class="headline">Request Document</v-card-title>
-        <v-container grid-list-xl fluid pt-0>
+        <v-container grid-list-xl fluid >
           <v-layout row wrap>
             <v-flex xs12 md12>
               <v-text-field label="Subject"
@@ -228,11 +228,13 @@
           <v-spacer></v-spacer>
                
           <v-btn color="primary" text @click="documentDialog=false">
-            Cancel
+            CANCEL
           </v-btn>
           <v-btn class="ml-5 btn-primary btn-primary--small" text @click="onSaveDocument">
-            Save
+            SAVE
           </v-btn>
+
+                  
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -241,7 +243,9 @@
 
 
   <!-- Layout -->
-  <v-tabs class="base-y-padding top-custom-tabs" >
+  <v-tabs 
+    :ripple="false"
+    class="base-y-padding top-custom-tabs" >
     <v-tab>Overview</v-tab>
     <v-tab>Trades and transactions</v-tab>
     <v-tab>Documents</v-tab>
@@ -318,23 +322,14 @@
                               Request Doc.
                             </v-btn>
                       </v-toolbar>
-                      <v-list two-line >
-                        <template v-for="(trade, index) in trades">
-                          <v-list-item
-                            :key="trade.entity_id"
-                            @click="editTrade(trade)">
-                            <v-list-item-content>
-                              <v-list-item-title v-html="trade.name"></v-list-item-title>
-                            </v-list-item-content>
-                            <v-btn icon @click.stop="deleteTrade(trade.entity_id)">
-                              <v-icon>delete</v-icon>
-                            </v-btn>
-                          </v-list-item>
-                          <v-divider
-                            v-if="index < trades.length - 1">
-                          </v-divider>
-                        </template>
-                      </v-list>
+
+                       <v-data-table
+                      :headers="headers"
+                      :items="desserts"
+                      :items-per-page="5"
+                      
+                    ></v-data-table>
+
                     </v-card>
             </v-col>
        </v-row>
@@ -517,6 +512,91 @@ export default {
   props: ['id'],
   data() {
     return {
+       headers: [
+          {
+            text: 'Sent to',
+            align: 'left',
+            sortable: false,
+            value: 'name',
+          },
+          { text: 'Type', value: 'type' },
+          { text: 'Requested info', value: 'request' },
+          { text: 'Date', value: 'date' },
+          { text: 'Status', value: 'status' },
+         
+        ],
+        desserts: [
+          {
+            name: 'John Smith',
+            type: 159,
+            request: 6.0,
+            date: '1/6/2020',
+            status: 'AWAITING',
+          },
+          {
+            name: 'Sanna Sadler',
+            type: 237,
+            request: 9.0,
+            date:  '1/6/2020',
+            status: "RECEIVED",
+          },
+          {
+            name: 'Imaani Plant',
+            type: 262,
+            request: 16.0,
+            date:  '1/2/2020',
+            status: 'AWAITING',
+          },
+          {
+            name: 'Jaskaran Britt',
+            type: 305,
+            request: 3.7,
+            date:  '1/6/2020',
+            status: "RECEIVED",
+          },
+          {
+            name: 'Octavia Kaye',
+            type: 356,
+            request: 16.0,
+            date:  '1/3/2020',
+            status: "RECEIVED",
+          },
+          {
+            name: 'Umayr Maldonado',
+            type: 375,
+            request: 0.0,
+            date:  '1/6/2020',
+            status: "RECEIVED",
+          },
+          {
+            name: 'Halle Charles',
+            type: 392,
+            request: 0.2,
+            date:  '1/2/2020',
+            status: "COMPLETE",
+          },
+          {
+            name: 'Sapphire Arnold',
+            type: 408,
+            request: 3.2,
+            date:  '1/1/2020',
+            status: "PENDING",
+          },
+          {
+            name: 'Umayr Maldonado',
+            type: 452,
+            request: 25.0,
+            date:  '1/6/2020',
+            status: "RECEIVED",
+          },
+          {
+            name: 'Kevin Frey',
+            type: 518,
+            request: 26.0,
+            date:  '1/6/2020',
+            status: "PENDING",
+          },
+        ],
       editMode: 'Create',    
       name: '',
       preservedName: '',

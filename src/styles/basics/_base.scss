@@ -267,6 +267,10 @@ div.v-application {
    color: #C8CBCE !important;
 }
 
+.v-data-table tr {
+   cursor: pointer;
+}
+
 .theme--light.v-data-table tbody tr:hover:not(.v-data-table__expanded__content) {
    background: $primary-light-gradient-2;
 }
@@ -285,3 +289,36 @@ div.v-application {
 }
 
 
+/// login 
+
+
+.intro-box {
+
+   h3 {
+      font-style: normal;
+      font-weight: 600;
+      font-size: 39px;
+   }
+   z-index: 3;
+   display: flex;
+   justify-content: space-between;
+   height: 100%;
+   flex-direction: column;
+   .message {
+      margin-bottom: 10%;
+
+      .copyrights {
+         margin-top: 25%;
+      }
+   }
+
+   p {
+      margin-top: 20px;
+      font-size: 14px;
+      width: 85%;
+   }
+   img {
+      width: 228px;
+      height: 19px;
+   }
+}

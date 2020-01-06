@@ -4,15 +4,17 @@
 #login, #signup, #reset {
 
    .v-sheet#login-sheet {
-      top: -39px;
+      top: 2px;
    }
 
    .v-sheet#reset-sheet {
       top: -65px;
    }
 
+   margin-top: -50px;
+
    .v-sheet {
-      width: 324px;
+      width: 414px;
       position: relative;
       top: 0px;
       background-color: transparent !important;
@@ -20,11 +22,37 @@
       .logo-large {
          margin-bottom: 100px;
       }
+      .account {
+         margin-top: 30px;
+         display: inline-block;
+         border: 2px solid #DFE6F0 !important;
+         box-sizing: border-box;
+         border-radius: 11px;
+         padding: 10px 30px;
+      }
+
+      .button-login {
+         background: #455AF7;
+         /* purple-shadow */
+         box-shadow: 0px 7px 18px rgba(69, 90, 247, 0.32) !important;
+         border-radius: 11px;
+         height: 52px
+      }
+      
       .login-block {
-         display: flex;
+         display: block;
          align-items: baseline;
          margin-bottom: 40px;
-         
+
+       
+         p {
+            margin-top: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            line-height: 17px;
+
+            color: #ABADB5;
+         }
          h1 {
             pointer-events: none;
          }
@@ -46,9 +74,8 @@
 
       a {
          font-weight: 500;
-         font-size: 15px;
-         color: $light-grey-2 !important;
-         text-decoration-line: underline !important;
+         font-size: 13px;
+         color: #4976EC;   
       }
    }
 }
