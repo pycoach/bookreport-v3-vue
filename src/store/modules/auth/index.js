@@ -7,6 +7,7 @@ import router from '../../../router'
 
 const state = {
   user: JSON.parse(localStorage.getItem('user')),
+  loading: false
 }
 
 const getters = {
@@ -40,17 +41,20 @@ const actions = {
   },
   signInUserApi(context, payload){
     const user = payload
+    state.loading = true
     api(false).post('/login', {
       'username': user.username,
       'password': user.password
     }).then(function (response) {
       const userData = response['data']
       if (userData['error']) {
+        state.loading = false
         state.loginDisabled = false
         context.commit('apiError', userData['error'])
       } else {
         userData['redirect'] = user.redirect
         context.dispatch('getUserLogin', userData)
+        state.loading = false
       }
     })
   },
