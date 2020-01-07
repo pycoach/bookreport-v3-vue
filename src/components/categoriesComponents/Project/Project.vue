@@ -21,7 +21,6 @@
                     
                     v-on="on"
                   >      <img src="../../../assets/icons/menu-icon.svg" alt="">
-                        <i class="pe-7s-more fs-24 delete-button"  style="color: #2A2F39"></i>
                   </v-btn>
                 </template>
                 <v-list>

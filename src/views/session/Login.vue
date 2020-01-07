@@ -4,45 +4,49 @@
           <Intro>
 
         </Intro>
-        <v-flex  xs7 md7 lg8 style="display: flex; align-items: center; justify-content: center;">  
+        <v-flex  xs12 md7 lg8 style="display: flex; align-items: center; justify-content: center;  height: 100vh;">  
           <div >
            <v-sheet id="login-sheet" >
             <div class="login-block"> 
-              <h1>Welcome to Bookreport </h1> 
+              <h1>Welcome to BookReport </h1> 
             <p >Sign in by entering the information below </p>
             </div>
             <v-form v-model="valid" class="">
             <v-text-field
-              class="mb-3"
+              
               label="Email"
+              placeholder="mail@user.com"
+              
               v-model="email"
               required
               :rules="emailRules"
-              validate-on-blur>
+              >
             </v-text-field>
             <v-text-field
               label="Password"
               v-model="password"
+              placeholder="••••••••••••••"
               :append-icon="showPassword ? 'visibility' : 'visibility_off'"
               :type="showPassword ? 'text' : 'password'"
               name="input-10-1"
+              required
               @click:append="showPassword = !showPassword"
               validate-on-blur
               v-on:keyup.enter="submit">
             </v-text-field>
             </v-form>
-              <a class="d-block text-right remember" @click="$router.push('/session/reset-password')">Forgot password?</a>
+              <a class="d-block text-right remember"  style="position: relative; top: -24px; " @click="$router.push('/session/reset-password')">Forgot password?</a>
               <v-btn
+                :class="{'no-shadow': $store.state.auth.loading }"
                 depressed
                  :disabled="$store.state.auth.loading"
-                class="primary mt-10 button-login"
+                class="primary  button-login"
                 style="width: 100%; "
                 @click="submit">
                 <img  class="ma-2" src="../../assets/icons/login-lock.svg" alt="">
                 SIGN IN
                   <v-progress-circular 
                   v-if="$store.state.auth.loading"
-                  
                   style="position: absolute; right: 30%;"
                   indeterminate
                   :size="22"
@@ -54,11 +58,7 @@
                 <div class="text-center account" style="border: 1px solid grey">
                    <span class="fs-13 dark-grey-text ">Don't have an account?</span> <a class="text-right remember fs-13 " @click="$router.push('/session/signup')">Register</a>
                 </div>
-               
               </div>
-
-           
-             
           </v-sheet>
           </div>
        </v-flex>  

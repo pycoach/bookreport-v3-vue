@@ -60,8 +60,12 @@
         :ripple="false"
         @click="$router.push(`${link.path}`).catch(err => {})">
          <v-list-item-icon>
-          <div v-if="link.path != $route.path" class="navbar-icon-light"  :class="`link-icon-` + index"></div>
-          <div  v-if="link.path === $route.path"  class="navbar-icon-light"  :class="`link-icon-dark-` + index"></div>
+          <div v-if="!$route.path.includes('Projecteditor')">
+             <div v-if="link.path != $route.path && index == 2" class="navbar-icon-light"  :class="`link-icon-` + index"></div>
+             </div>  
+          <div v-if="link.path != $route.path && index != 2" class="navbar-icon-light"  :class="`link-icon-` + index"></div>
+          <div  v-if="link.path === $route.path "  class="navbar-icon-light"  :class="`link-icon-dark-` + index"></div>  
+           <div  v-if="$route.path.includes('Projecteditor') && index == 2 "  class="navbar-icon-light"  :class="`link-icon-dark-` + 2"></div>
         </v-list-item-icon>
         <v-list-item-content>
           <v-list-item-title :class="{linkActive: link.path === $route.path  }" >{{ link.name }}</v-list-item-title>

@@ -12,6 +12,11 @@
       display: none !important;
    }
 }
+.v-card--link:focus:before {
+   opacity: 0.02 !important;
+   background: #006fff !important;
+ }
+ 
 .v-card {
    box-shadow: 3px 4px 41px rgba(0, 0, 0, 0.06);
    &__title {
@@ -19,6 +24,8 @@
       width: 100%;
       word-break: keep-all;
    }
+
+ 
 
 
    .card-search {

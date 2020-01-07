@@ -68,6 +68,11 @@
          }
       }
 
+      .v-card--link:focus:before {
+         opacity: 0.02;
+         background: #006fff;
+     }
+
       .users-block {
          font-weight: 600;
          font-size: 12px;

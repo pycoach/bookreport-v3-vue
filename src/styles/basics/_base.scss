@@ -1,4 +1,5 @@
-
+$pe-7s-font-path: "../../node_modules/pe7-icon/dist/fonts" !default;
+@import "node_modules/pe7-icon/dist/scss/pe-icon-7-stroke";
 div.v-application {
     background: #F5F6FA !important;
 
@@ -322,3 +323,5 @@ div.v-application {
       height: 19px;
    }
 }
+
+

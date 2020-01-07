@@ -11,6 +11,13 @@
 
    color: #fff;
 
+   
+   @media screen and (max-width: 959px) { 
+      display: none;
+   }
+
+
+
    &::after {
       content: "";
       background: url('../assets/documents.svg') repeat-y center center;

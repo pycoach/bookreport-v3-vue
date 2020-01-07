@@ -3,13 +3,12 @@
   <v-container fluid pa-0 id="signup">
       <v-layout row wrap>
          <Intro>
-
         </Intro>
-        <v-flex xs7 md7 lg8 style="display: flex; align-items: center; justify-content: center;">  
+        <v-flex xs12 md7 lg8 style="display: flex; align-items: center; justify-content: center;">  
           <div >
            <v-sheet id="login-sheet" >
             <div class="login-block"> 
-              <h1>Welcome to Bookreport </h1> 
+              <h1>Welcome to BookReport </h1> 
               <p >Sign up by entering the information below </p>
             </div>
         <v-form v-model="valid" class="mb-4">
@@ -17,18 +16,21 @@
           label="Name"
           v-model="name"
           required
+          placeholder="John Smith"
           :rules="nameRules"
           validate-on-blur>
         </v-text-field>
         <v-text-field
           label="Email"
           v-model="email"
+          placeholder="mail@user.com"
           required
           :rules="emailRules"
           validate-on-blur>
         </v-text-field>
         <v-text-field
           label="Password"
+          placeholder="••••••••••••••"
           v-model="password"
           :append-icon="showPassword ? 'visibility' : 'visibility_off'"
           :rules="[passwordRules.required, passwordRules.min]"
@@ -45,7 +47,8 @@
           <v-btn
             :disabled="signUpDisabled"
             depressed
-            class="primary mt-10 button-login"
+            :class="{'no-shadow': signUpDisabled}"
+            class="primary button-login"
                 style="width: 100%"
             @click="submit">
               <img  class="ma-2" src="../../assets/icons/login-lock.svg" alt="">

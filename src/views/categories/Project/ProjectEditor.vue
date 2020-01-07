@@ -2,7 +2,7 @@
   <div class=''>
      <div class="d-flex justify-space-between base-y-padding">
       <div class="d-flex align-center">
-       <img style="cursor: pointer" class="mr-4" src="../../../assets/icons/back.svg" alt="" @click="$router.push('/Project')">
+       <img style="cursor: pointer" class="mr-4" src="../../../assets/icons/back.svg" alt="" @click="$router.push('/project')">
       <quick-edit  v-on:input="saveProject" class="top-header " v-model="name" :emptyText="editMode == 'Create'  ?  'Create Project' : 'Loading'">
         
         <template v-slot:button-cancel >
@@ -60,8 +60,8 @@
           </v-container>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="red darken-1" @click="userDialog=false">Cancel</v-btn>
-          <v-btn color="green darken-1" @click="saveUser">Save</v-btn>
+          <v-btn color="primary" text @click="userDialog=false">Cancel</v-btn>
+          <v-btn class="ml-5 btn-primary btn-primary--small"  @click="saveUser">Save</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -87,7 +87,7 @@
             </v-flex>
           </v-layout>
         </v-container>
-        <v-card-actions>
+        <v-card-actions >
           <v-spacer></v-spacer>
           <v-btn  color="primary" text @click="tradeDialog=false">
             Cancel
@@ -294,7 +294,7 @@
                       </v-flex>    
                     </v-layout>
                   </v-container>
-                  <v-card-actions v-if="editMode == 'Create' || editDescriptionMode">
+                  <v-card-actions v-if="editMode == 'Create' || editDescriptionMode" class="pa-5">
                     <v-spacer></v-spacer>
                     <v-btn v-if="editMode == 'Create'" color="primary" text @click="$router.push('/Project')">
                       CANCEL
@@ -308,7 +308,7 @@
                   </v-card-actions>
                 </v-card>
              </v-col>
-            <v-col sm="12" md="7" lg="7"   >
+            <v-col sm="12" md="7" lg="7"  v-show="editMode == 'Edit'" >
                     <v-card >
                       <v-toolbar>
                         <v-card-title>Info Requests</v-card-title>
@@ -336,7 +336,7 @@
      </v-tab-item>
      <v-tab-item key="2" class="trades-transactions">
             <v-row class="mb-6" v-show="editMode == 'Edit'">
-                <v-col sm="12" md="6" lg="6"   >
+                <v-col sm="12" md="6" lg="6">
                     <v-card >
                       <v-toolbar style="border: none">
                         <v-card-title>Trades
@@ -461,20 +461,18 @@
      </v-tab-item>
 
      <v-tab-item key="6">
-         <v-layout row wrap class="">
-              <v-flex v-show="editMode == 'Edit'" xs12 md3 class="pa-5">
-              <v-container grid-list-xl fluid>
-                <v-hover>
-                  <v-card max-width="600" slot-scope="{ hover }"
-                    :class="`elevation-${hover ? 12 : 2}`">
+       <v-row class="mb-6" v-show="editMode == 'Edit'">
+                <v-col sm="12" md="6" lg="6">
+                                  <v-card>
                     <v-toolbar >
                       <v-card-title>Users</v-card-title>
                       <v-spacer></v-spacer>
-                      <v-btn icon>
-                        <v-icon @click="addUser">add</v-icon>
-                      </v-btn>
+                          <v-btn  class="ml-5 btn-primary btn-primary--small  "
+                            @click="addUser">
+                              + Add
+                            </v-btn>
                     </v-toolbar>
-                    <v-list two-line>
+                    <v-list two-line style="min-height: 450px;">
                       <template v-for="(user, index) in users">
                         <v-list-item
                           :key="user.user_id"
@@ -483,7 +481,7 @@
                             <v-list-item-title v-html="user.name"></v-list-item-title>
                           </v-list-item-content>
                           <v-btn icon @click.stop="deleteUser(user.user_id)">
-                            <v-icon>delete</v-icon>
+                             <img class="close-icon" src="../../../assets/icons/trash.svg" alt="">
                           </v-btn>
                         </v-list-item>
                         <v-divider
@@ -492,10 +490,8 @@
                       </template>
                     </v-list>
                   </v-card>
-                </v-hover>
-              </v-container>
-              </v-flex>
-         </v-layout>
+                </v-col>
+       </v-row>
      </v-tab-item>
 
   </v-tabs>
