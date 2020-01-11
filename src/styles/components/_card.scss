@@ -1,0 +1,123 @@
+
+.v-dialog > .v-card > .v-card__title {
+   letter-spacing: 0.002em !important;
+}
+
+.v-dialog > .v-card::after {
+   display: none;
+}
+
+.v-select-list.v-card {
+   &::after {
+      display: none !important;
+   }
+}
+.v-card--link:focus:before {
+   opacity: 0.02 !important;
+   background: #006fff !important;
+ }
+ 
+.v-card {
+   box-shadow: 3px 4px 41px rgba(0, 0, 0, 0.06);
+   &__title {
+      flex-wrap: nowrap;
+      width: 100%;
+      word-break: keep-all;
+   }
+
+ 
+
+
+   .card-search {
+   
+  
+      color: #808080;
+   
+      .v-label--active {
+         display: none;
+      }
+      
+      .v-input__slot {
+         padding-top: 10px;
+         margin-bottom: 0px; 
+         font-weight: 400 !important;
+   
+         .v-text-field__slot {
+            font-size: 14px;
+         }
+         &:before {
+            display: none;
+         }
+   
+         &:after {
+            display: none;
+         }
+      }
+   }
+
+   &::after {
+      z-index: 0;
+      content: "";
+      width: 100%;
+      background: #455AF7;
+      position: absolute;
+      top: -2px;
+      height: 32px;
+      display: block;
+      border-radius: 12px;
+   }
+   &:not(.v-sheet--tile):not(.v-card--shaped) {
+      border-radius: 12px;
+   }
+ 
+   .v-toolbar {
+      position: relative;
+      z-index: 1;
+      height: 71px !important;
+      box-shadow: none;
+      border-bottom: 1px solid #F0F0F0;
+
+      &__content {
+         height: 71px !important;
+      }
+
+      .headline {
+         font-style: normal;
+         font-weight: 600 !important;;
+         font-size: 20px !important;
+      }
+      .v-toolbar__content > .v-btn.v-btn--icon:last-child, .v-toolbar__extension > .v-btn.v-btn--icon:last-child {
+         margin-right: 0;
+      }
+
+      .v-card__title {
+         font-weight: bold;
+         font-size: 19px;
+         padding-left: 0 !important;
+      }
+   }
+
+   &__text {
+      color: $dark-grey !important;
+   }
+   .v-list--two-line .v-list-item, .v-list-item--two-line {
+      min-height: 71px;
+   }
+   
+   .v-list {
+      padding: 0;
+
+      .v-list-item--link:hover::before {
+         
+         background-color: $primary;
+      }
+   }
+}
+
+// trades and transactions cards 
+
+.overview, .trades-transactions {
+   .v-list {
+      min-height: 40vh;
+   }
+}

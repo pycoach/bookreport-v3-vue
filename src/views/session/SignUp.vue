@@ -1,28 +1,36 @@
+
 <template>
-  <v-container fluid>
-    <v-row justify="space-around">
-      <v-sheet width="400" height="500" elevation="5" :tile="false">
-        <h1 class="primary pa-5 white--text">Enter your details to Sign Up</h1>
+  <v-container fluid pa-0 id="signup">
+      <v-layout row wrap>
+         <Intro>
+        </Intro>
+        <v-flex xs12 md7 lg8 style="display: flex; align-items: center; justify-content: center;">  
+          <div >
+           <v-sheet id="login-sheet" >
+            <div class="login-block"> 
+              <h1>Welcome to BookReport </h1> 
+              <p >Sign up by entering the information below </p>
+            </div>
         <v-form v-model="valid" class="mb-4">
         <v-text-field
-          class="pa-3"
           label="Name"
           v-model="name"
           required
+          placeholder="John Smith"
           :rules="nameRules"
           validate-on-blur>
         </v-text-field>
         <v-text-field
-          class="pa-3"
           label="Email"
           v-model="email"
+          placeholder="mail@user.com"
           required
           :rules="emailRules"
           validate-on-blur>
         </v-text-field>
         <v-text-field
-          class="pa-3"
           label="Password"
+          placeholder="••••••••••••••"
           v-model="password"
           :append-icon="showPassword ? 'visibility' : 'visibility_off'"
           :rules="[passwordRules.required, passwordRules.min]"
@@ -35,26 +43,50 @@
           v-on:keyup.enter="submit">
         </v-text-field>
         </v-form>
-        <v-row justify="space-around">
+         
           <v-btn
             :disabled="signUpDisabled"
             depressed
+            :class="{'no-shadow': signUpDisabled}"
+            class="primary button-login"
+                style="width: 100%"
             @click="submit">
+              <img  class="ma-2" src="../../assets/icons/login-lock.svg" alt="">
             Sign Up
-            <v-icon right>person_add</v-icon>
+            <v-progress-circular 
+                v-if="signUpDisabled"
+                style="position: absolute; right: 30%;"
+                indeterminate
+                :size="22"
+                color="#fff"
+              ></v-progress-circular>
           </v-btn>
-        </v-row>
-        <v-row justify="space-around">
-          <a class="pa-3" @click="$router.push('/session/login')">Already have an account?</a>
-        </v-row>
+          <div class="mt-5 text-center" >
+            <div class="text-center account" style="border: 1px solid grey">
+                   <span class="fs-13 dark-grey-text ">Already have an account?</span> <a class="text-right remember fs-13 " @click="$router.push('/session/login')">Login</a>
+                </div>
+        </div>
+          
       </v-sheet>
-    </v-row>
+          </div>
+       </v-flex>  
+       
+      
+    </v-layout>
+   
   </v-container>
+  
 </template>
 
+
+
 <script>
+import Intro from '../../components/Intro'
 export default {
   name: 'SignUp',
+    components: {
+      Intro
+  },
   data() {
     return {
       valid: false,

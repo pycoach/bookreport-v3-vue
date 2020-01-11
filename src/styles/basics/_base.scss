@@ -1,0 +1,327 @@
+$pe-7s-font-path: "../../node_modules/pe7-icon/dist/fonts" !default;
+@import "node_modules/pe7-icon/dist/scss/pe-icon-7-stroke";
+div.v-application {
+    background: #F5F6FA !important;
+
+   .base-y-padding {
+      padding-left: 50px; 
+      padding-right: 50px;
+   }
+   .base-y-margin {
+      margin-left: 50px; 
+      margin-right: 50px;
+   }
+
+   .base-l-padding {
+      padding-left: 50px; 
+     
+   }
+
+   .green--text {
+      color: $primary !important;
+   }
+
+   .v-text-field > .v-input__control > .v-input__slot  {
+      font-size: 16px !important;
+      font-weight: 600;
+   }
+
+   
+
+   .line-divider {
+      width: 110px;
+      height: 2px;
+      margin: 0 auto;
+      background: linear-gradient(270deg, #F7F7F7 -1.16%, rgba(247, 247, 247, 0) 124.54%);
+      margin-bottom: 15px;
+   }
+
+   .vertical-divider {
+      margin-left: 40px;
+      margin-right: 20px;
+      width: 1px;
+      height: 33px;
+      background: #C4C4C4;
+
+      &--small {
+         margin-left: 15px;
+         margin-right: 10px;
+         height: 21px;
+      }
+   }
+
+   
+
+   .large-divider {
+      height: 1px;
+      margin-bottom: 48px;
+      background: #D6D6D6;
+   }
+
+   .primary {
+      background: $primary !important;
+   }
+   .primary-text {
+      color: $primary !important;
+      caret-color: $primary !important;
+   }
+
+   .primary--text {
+      color: $primary !important;
+      caret-color: $primary !important;
+   }
+   
+
+   // text-input fields 
+
+   .v-label--active {
+      text-transform: uppercase !important;
+   }
+   .v-textarea  {
+       .v-label--active {
+          text-transform: capitalize !important;
+       }
+   }
+
+   
+}
+
+
+
+// component top part 
+
+.top-header {
+   font-size: 48px;
+   
+   
+   span {
+      font-weight: bold;
+      color: $dark-grey !important;
+   }
+
+   .check-icon {
+      top: 10px !important;
+      left: 7px !important;
+      position: absolute !important;
+   }
+
+   .close-icon {
+      top: 10px !important;
+      left: 9px !important;
+      position: absolute !important;
+   }
+
+   .vue-quick-edit__button {
+      position: relative;
+      border: none !important;
+      margin: 0 !important;
+      &--ok {
+         background: #455AF7;
+         box-shadow: 0px 7px 18px rgba(69, 90, 247, 0.32);
+      }
+
+      &--cancel {
+         background: #FFFFFF;
+         box-shadow: 0px 7px 18px rgba(156, 158, 176, 0.32);
+      }
+   }
+
+   .vue-quick-edit {
+      position: relative;
+      &:focus {
+         outline: 0;
+         }
+
+     
+      &__link--is-clickable {
+         border-bottom: none;   
+         &:focus {
+            outline: 0;
+            }
+      }
+
+      
+   
+      &__input {
+            font-weight: bold;
+            background-color: transparent ;
+            color: $dark-grey;
+            border: none; 
+            border-bottom: 1px dashed $light-grey; 
+            height: 63px; 
+            width: 40vw;
+            padding: 0; 
+
+            &:focus {
+               outline: 0;
+               }
+               &:active {
+                  outline: 0;
+                  }
+      }
+   }
+ 
+}
+
+.top-search {
+   
+  
+   color: #808080;
+
+   .v-label--active {
+      display: none;
+   }
+   
+   .v-input__slot {
+      margin-bottom: 3px; 
+      font-weight: 400 !important;
+
+      .v-text-field__slot {
+         font-size: 21px;
+      }
+      &:before {
+         display: none;
+      }
+
+      &:after {
+         display: none;
+      }
+   }
+}
+
+.top-custom-tabs {
+   
+   margin-top: 10px;
+
+   .v-tabs-bar {
+      font-size: 16px;
+      line-height: 19px;
+      
+      /* medium-grey */
+      color: #757575;
+      background-color: transparent !important;
+      border-bottom: 1px solid #D6D6D6;
+
+      .v-tab {
+         padding: 0 30px;
+         letter-spacing: inherit;
+         text-transform: capitalize !important;
+
+         
+      }
+   }
+
+   .v-tabs-items {
+      margin-top: 40px;
+      background-color: transparent;
+   }
+}
+
+
+
+
+
+//input customization 
+
+
+.v-input {
+   &.description {
+      
+     
+
+    
+      
+   }
+   &.no-edit-mode {
+      padding: 0 !important;
+      font-weight: 400 !important;
+      fieldset {
+         border: none ;
+         
+      }
+      textarea {
+         font-weight: 400 !important;
+      }
+      pointer-events: none;
+      label {
+         visibility: hidden
+      }
+   }
+}
+
+
+
+
+// tables customization 
+
+
+.v-data-table td, .v-data-table th {
+   padding: 16px 16px;
+
+   
+}
+
+.v-data-table th {
+   font-weight: 600;
+   font-size: 14px;
+   line-height: 17px;
+   color: #C8CBCE !important;
+}
+
+.v-data-table tr {
+   cursor: pointer;
+}
+
+.theme--light.v-data-table tbody tr:hover:not(.v-data-table__expanded__content) {
+   background: $primary-light-gradient-2;
+}
+
+
+.theme--light.v-data-table tbody tr:not(:last-child) td:not(.v-data-table__mobile-row) {
+   border-bottom: 1px solid #F1F4F8;
+}
+
+.theme--light.v-data-table thead tr:last-child th {
+   border-bottom: 1px solid #F1F4F8;
+}
+
+.v-data-table__wrapper {
+   min-height: 50vh;
+}
+
+
+/// login 
+
+
+.intro-box {
+
+   h3 {
+      font-style: normal;
+      font-weight: 600;
+      font-size: 39px;
+   }
+   z-index: 3;
+   display: flex;
+   justify-content: space-between;
+   height: 100%;
+   flex-direction: column;
+   .message {
+      margin-bottom: 10%;
+
+      .copyrights {
+         margin-top: 25%;
+      }
+   }
+
+   p {
+      margin-top: 20px;
+      font-size: 14px;
+      width: 85%;
+   }
+   img {
+      width: 228px;
+      height: 19px;
+   }
+}
+
+

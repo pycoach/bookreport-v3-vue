@@ -1,5 +1,5 @@
 <template>
-  <v-footer
+  <v-footer v-if="false"
     color="primary lighten-1"
     padless>
     <v-row

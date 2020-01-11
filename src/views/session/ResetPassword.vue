@@ -1,11 +1,18 @@
 <template>
-  <v-container fluid>
-    <v-row justify="space-around">
-      <v-sheet width="400" height="280" elevation="5" :tile="false">
-        <h1 class="primary pa-5 white--text">Enter your email address</h1>
+  <v-container fluid pa-0 id="login">
+      
+      <v-layout row wrap>
+        <Intro>
+
+        </Intro>
+        <v-flex xs12 md7 lg8 style="display: flex; align-items: center; justify-content: center;">  
+          <div >
+           <v-sheet id="login-sheet" >
+            <div class="login-block"> 
+              <h1>Enter your email address</h1> 
+            </div>
         <v-form v-model="valid" class="mb-4">
         <v-text-field
-          class="pa-3"
           label="Email"
           v-model="username"
           required
@@ -14,22 +21,33 @@
           v-on:keyup.enter="submit">
         </v-text-field>
         </v-form>
-        <v-row justify="space-around">
           <v-btn
             depressed
+            
+            class="primary mt-10  button-login"
+            style="width: 100%"
             @click="submit">
             Send Email
-            <v-icon right>exit_to_app</v-icon>
+            
           </v-btn>
-        </v-row>
+          
       </v-sheet>
-    </v-row>
+          </div>
+       </v-flex>  
+      
+      
+    </v-layout>
+   
   </v-container>
 </template>
 
 <script>
+import Intro from '../../components/Intro'
 export default {
   name: 'ResetPassword',
+   components: {
+      Intro
+  },
   data() {
     return {
       valid: false,

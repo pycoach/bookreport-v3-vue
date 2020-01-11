@@ -84,6 +84,7 @@ const router =  new Router({
       name: 'signup',
       component: SignUp,
       meta: {
+        title: 'BookReport - SignUp',
         hideNavigation: true
       }
     },
@@ -92,6 +93,7 @@ const router =  new Router({
       name: 'login',
       component: Login,
       meta: {
+        title: 'BookReport - Login',
         hideNavigation: true
       }
     },

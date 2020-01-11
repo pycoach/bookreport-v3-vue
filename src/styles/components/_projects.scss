@@ -1,0 +1,102 @@
+#Projects {
+   .v-card {
+      .v-toolbar { 
+         border-bottom: none;
+         
+        &__content {
+            font-weight: 600;
+            font-size: 14px;
+            .project-title {
+               font-weight: 600;
+               font-size: 16px;
+               color: $dark-grey;
+            }
+            .project-last-edited {
+               font-weight: 500;
+               font-size: 11px;
+               color: $light-grey;
+            }
+            button {
+               position: relative;
+                right: -11px;
+            }
+           
+            .project-icon {
+               box-shadow: 0px 4px 7px rgba(0, 0, 0, 0.07);
+               border-radius: 6px;
+               background-color: #fff;
+               margin-right: 1rem;
+               width: 40px;
+               height: 40px;
+            }
+         }
+      }
+
+      .v-card__text {
+         min-height: 92px;
+      }
+
+      .v-divider {
+         border-color: #F1F4F8;
+         width: 90%;
+         
+         margin: 0 auto;
+      }
+
+      .tasks-counter {
+         padding: 0 16px;
+         text-align: center;
+         font-weight: 600;
+         font-size: 12px;
+         color: $medium-grey;
+         .row > div:first-child, .row > div:nth-child(2) {
+            border-right: 1px solid #F1F4F8;
+         }
+         
+         span {
+            font-weight: 500;
+            font-size: 22px;
+            color: $dark-grey;
+         }
+
+         .transactions {
+            width: inherit;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            
+         }
+      }
+
+      .v-card--link:focus:before {
+         opacity: 0.02;
+         background: #006fff;
+     }
+
+      .users-block {
+         font-weight: 600;
+         font-size: 12px;
+         color: $medium-grey;
+         padding: 3px 12px;
+         img {
+            margin-right: 0.5rem;
+         }
+
+         &__name {
+            font-weight: normal;
+            font-weight: 500;
+            font-size: 11px;
+            line-height: 16px;   
+            color: $dark-grey;
+         }
+
+         &__role {
+            font-weight: 400;
+            font-size: 11px;
+            line-height: 15px;
+            color: #688097;
+         }
+        
+      }
+   }
+}

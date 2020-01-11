@@ -1,6 +1,6 @@
 <template>
-  <nav>
-    <v-app-bar
+  <nav >
+    <v-app-bar v-if="false"
       app
       flat
       fixed

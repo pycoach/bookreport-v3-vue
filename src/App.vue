@@ -14,10 +14,19 @@ import Footer from './components/Footer'
 import Header from './components/Header'
 
 export default {
+  
   name: 'App',
   components: {
     Footer,
     Header
   },
+   watch: {
+      '$route':{
+        handler: (to, from) => {
+          document.title = 'BookReport'
+        },
+         immediate: true
+      }
+    },
 };
 </script>
