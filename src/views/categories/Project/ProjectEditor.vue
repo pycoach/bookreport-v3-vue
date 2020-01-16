@@ -238,8 +238,97 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog persistent v-model="topicTypeDialog" max-width="100%">
+      <v-card>
+        <v-card-title class="headline">{{topicTypeEditMode}} Topic Type</v-card-title>
+        <v-container grid-list-xl fluid >
+          <v-layout row wrap>
+            <v-flex xs12 md12>
+              <v-text-field label="Name"
+                clearable
+                v-model="topicTypeName">
+              </v-text-field>
+            </v-flex>
+            <v-flex xs12 md12>
+              <v-textarea label="Description"
+                v-model="topicTypeDescription"
+                outlined
+                auto-grow
+                rows="2"
+                row-height="10">
+              </v-textarea>
+            </v-flex>
+            <v-flex xs12 md12>
+              <v-data-table
+                :headers="topic_type_headers"
+                :items="topicTypeVariables"
+                disable-sort
+                class="elevation-1"
+              >                               
+              </v-data-table>
+            </v-flex>
+            <v-flex xs12 md12>
+              <v-tabs grow v-model="topicTypeTab">
+                <v-tab>Template</v-tab>
+                <v-tab>Preview</v-tab>
+              </v-tabs>
 
-
+              <v-divider/> 
+              <v-tabs-items v-model="topicTypeTab">
+                <v-tab-item key="topic-1">
+                  <tiptap-vuetify v-model="topicTypeTemplate" :extensions="extensions"/>
+                </v-tab-item>
+                <v-tab-item key="topic-2">                           
+                  <div class="tiptap-vuetify-editor__content" v-html="topicTypeTemplate"/>
+                </v-tab-item>
+              </v-tabs-items>              
+            </v-flex>
+          </v-layout>
+        </v-container>
+        <v-card-actions >
+          <v-spacer></v-spacer>
+          <v-btn  color="primary" text @click="topicTypeDialog=false">
+            Cancel
+          </v-btn>
+          <v-btn  class="ml-5 btn-primary btn-primary--small"  text @click="saveTopicType">
+            Save
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-dialog persistent v-model="topicDialog" max-width="500">
+      <v-card>
+        <v-card-title class="headline">{{topicEditMode}} Topic</v-card-title>
+        <v-container grid-list-xl fluid >
+          <v-layout row wrap>
+            <v-flex xs12 md12>
+              <v-text-field label="Name"
+                clearable
+                v-model="topicName">
+              </v-text-field>
+            </v-flex>
+            <v-flex xs12 md12>
+              <v-textarea label="Description"
+                v-model="topicDescription"
+                outlined
+                auto-grow
+                rows="4"
+                row-height="30">
+              </v-textarea>
+            </v-flex>
+          </v-layout>
+        </v-container>
+        <v-card-actions >
+          <v-spacer></v-spacer>
+          <v-btn  color="primary" text @click="topicDialog=false">
+            Cancel
+          </v-btn>
+          <v-btn  class="ml-5 btn-primary btn-primary--small"  text @click="saveTopic">
+            Save
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
 
   <!-- Layout -->
@@ -251,6 +340,7 @@
     <v-tab>Documents</v-tab>
     <v-tab>Reports</v-tab>
     <v-tab>Workesheet</v-tab>
+    <v-tab>Topic</v-tab>
     <v-tab>Users</v-tab>
 
     <v-tab-item key="1" class="overview">
@@ -439,8 +529,7 @@
                     </v-list> -->
                   </v-card>
               </v-col>
-              </v-row>
-      
+              </v-row>      
      </v-tab-item>
 
      <v-tab-item key="3">
@@ -454,6 +543,7 @@
 
          </v-layout>
      </v-tab-item>
+
      <v-tab-item key="5">
          <v-layout row wrap class="">
 
@@ -461,6 +551,105 @@
      </v-tab-item>
 
      <v-tab-item key="6">
+      <v-row class="mb-6" v-show="editMode == 'Edit'">
+            <v-col sm="12" md="6" lg="6">
+                <v-card >
+                  <v-toolbar style="border: none">
+                    <v-card-title>Topic Types
+                        <div class="vertical-divider vertical-divider--small"></div>
+                      <img class="mr-3" src="../../../assets/search.svg" height="17px" alt="">
+                      <v-text-field
+                          class="card-search"
+                          label="Find Topic Types"
+                          placeholder="Find Topic Types"
+                          v-model="topicTypeSearch"
+                          >
+                        </v-text-field>
+                    </v-card-title>
+                    <v-spacer></v-spacer>
+                        <v-btn  class="ml-5 btn-primary btn-primary--small  "
+                        @click="addTopicType">
+                          + Add
+                        </v-btn>
+                  </v-toolbar>
+                      <v-simple-table >
+                      <template  >
+                        <thead  >
+                          <tr>
+                            <th class="text-left">Name</th>
+                            <th class="text-left">Description</th>
+                            <th class="text-left">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody >
+                          <tr v-for="(topicType, index) in filteredTopicTypes"  @click="editTopicType(topicType)" :key="topicType.entity_id" >
+                            <td style="width: 40%">{{ topicType.name }}</td>
+                            <td style="width: 60%">{{ topicType.description.length > 25 ? topicType.description.slice(0, 25) + '...' : topicType.description }}</td>
+                              <td>
+                                <v-btn icon @click.stop="deleteTopicType(topicType.entity_id)">
+                                        <img class="close-icon" src="../../../assets/icons/trash.svg" alt="">
+                                </v-btn></td>
+                          </tr>
+                        </tbody>
+                      </template>
+                    </v-simple-table>
+                </v-card>
+            </v-col>
+
+              <v-col sm="12" md="6" lg="6"   >
+              <v-card>
+                <v-toolbar style="border: none">
+                  <v-card-title>Topics
+                      <div class="vertical-divider vertical-divider--small"></div>
+                      <img class="mr-3" src="../../../assets/search.svg" height="17px" alt="">
+                      <v-text-field
+                        class="card-search"
+                        label="Find Topics"
+                        placeholder="Find Topics"
+                        v-model="topicSearch"
+                        >
+                        </v-text-field>
+                  </v-card-title>
+                  <v-btn  v-show="userRole == 'provider admin'" class="ml-5 btn-primary btn-primary--small  "
+                        @click="addTopic">
+                          + Add
+                    </v-btn>
+                </v-toolbar>
+                  <v-simple-table >
+                      <template  >
+                        <thead  >
+                          <tr>
+                            <th class="text-left">Name</th>
+                            <th class="text-left">Description</th>
+                            <th class="text-left">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody v-if="userRole == 'provider admin'">
+                          <tr v-for="(topic, index) in filteredTopics"  @click="editTopic(topic)" :key="topic.entity_id" >
+                            <td style="width: 40%">{{ topic.name }}</td>
+                            <td style="width: 60%">{{ topic.description.length > 25 ? topic.description.slice(0, 25) + '...' : topic.description }}</td>
+                              <td>
+                                <v-btn icon @click.stop="deleteTopic(topic.entity_id)">
+                                        <img class="close-icon" src="../../../assets/icons/trash.svg" alt="">
+                                </v-btn></td>
+                          </tr>
+                        </tbody>
+
+                        <tbody v-else>
+                          <tr v-for="(topic, index) in filteredTopics" :key="topic.entity_id" >
+                            <td style="width: 40%">{{ topic.name }}</td>
+                            <td style="width: 60%">{{ topic.description.length > 25 ? topic.description.slice(0, 25) + '...' : topic.description }}</td>
+                          </tr>
+                        </tbody>
+
+                      </template>
+                    </v-simple-table>
+              </v-card>
+          </v-col>
+          </v-row>  
+     </v-tab-item>
+
+     <v-tab-item key="7">
        <v-row class="mb-6" v-show="editMode == 'Edit'">
                 <v-col sm="12" md="6" lg="6">
                                   <v-card>
@@ -502,9 +691,31 @@
 <script>
 import { mapGetters } from 'vuex'
 import QuickEdit from 'vue-quick-edit';
+
+import {
+  // component
+  TiptapVuetify,
+  // extensions
+  Heading,
+  Bold,
+  Italic,
+  Strike,
+  Underline,
+  Code,
+  Paragraph,
+  BulletList,
+  OrderedList,
+  ListItem,
+  Link,
+  Blockquote,
+  HardBreak,
+  HorizontalRule,
+  History
+} from "tiptap-vuetify";
+
 export default {
   name: 'ProjectEditor',
-  components: { QuickEdit },
+  components: { QuickEdit, TiptapVuetify, },
   props: ['id'],
   data() {
     return {
@@ -602,12 +813,14 @@ export default {
       editDescriptionMode: false,
       description: '',
       preservedDescription: '',
+
       tradeName: '',
       tradeDescription: '',
       tradeDialog: false,
       tradeEditMode: 'Create',
       tradeSearch: '',
       activeTrade: {},
+
       transactionName: '',
       transactionDescription: '',
       transactionTrade: null,
@@ -615,6 +828,53 @@ export default {
       transactionEditMode: 'Create',
       transactionSearch: '',
       activeTransaction: {},
+
+      topicTypeName: '',
+      topicTypeDescription: '',
+      topicTypeDialog: false,
+      topicTypeEditMode: 'Create',
+      topicTypeSearch:'',
+      activeTopicType: {},
+      topicTypeTab: null,
+      topicTypeTemplate: '',
+      topic_type_headers: [
+        { text: 'Name',value: 'name' },
+        { text: 'Description', value: 'description' },
+        { text: 'Data Type', value: 'data_type' },
+        { text: 'Example Value', value: 'example_value' },
+      ],
+      topicTypeVariables: [
+        {
+          name: 'Asset Total',
+          description: 'The total value of the assets',
+          data_type: 'Number',
+          example_value: '12,345,333',
+        },
+        {
+          name: 'Liability Total',
+          description: 'The total value of the eiabilities',
+          data_type: 'Number',
+          example_value: '92,98,661',
+        },
+        {
+          name: 'Equity Total',
+          description: 'The total value of the equities',
+          data_type: 'Number',
+          example_value: '62,345,543',
+        },
+      ],
+
+
+      topics: [],
+      topicName: '',
+      topicDescription: '',
+      topicDialog: false,
+      topicEditMode: 'Create',
+      topicSearch:'',
+      activeTopic: {},
+      topicTab: null,
+
+
       userDialog: false,
       userEditMode: 'Add',
       username: '',
@@ -636,6 +896,34 @@ export default {
       documentBody: '',
       documents: [],
       documentClient: null,
+
+      extensions: [
+      History,
+      Blockquote,
+      Link,
+      Underline,
+      Strike,
+      Italic,
+      ListItem, // if you need to use a list (BulletList, OrderedList)
+      BulletList,
+      OrderedList,
+      [
+        Heading,
+        {
+          // Options that fall into the tiptap's extension
+          options: {
+            levels: [1, 2, 3]
+          }
+        }
+      ],
+      Bold,
+      Link,
+      Code,
+      HorizontalRule,
+      Paragraph,
+      HardBreak // line break on Shift + Ctrl + Enter
+    ],   
+
     }
   },
   mounted() {
@@ -646,12 +934,13 @@ export default {
       this.$store.dispatch('getProject', this.id)
       this.$store.dispatch('loadTrades', this.id)
       this.$store.dispatch('loadTransactions', this.id)
+      this.$store.dispatch('loadTopicTypes', this.id)
     } else {
       this.$store.commit('setActiveProject', {user_id: this.user_id})
     }    
   },
   computed: {
-    ...mapGetters(['activeProject', 'user', 'trades', 'transactions']),
+    ...mapGetters(['activeProject', 'user', 'trades', 'transactions', 'topic_types',]),
       filteredTrades() {
         return this.trades.filter(trade => {
               
@@ -663,6 +952,18 @@ export default {
         return this.transactions.filter(transaction => {
               
              return transaction.name.toLowerCase().indexOf(this.transactionSearch.toLowerCase()) > -1
+        })
+      },
+      filteredTopicTypes() {
+        return this.topic_types.filter(topic_type => {
+              
+             return topic_type.name.toLowerCase().indexOf(this.topicTypeSearch.toLowerCase()) > -1
+        })
+      },
+      filteredTopics() {
+        return this.topics.filter(topic => {
+              
+             return topic.name.toLowerCase().indexOf(this.topicSearch.toLowerCase()) > -1
         })
       },
   },
@@ -771,6 +1072,76 @@ export default {
     transactionTradeChanged(trade) {
       this.activeTransaction['trade_id'] = trade['entity_id']
     },    
+
+    addTopicType() {
+      this.topicTypeEditMode = 'Create'
+      this.topicTypeDialog = true
+
+      this.activeTopicType = {
+        'project_id': this.id
+      }
+      this.topicTypeName = ''
+      this.topicTypeDescription = ''        
+      this.topicTypeTemplate = ''
+    },
+
+    editTopicType(topicType) {
+      this.topicTypeEditMode = 'Edit'
+      this.topicTypeDialog = true
+
+      this.activetopicType = topicType
+      this.topicTypeName = topicType['name']
+      this.topicTypeDescription = topicType['description']     
+      this.topicTypeVariables = topicType['variables']
+      this.topicTypeTemplate = topicType['template']
+    },
+    deleteTopicType(id) {
+      this.$store.dispatch('deleteTopicType', id)
+    },
+    async saveTopicType() {    
+      this.topicTypeDialog = false
+      this.activeTopicType['name'] = this.topicTypeName
+      this.activeTopicType['description'] = this.topicTypeDescription
+      this.activeTopicType['variables'] = this.topicTypeVariables
+      this.activeTopicType['template'] = this.topicTypeTemplate
+
+      await this.$store.dispatch('saveTopicType', this.activeTopicType).then(function (topicType) {
+        if (!topicType['error']) {
+           // Why do we redirecting to the same page on trade save? 
+          // window.location = '/Projecteditor/' + trade.project_id
+        }
+      })
+    },
+
+    addTopic() {
+      this.activeTopic = {
+        'project_id': this.id
+      }
+      this.topicName = ''
+      this.topicDescription = ''
+      this.topicEditMode = 'Create'
+      this.topicDialog = true
+    },    
+    editTopic(topic) {
+      this.activetopic = topic
+      this.topicName = topic['name']
+      this.topicDescription = topic['description']
+      this.topicEditMode = 'Edit'
+      this.topicDialog = true
+    },
+    deleteTopic(id) {
+      this.$store.dispatch('deleteTopic', id)
+    },
+    async saveTopic() {    
+      this.topicDialog = false
+      await this.$store.dispatch('saveTopic', this.activeTopic).then(function (topic) {
+        if (!topic['error']) {
+           // Why do we redirecting to the same page on trade save? 
+          // window.location = '/Projecteditor/' + trade.project_id
+        }
+      })
+    },
+
     addUser() {
       this.userDialog = true
       this.activeUser = {}
