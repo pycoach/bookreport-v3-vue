@@ -1170,6 +1170,7 @@ export default {
     },
     addTopicTypeVariable() {
       if(this.activeTopicTypeVariable.name && this.activeTopicTypeVariable.data_type){
+        
         this.activeTopicTypeVariable.edit = false
         this.topicTypeVariables.splice(this.topicTypeVariables.length-1, 0, this.activeTopicTypeVariable)
         this.activeTopicTypeVariable = {}
