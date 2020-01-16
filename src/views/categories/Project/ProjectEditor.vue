@@ -238,7 +238,7 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog persistent v-model="topicTypeDialog" max-width="100%">
+    <v-dialog persistent v-model="topicTypeDialog" max-width="80%">
       <v-card>
         <v-card-title class="headline">{{topicTypeEditMode}} Topic Type</v-card-title>
         <v-container grid-list-xl fluid >
@@ -259,13 +259,48 @@
               </v-textarea>
             </v-flex>
             <v-flex xs12 md12>
-              <v-data-table
-                :headers="topic_type_headers"
-                :items="topicTypeVariables"
-                disable-sort
-                class="elevation-1"
-              >                               
-              </v-data-table>
+              <table class="topictype-table" style="width:100%;">
+                <tr>
+                  <th>Name</th>
+                  <th>Description</th>
+                  <th>Data Type</th>
+                  <th>Example Value</th>
+                  <th>Action</th>
+                </tr>  
+                <tr v-for="(item, index) in topicTypeVariables" :key="index">
+                  <td>
+                    <div v-if="!item.edit">{{item.name}}</div>
+                    <v-text-field v-else v-model="activeTopicTypeVariable.name"></v-text-field>
+                  </td>
+                  <td>
+                    <div v-if="!item.edit">{{item.description}}</div>
+                    <v-text-field v-else v-model="activeTopicTypeVariable.description"></v-text-field>
+                  </td>
+                  <td>
+                    <div v-if="!item.edit">{{item.data_type}}</div>
+                    <v-select v-else v-model="activeTopicTypeVariable.data_type" :items="['Text', 'Number']"></v-select>
+                  </td>
+                  <td>
+                    <div v-if="!item.edit">{{item.example_value}}</div>
+                    <v-text-field v-else v-model="activeTopicTypeVariable.example_value"></v-text-field>
+                  </td>
+                  <td>
+                    <div v-if="item.name==''">                      
+                      <v-btn :disabled="!item.edit || !activeTopicTypeVariable.name || !activeTopicTypeVariable.data_type" @click="addTopicTypeVariable()">add</v-btn>
+                      <v-btn :disabled="!item.edit" @click="clearTopicTypeVariable()">clear</v-btn>
+                    </div>
+                    <div v-else-if="!item.edit">                      
+                      <v-btn @click="editTopicTypeVariable(item)">edit</v-btn>
+                      <v-btn @click="deleteTopicTypeVariable(item)">delete</v-btn>
+                    </div>
+                    <div v-else>
+                      <v-btn @click="saveTopicTypeVariable(item)">Save</v-btn>
+                      <v-btn @click="cancelTopicTypeVariable(item)">Cancel</v-btn>
+                    </div>
+                  </td>
+                </tr>
+
+              </table>
             </v-flex>
             <v-flex xs12 md12>
               <v-tabs grow v-model="topicTypeTab">
@@ -287,10 +322,10 @@
         </v-container>
         <v-card-actions >
           <v-spacer></v-spacer>
-          <v-btn  color="primary" text @click="topicTypeDialog=false">
+          <v-btn  color="primary" text @click="cancelTopicType">
             Cancel
           </v-btn>
-          <v-btn  class="ml-5 btn-primary btn-primary--small"  text @click="saveTopicType">
+          <v-btn  :disabled="topicTypeName=='' || topicTypeVariables.length == 1" class="ml-5 btn-primary btn-primary--small"  text @click="saveTopicType">
             Save
           </v-btn>
         </v-card-actions>
@@ -843,24 +878,14 @@ export default {
         { text: 'Data Type', value: 'data_type' },
         { text: 'Example Value', value: 'example_value' },
       ],
+      activeTopicTypeVariable: {},
       topicTypeVariables: [
         {
-          name: 'Asset Total',
-          description: 'The total value of the assets',
-          data_type: 'Number',
-          example_value: '12,345,333',
-        },
-        {
-          name: 'Liability Total',
-          description: 'The total value of the eiabilities',
-          data_type: 'Number',
-          example_value: '92,98,661',
-        },
-        {
-          name: 'Equity Total',
-          description: 'The total value of the equities',
-          data_type: 'Number',
-          example_value: '62,345,543',
+          name: '',
+          description: '',
+          data_type: '',
+          example_value: '',
+          edit: true
         },
       ],
 
@@ -1083,34 +1108,119 @@ export default {
       this.topicTypeName = ''
       this.topicTypeDescription = ''        
       this.topicTypeTemplate = ''
+      this.topicTypeVariables = [
+        {
+          name: '',
+          description: '',
+          data_type: '',
+          example_value: '',
+          edit: true
+        },
+      ]
+      this.activeTopicTypeVariable = {}
     },
 
     editTopicType(topicType) {
       this.topicTypeEditMode = 'Edit'
       this.topicTypeDialog = true
 
-      this.activetopicType = topicType
+      Object.assign(this.activeTopicType, topicType)      
       this.topicTypeName = topicType['name']
       this.topicTypeDescription = topicType['description']     
       this.topicTypeVariables = topicType['variables']
+      this.topicTypeVariables.push(
+        {
+          name: '',
+          description: '',
+          data_type: '',
+          example_value: '',
+          edit: true
+        }
+      )
+      this.activeTopicTypeVariable = {}
       this.topicTypeTemplate = topicType['template']
     },
     deleteTopicType(id) {
       this.$store.dispatch('deleteTopicType', id)
     },
-    async saveTopicType() {    
+    saveTopicType() {    
       this.topicTypeDialog = false
+
       this.activeTopicType['name'] = this.topicTypeName
       this.activeTopicType['description'] = this.topicTypeDescription
+      for(let i = 0; i < this.topicTypeVariables.length; i ++){
+        delete this.topicTypeVariables[i].edit
+        if(this.topicTypeVariables[i].name == ''){
+          this.topicTypeVariables.splice(i, 1)
+        }
+      }
       this.activeTopicType['variables'] = this.topicTypeVariables
       this.activeTopicType['template'] = this.topicTypeTemplate
 
-      await this.$store.dispatch('saveTopicType', this.activeTopicType).then(function (topicType) {
-        if (!topicType['error']) {
-           // Why do we redirecting to the same page on trade save? 
-          // window.location = '/Projecteditor/' + trade.project_id
+      this.$store.dispatch('saveTopicType', this.activeTopicType)
+    },
+    cancelTopicType() {
+      this.topicTypeDialog=false
+      for(let i = 0; i < this.topicTypeVariables.length; i ++){
+        delete this.topicTypeVariables[i].edit
+        if(this.topicTypeVariables[i].name == ''){
+          this.topicTypeVariables.splice(i, 1)
         }
-      })
+      }
+    },
+    addTopicTypeVariable() {
+      if(this.activeTopicTypeVariable.name && this.activeTopicTypeVariable.data_type){
+        this.activeTopicTypeVariable.edit = false
+        this.topicTypeVariables.splice(this.topicTypeVariables.length-1, 0, this.activeTopicTypeVariable)
+        this.activeTopicTypeVariable = {}
+      }
+      
+    },
+
+    clearTopicTypeVariable() {
+      this.activeTopicTypeVariable = {}
+    },
+    editTopicTypeVariable(variable) {      
+      Object.assign(this.activeTopicTypeVariable, variable) 
+
+      for(let i = 0; i < this.topicTypeVariables.length; i ++){
+        if(this.topicTypeVariables[i].name == variable.name){          
+          this.topicTypeVariables[i].edit = true
+        }
+        else {
+          this.topicTypeVariables[i].edit = false
+        }
+      }
+    },
+
+    deleteTopicTypeVariable(variable) {
+      for(let i = 0; i < this.topicTypeVariables.length; i ++){
+        if(this.topicTypeVariables[i].name == variable.name){
+          this.topicTypeVariables.splice(i, 1)
+        }
+      }
+      
+    },
+
+    saveTopicTypeVariable(variable) {
+      for(let i = 0; i < this.topicTypeVariables.length; i ++){
+        if(this.topicTypeVariables[i].name == variable.name){
+          Object.assign(this.topicTypeVariables[i], this.activeTopicTypeVariable) 
+          this.topicTypeVariables[i].edit = false
+        }
+      } 
+      this.topicTypeVariables[this.topicTypeVariables.length-1].edit = true
+      this.activeTopicTypeVariable = {}
+    },
+
+    cancelTopicTypeVariable(variable) {      
+      for(let i = 0; i < this.topicTypeVariables.length; i ++){
+        if(this.topicTypeVariables[i].id == variable.id){
+          this.topicTypeVariables[i].edit = false
+        }
+      }
+      this.topicTypeVariables[this.topicTypeVariables.length-1].edit = true
+      this.activeTopicTypeVariable = {}
     },
 
     addTopic() {
@@ -1327,3 +1437,11 @@ export default {
   }
 }
 </script>
+<style>
+.topictype-table {
+  border-collapse: collapse;
+}
+.topictype-table th, .topictype-table td {
+  border: 1px solid black;
+}
+</style>
