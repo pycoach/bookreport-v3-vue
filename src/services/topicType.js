@@ -94,9 +94,11 @@ const actions = {
     const topicTypeData = {
       'version': payload['version'],
       'user_id': payload['user_id'],
-      'name': payload['name'],
-      'description': payload['description'],
       'project_id': payload['project_id'],
+      'name': payload['name'],
+      'description': payload['description'],      
+      'template': payload['template'],
+      'variables': payload['variables'],
     }
     addIfPresent(payload, topicTypeData, 'entity_id')
     if (payload['entity_id']) {
