@@ -91,18 +91,9 @@ const actions = {
     get(context, URL + '/project/' + id, handleTopicTypeLoad)
   },
   saveTopicType(context, payload) {
-    const topicTypeData = {
-      'version': payload['version'],
-      'user_id': payload['user_id'],
-      'project_id': payload['project_id'],
-      'name': payload['name'],
-      'description': payload['description'],      
-      'template': payload['template'],
-      'variables': payload['variables'],
-    }
     addIfPresent(payload, topicTypeData, 'entity_id')
     if (payload['entity_id']) {
-      return put(context, topicTypeData, handleTopicTypeSave)
+      return put(context, payload, handleTopicTypeSave)
     } else {
       return post(context, URL, payload, handleTopicTypeSave)
     }

@@ -278,7 +278,7 @@
                   </td>
                   <td>
                     <div v-if="!item.edit">{{item.data_type}}</div>
-                    <v-select v-else v-model="activeTopicTypeVariable.data_type" :items="['Text', 'Number']"></v-select>
+                    <v-select v-else v-model="activeTopicTypeVariable.data_type" :items="['Text', 'Number', 'Date']"></v-select>
                   </td>
                   <td>
                     <div v-if="!item.edit">{{item.example_value}}</div>
@@ -331,25 +331,89 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog persistent v-model="topicDialog" max-width="500">
+    <v-dialog persistent v-model="topicDialog" max-width="80%">
       <v-card>
         <v-card-title class="headline">{{topicEditMode}} Topic</v-card-title>
         <v-container grid-list-xl fluid >
           <v-layout row wrap>
             <v-flex xs12 md12>
-              <v-text-field label="Name"
+              <v-select label="Topic Type"
                 clearable
-                v-model="topicName">
+                v-model="selectedTopicType"
+                item-text="name"
+                return-object
+                :items="topic_types"
+                >
+              </v-select>
+            </v-flex>
+            <v-flex xs12 md12>
+              <v-text-field label="Topic Name"
+                clearable
+                v-model="topicName"
+                >
               </v-text-field>
             </v-flex>
             <v-flex xs12 md12>
-              <v-textarea label="Description"
-                v-model="topicDescription"
-                outlined
-                auto-grow
-                rows="4"
-                row-height="30">
-              </v-textarea>
+              <v-select label="Trade"
+                clearable
+                v-model="topicTrade"
+                item-text="name"
+                :items="trades"
+                >
+              </v-select>
+            </v-flex>
+            <v-flex xs12 md12>
+              <v-select label="Transaction"
+                clearable
+                v-model="topicTransaction"
+                item-text="name"
+                :items="transactions"
+                >
+              </v-select>
+            </v-flex>
+            <v-flex xs12 md12>
+              <v-select label="Document"
+                clearable
+                v-model="topicDocumentType"
+                item-text="name"
+                :items="['Financial', 'Experimental', 'Non-proficient']"
+                >
+              </v-select>
+            </v-flex>
+
+            <v-flex xs12 md12>
+              <table class="topictype-table" style="width:100%;">
+                <tr>
+                  <th>Name</th>
+                  <th>Value</th>
+                </tr>  
+                <tr v-for="(item, index) in topicVariables" :key="index">
+                  <td>
+                    <div>{{item.name}}</div>
+                  </td>
+                  <td>
+                    <v-text-field v-model="topicVariables[index].value" :label="item.place_holder"></v-text-field>
+                  </td>
+                </tr>
+
+              </table>
+            </v-flex>
+
+            <v-flex xs12 md12>
+              <v-tabs grow v-model="topicTab">
+                <v-tab>Template</v-tab>
+                <v-tab>Preview</v-tab>
+              </v-tabs>
+
+              <v-divider/> 
+              <v-tabs-items v-model="topicTab">
+                <v-tab-item key="topic-1">
+                  <tiptap-vuetify v-model="topicTemplate" :extensions="extensions"/>
+                </v-tab-item>
+                <v-tab-item key="topic-2">                           
+                  <div class="tiptap-vuetify-editor__content" v-html="topicTemplate"/>
+                </v-tab-item>
+              </v-tabs-items>              
             </v-flex>
           </v-layout>
         </v-container>
@@ -655,14 +719,12 @@
                         <thead  >
                           <tr>
                             <th class="text-left">Name</th>
-                            <th class="text-left">Description</th>
                             <th class="text-left">Action</th>
                           </tr>
                         </thead>
                         <tbody v-if="userRole == 'provider admin'">
                           <tr v-for="(topic, index) in filteredTopics"  @click="editTopic(topic)" :key="topic.entity_id" >
-                            <td style="width: 40%">{{ topic.name }}</td>
-                            <td style="width: 60%">{{ topic.description.length > 25 ? topic.description.slice(0, 25) + '...' : topic.description }}</td>
+                            <td style="width: 100%">{{ topic.name }}</td>
                               <td>
                                 <v-btn icon @click.stop="deleteTopic(topic.entity_id)">
                                         <img class="close-icon" src="../../../assets/icons/trash.svg" alt="">
@@ -672,8 +734,7 @@
 
                         <tbody v-else>
                           <tr v-for="(topic, index) in filteredTopics" :key="topic.entity_id" >
-                            <td style="width: 40%">{{ topic.name }}</td>
-                            <td style="width: 60%">{{ topic.description.length > 25 ? topic.description.slice(0, 25) + '...' : topic.description }}</td>
+                            <td style="width: 100%">{{ topic.name }}</td>
                           </tr>
                         </tbody>
 
@@ -889,10 +950,14 @@ export default {
         },
       ],
 
-
-      topics: [],
       topicName: '',
-      topicDescription: '',
+      topicTrade: '',
+      topicTransaction: '',
+      topicDocumentType: '',
+      topicTemplate: '',
+      topicVariables: [],
+      topicSnippetsIds: [],
+      selectedTopicType: {},
       topicDialog: false,
       topicEditMode: 'Create',
       topicSearch:'',
@@ -960,12 +1025,13 @@ export default {
       this.$store.dispatch('loadTrades', this.id)
       this.$store.dispatch('loadTransactions', this.id)
       this.$store.dispatch('loadTopicTypes', this.id)
+      this.$store.dispatch('loadTopics', this.id)
     } else {
       this.$store.commit('setActiveProject', {user_id: this.user_id})
     }    
   },
   computed: {
-    ...mapGetters(['activeProject', 'user', 'trades', 'transactions', 'topic_types',]),
+    ...mapGetters(['activeProject', 'user', 'trades', 'transactions', 'topic_types','topics']),
       filteredTrades() {
         return this.trades.filter(trade => {
               
@@ -1225,34 +1291,71 @@ export default {
     },
 
     addTopic() {
-      this.activeTopic = {
-        'project_id': this.id
-      }
-      this.topicName = ''
-      this.topicDescription = ''
       this.topicEditMode = 'Create'
       this.topicDialog = true
+
+      this.activeTopic = {
+        'project_id': this.id,
+        'snippet_ids': []
+      }
+      this.topicName = ''
+      this.topicDescription = ''      
+      this.topicVariables = {}
     },    
+
     editTopic(topic) {
-      this.activetopic = topic
-      this.topicName = topic['name']
-      this.topicDescription = topic['description']
       this.topicEditMode = 'Edit'
       this.topicDialog = true
+
+      Object.assign(this.activeTopic, topic) 
+      this.topicName = topic['name']
+      this.topicTrade = topic['trade']
+      this.topicTransaction = topic['transaction']
+      this.topicDocumentType = topic['document']
+      this.topicTemplate = topic['template']
+      this.topicSnippetsIds = topic['snippet_ids']      
+
+      
+      for(let i = 0; i < this.topic_types.length; i++){
+        if (topic['topic_type_id'] == this.topic_types[i].entity_id){
+          Object.assign(this.selectedTopicType, this.topic_types[i])
+          
+        }
+      }
+      
+      this.topicVariables = topic['variables']  
     },
+
     deleteTopic(id) {
       this.$store.dispatch('deleteTopic', id)
     },
-    async saveTopic() {    
-      this.topicDialog = false
-      await this.$store.dispatch('saveTopic', this.activeTopic).then(function (topic) {
-        if (!topic['error']) {
-           // Why do we redirecting to the same page on trade save? 
-          // window.location = '/Projecteditor/' + trade.project_id
-        }
-      })
-    },
 
+    saveTopic() {    
+      this.topicDialog = false
+
+      let topic = Object.assign({}, this.activeTopic)
+      topic['topic_type_id'] = this.selectedTopicType.entity_id
+      topic['name'] = this.topicName
+      topic['trade'] = this.topicTrade
+      topic['transaction'] = this.topicTransaction
+      topic['document'] = this.topicDocumentType
+      topic['template'] = this.topicTemplate      
+
+      let variables = []
+      for(let i = 0;i < this.topicVariables.length; i++){
+        let variable = {
+          'name': this.topicVariables[i].name,
+          'data_type': this.topicVariables[i].data_type,
+          'value': this.topicVariables[i].value,
+        }
+        variables.push(variable)
+      }
+      topic['variables'] = variables
+
+      console.log(topic)      
+
+      this.$store.dispatch('saveTopic', topic)
+    },
     addUser() {
       this.userDialog = true
       this.activeUser = {}
@@ -1434,6 +1537,26 @@ export default {
     documents() {
       this.documentBody = 'Please provide the following documents:' + this.documents.join(',')
 
+    },
+    selectedTopicType() {
+      this.topicName = this.selectedTopicType.name + ' for ' + this.topicTransaction
+      this.topicTemplate = this.selectedTopicType.template
+
+      this.topicVariables = []
+      for(let i = 0; i < this.selectedTopicType.variables.length; i++){
+        let variable_type = this.selectedTopicType.variables[i]
+        let variable = {
+          'name': variable_type.name,
+          'data_type':variable_type.data_type,
+          'place_holder': 'ex: ' + variable_type.example_value,
+          'value': ''
+        }
+        this.topicVariables.push(variable)
+      }
+
+    },    
+    topicTransaction() {
+      this.topicName = this.selectedTopicType.name + ' for ' + this.topicTransaction
     }
   }
 }
