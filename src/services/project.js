@@ -139,6 +139,19 @@ const actions = {
     }
     return project
   },
+  async uploadDocumentFiles(context, payload) {
+    console.log('[project.js] file uploadDocumentFiles --- context', context);
+    console.log('[project.js] file uploadDocumentFiles --- payload', payload);
+    let documentFile = {}
+    if (payload['entity_id']) {
+      console.log(' **** Has entity_id', payload['entity_id']);
+    } else {
+      console.log(' **** Doesn\'t have entity_id');
+      documentFile = post(context, '/upload-set', payload)
+    }
+    console.log('[project.js] file uploadDocumentFiles --- response', documentFile);
+    return documentFile
+  },
   saveRequestInformation(context, payload){
     return post(context, REQUEST_INFORMATION_URL, payload, handleRequestInformationSave)
   },

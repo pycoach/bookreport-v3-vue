@@ -238,6 +238,64 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog persistent v-model="fileDialog" max-width="500">
+      <v-card>
+        <v-card-title class="headline">Upload Files</v-card-title>
+        <v-container grid-list-xl fluid >
+          <v-layout row wrap>
+            <v-flex xs12 md12>
+                <v-select
+                  v-model="selectedDocumentTypes"
+                  :items="documentTypes"
+                  label="Document Type(s)"
+                  multiple chips deletable-chips clearable dense
+                />
+            </v-flex>
+            <v-flex xs12 md12>
+                <v-combobox
+                  v-model="selectedDocumentTransactions"
+                  :items="documentTransactions"
+                  label="Transactions"
+                  multiple chips small-chips deletable-chips clearable dense
+                />
+            </v-flex>
+            <v-flex xs12 md12>
+                <v-combobox
+                  v-model="selectedDocumentTrades"
+                  :items="documentTrades"
+                  label="Trades"
+                  multiple chips small-chips deletable-chips clearable dense
+                />
+            </v-flex>
+            <v-flex xs12 md12>
+                <Dropzone
+                  ref="dropzone"
+                  :trades="selectedTradeList"
+                  :transactions="selectedTransactionList"
+                  @queuecomplete="queuecomplete"
+                />
+            </v-flex>
+          </v-layout>
+        </v-container>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn 
+            color="primary" 
+            text 
+            @click="cancelUpload"
+          >
+            CANCEL
+          </v-btn>
+          <v-btn
+            class="ml-5 btn-primary btn-primary--small"
+            text
+            @click="uploadFiles"
+          >
+            UPLOAD
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
 
 
@@ -444,8 +502,14 @@
      </v-tab-item>
 
      <v-tab-item key="3">
-         <v-layout row wrap class="">
-
+         <v-layout wrap>
+             <v-row class="mb-6">
+                 <v-col sm="12">
+                     <v-btn class="btn-primary btn-primary--small" @click="onUploadFile">
+                         + Upload
+                     </v-btn>
+                 </v-col>
+             </v-row>
          </v-layout>
      </v-tab-item>
 
@@ -502,9 +566,11 @@
 <script>
 import { mapGetters } from 'vuex'
 import QuickEdit from 'vue-quick-edit';
+import Dropzone from '../../../components/categoriesComponents/Dropzone/VueDropzone';
+import moment from 'moment'
 export default {
   name: 'ProjectEditor',
-  components: { QuickEdit },
+  components: { QuickEdit, Dropzone },
   props: ['id'],
   data() {
     return {
@@ -636,6 +702,17 @@ export default {
       documentBody: '',
       documents: [],
       documentClient: null,
+
+      fileDialog: false,
+      files: [],
+      documentTypes: ["Fund - Financial","Fund - Memo", "Investment - Financial", "Investment - Legal",
+        "Investment - Memo", "Investment - Value Model"],
+      selectedDocumentTypes: [],
+      documentTransactions: [],
+      selectedDocumentTransactions: [],
+      documentTrades: [],
+      selectedDocumentTrades: [],
+      uploadSet: null,
     }
   },
   mounted() {
@@ -896,6 +973,64 @@ export default {
       this.documentDialog = false
     },
 
+
+    onUploadFile() {
+      this.fileDialog = true;
+    },
+    queuecomplete() {
+      this.files = this.$refs.dropzone.dropzone.getAcceptedFiles();
+      console.log('files', this.files);
+    },
+    async uploadFiles () {
+      let files = this.$refs.dropzone.dropzone.files;
+      if (files.length === 0) return;
+
+      const now = new Date();
+      let newUploadSet = {
+        'StartTimeUtc': moment.utc(now).format(),
+        'StartTimeLocal': moment(now).format()
+      };
+
+      if (this.$route.params.id) {
+        newUploadSet['ProjectID'] = this.$route.params.id;
+      }
+      newUploadSet['PlannedFiles'] = files.map(file => {return file['name']});
+  
+      await this.saveUploadSet(newUploadSet);
+      
+      console.log('this.uploadSet', this.uploadSet);
+    },
+    async saveUploadSet(uploadSet){
+      await this.$store.dispatch('uploadDocumentFiles', uploadSet).then(res => {
+        this.uploadSet = res;
+      });
+    },
+    selectedTradeList () {
+      return this.selectedDocumentTrades.join()
+    },
+    selectedTransactionList () {
+      return this.selectedDocumentTransactions.join()
+    },
+    checkForUpload() {
+      console.log("Checking for upload, files to process = " + this.filesToProcess)
+      this.filesToProcess--
+      if (this.filesToProcess < 1) {
+        console.log("Process queue")
+        this.dropzone.processQueue()
+      }
+    },
+    setFileUrls() {
+      const fileCount = this.dropzone.files.length
+      this.filesToProcess = fileCount
+      for (let i=0;i < fileCount;i++) {
+        this.setFileUrl(this.dropzone.files[i], this.checkForUpload)
+      }
+    },
+    cancelUpload () {
+      this.fileDialog = false;
+      console.log('this.$refs.dropzone.dropzone', this.$refs.dropzone.dropzone);
+      this.$refs.dropzone.dropzone.removeAllFiles(true)
+    },
   },
   watch: {
     activeProject() {      
