@@ -5,6 +5,8 @@ import api from 'Api'
 const URL = '/project'
 const REQUEST_INFORMATION_URL = '/info-req'
 const REQUEST_DOCUMENT_URL = '/doc-req'
+const REQUEST_UPLOAD_SET_URL = '/upload-set'
+const REQUEST_FILE_UPLOAD_URL = '/signings3'
 const state = {
   projects: [],
   activeProject: {}
@@ -58,6 +60,28 @@ function handleProjectSave(context, response) {
     context.commit('setActiveProject', project)
   }
   return project
+}
+
+function handleUploadFile(context, response) {
+  const uploadSet = response['data']
+  if (uploadSet['error']) {
+    context.commit('apiError', uploadSet['error'])
+  } else {
+    context.commit('uploadSetSuccess', uploadSet)
+  }
+  return uploadSet
+}
+
+function handleGetSignedURL(context, response) {
+  const signedUrl = response['data']
+  console.log('handleGetSignedURL', signedUrl)
+  if (signedUrl['error']) {
+    context.commit('apiError', signedUrl['error'])
+  } 
+  else {
+    context.commit('signedUrlSuccess', signedUrl)
+  }
+  return signedUrl
 }
 
 function handleRequestInformationSave(context, response) {
@@ -140,17 +164,22 @@ const actions = {
     return project
   },
   async uploadDocumentFiles(context, payload) {
-    console.log('[project.js] file uploadDocumentFiles --- context', context);
-    console.log('[project.js] file uploadDocumentFiles --- payload', payload);
-    let documentFile = {}
+    let data = {};
+    // This case needs observation
     if (payload['entity_id']) {
       console.log(' **** Has entity_id', payload['entity_id']);
+      payload = {
+        'upload_set_id': payload['entity_id'],
+        'file_name': payload['fileName']
+      };
+      // data = put(context, REQUEST_UPLOAD_SET_URL, payload)
     } else {
-      console.log(' **** Doesn\'t have entity_id');
-      documentFile = post(context, '/upload-set', payload)
+      data = post(context, REQUEST_UPLOAD_SET_URL, payload, handleUploadFile)
     }
-    console.log('[project.js] file uploadDocumentFiles --- response', documentFile);
-    return documentFile
+    return data
+  },
+  async getSignedURL(context, payload) {
+    return post(context, REQUEST_FILE_UPLOAD_URL, payload, handleGetSignedURL)
   },
   saveRequestInformation(context, payload){
     return post(context, REQUEST_INFORMATION_URL, payload, handleRequestInformationSave)
@@ -200,6 +229,20 @@ const mutations = {
   },
   setActiveProject(state, project) {
     state.activeProject = project
+  },
+  uploadSetSuccess(state, project) {
+    Vue.notify({
+      group: 'loggedIn',
+      type: 'success',
+      text: 'Upload Set Saved'
+    })
+  },
+  signedUrlSuccess(state, project) {
+    Vue.notify({
+      group: 'loggedIn',
+      type: 'success',
+      text: 'Signed URL'
+    })
   }
 }
 

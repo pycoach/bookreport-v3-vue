@@ -14,32 +14,6 @@ import '../../../../node_modules/dropzone/dist/dropzone.css';
 Dropzone.autoDiscover = false;
 export default {
   name: 'VueDropzone',
-  props: {
-    projectId: {
-      type: [String, Number],
-      required: false
-    },
-    auto: {
-      type: [String, Number],
-      required: false
-    },
-    transactions: {
-      type: Function,
-      required: false
-    },
-    documentTypes: {
-      type: Function,
-      required: false
-    },
-    trades: {
-      type: Function,
-      required: false
-    },
-    uploadSet: {
-      type: Function,
-      required: false
-    }
-  },
   mounted() {
     const vm = this
     const options = {

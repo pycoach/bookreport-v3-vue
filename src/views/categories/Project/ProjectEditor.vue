@@ -270,8 +270,6 @@
             <v-flex xs12 md12>
                 <Dropzone
                   ref="dropzone"
-                  :trades="selectedTradeList"
-                  :transactions="selectedTransactionList"
                   @queuecomplete="queuecomplete"
                 />
             </v-flex>
@@ -289,6 +287,8 @@
           <v-btn
             class="ml-5 btn-primary btn-primary--small"
             text
+            :disabled="uploading"
+            :loading="uploading"
             @click="uploadFiles"
           >
             UPLOAD
@@ -713,6 +713,8 @@ export default {
       documentTrades: [],
       selectedDocumentTrades: [],
       uploadSet: null,
+      filesToProcess: 0,
+      uploading: false
     }
   },
   mounted() {
@@ -742,6 +744,15 @@ export default {
              return transaction.name.toLowerCase().indexOf(this.transactionSearch.toLowerCase()) > -1
         })
       },
+    selectedTradeList () {
+      return this.selectedDocumentTrades.join()
+    },
+    selectedTransactionList () {
+      return this.selectedDocumentTransactions.join()
+    },
+    selectedDocumentTypeList () {
+      return this.selectedDocumentTypes.join()
+    },
   },
   methods: {
     async saveProject() {
@@ -978,58 +989,67 @@ export default {
       this.fileDialog = true;
     },
     queuecomplete() {
-      this.files = this.$refs.dropzone.dropzone.getAcceptedFiles();
-      console.log('files', this.files);
+      if (this.uploading) {
+        this.files = this.$refs.dropzone.dropzone.getAcceptedFiles();
+        // this.cancelUpload()
+      }
     },
     async uploadFiles () {
       let files = this.$refs.dropzone.dropzone.files;
       if (files.length === 0) return;
-
       const now = new Date();
       let newUploadSet = {
-        'StartTimeUtc': moment.utc(now).format(),
-        'StartTimeLocal': moment(now).format()
+        'start_time_utc': moment.utc(now).format(),
+        'start_time_local': moment(now).format()
       };
-
-      if (this.$route.params.id) {
-        newUploadSet['ProjectID'] = this.$route.params.id;
-      }
-      newUploadSet['PlannedFiles'] = files.map(file => {return file['name']});
-  
+      if (this.$route.params.id) newUploadSet['project_id'] = this.$route.params.id;
+      newUploadSet['files'] = files.map(file => {return file['name']});
+      newUploadSet['user_id'] = this.user.user_id;
       await this.saveUploadSet(newUploadSet);
-      
-      console.log('this.uploadSet', this.uploadSet);
+      this.setFileUrls();
+      this.uploading = true;
     },
     async saveUploadSet(uploadSet){
       await this.$store.dispatch('uploadDocumentFiles', uploadSet).then(res => {
         this.uploadSet = res;
       });
     },
-    selectedTradeList () {
-      return this.selectedDocumentTrades.join()
-    },
-    selectedTransactionList () {
-      return this.selectedDocumentTransactions.join()
-    },
     checkForUpload() {
-      console.log("Checking for upload, files to process = " + this.filesToProcess)
-      this.filesToProcess--
+      this.filesToProcess--;
       if (this.filesToProcess < 1) {
-        console.log("Process queue")
-        this.dropzone.processQueue()
+        console.log("Process queue");
+        this.$refs.dropzone.dropzone.processQueue()
       }
     },
     setFileUrls() {
-      const fileCount = this.dropzone.files.length
-      this.filesToProcess = fileCount
-      for (let i=0;i < fileCount;i++) {
-        this.setFileUrl(this.dropzone.files[i], this.checkForUpload)
+      const fileCount = this.$refs.dropzone.dropzone.files.length;
+      this.filesToProcess = fileCount;
+      for (let i = 0; i < fileCount; i++) {
+        this.setFileUrl(this.$refs.dropzone.dropzone.files[i], this.checkForUpload)
       }
+    },
+    setFileUrl(file, done) {
+      const payload = {
+        'fileName': file.name,
+        'fullPath': file.fullPath || file.name,
+        'contentType': file.type,
+        'Transactions': this.selectedTradeList,
+        'DocumentTypes': this.selectedDocumentTypeList,
+        'Trades': this.selectedTradeList,
+        'UserID': this.user.user_id,
+        'ProjectID': this.$route.params.id,
+        'UploadSetID': this.uploadSet ? this.uploadSet.entity_id : null
+      };
+      console.log('setFileUrl this.uploadSet', payload);
+      this.$store.dispatch('getSignedURL', payload).then(url => {
+        file.uploadURL = url;
+        if (done) done()
+      })
     },
     cancelUpload () {
       this.fileDialog = false;
-      console.log('this.$refs.dropzone.dropzone', this.$refs.dropzone.dropzone);
-      this.$refs.dropzone.dropzone.removeAllFiles(true)
+      this.$refs.dropzone.dropzone.removeAllFiles(true);
+      this.uploading = false
     },
   },
   watch: {
