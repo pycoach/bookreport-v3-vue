@@ -55,7 +55,7 @@
       }
    }
 
-   &::after {
+   &:not(.v-picker)::after {
       z-index: 0;
       content: "";
       width: 100%;
