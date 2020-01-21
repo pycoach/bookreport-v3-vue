@@ -16,6 +16,7 @@
     "material-design-icons-iconfont": "^5.0.1",
     "moment": "^2.24.0",
     "node-sass": "^4.13.0",
+    "tiptap-vuetify": "^2.10.0",
     "velocity-animate": "^1.5.2",
     "vue": "^2.6.10",
     "vue-image-crop-upload": "^2.5.0",

@@ -11,6 +11,9 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css'
 // Importing all css styles
 import './lib/globalCss'
 
+import { TiptapVuetifyPlugin } from "tiptap-vuetify";
+import "tiptap-vuetify/dist/main.css";
+
 router.beforeEach((to, from, next) => {
   const auth = new AuthService()
   const authenticated = auth.authenticated
@@ -48,6 +51,10 @@ router.afterEach((to, from) => {
 Vue.config.productionTip = false
 
 Vue.use(Notifications, { velocity })
+Vue.use(TiptapVuetifyPlugin, {
+  vuetify,
+  // "md" (default), "fa", "mdi"
+});
 
 new Vue({
   router,
