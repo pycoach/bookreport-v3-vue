@@ -238,7 +238,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
     <v-dialog persistent v-model="topicTypeDialog" max-width="80%">
       <v-card>
         <v-card-title class="headline">{{topicTypeEditMode}} Topic Type</v-card-title>
@@ -253,6 +252,7 @@
             <v-flex xs12 md12>
               <v-textarea label="Description"
                 v-model="topicTypeDescription"
+                clearable
                 outlined
                 auto-grow
                 rows="2"
@@ -300,7 +300,6 @@
                     </div>
                   </td>
                 </tr>
-
     <v-dialog persistent v-model="fileDialog" max-width="500">
       <v-card>
         <v-card-title class="headline">Upload Files</v-card-title>
@@ -875,16 +874,11 @@ import {
   History
 } from "tiptap-vuetify";
 
-export default {
-  name: 'ProjectEditor',
-  components: { QuickEdit, TiptapVuetify, },
-
 import Dropzone from '../../../components/categoriesComponents/Dropzone/VueDropzone';
 import moment from 'moment'
 export default {
   name: 'ProjectEditor',
-  components: { QuickEdit, Dropzone },
-
+  components: { QuickEdit, TiptapVuetify, Dropzone },
   props: ['id'],
   data() {
     return {
@@ -1451,8 +1445,6 @@ export default {
       }
       topic['variables'] = variables
 
-      console.log(topic)      
-
       this.$store.dispatch('saveTopic', topic)
     },
     addUser() {
@@ -1710,21 +1702,22 @@ export default {
 
     },
     selectedTopicType() {
-      this.topicName = this.selectedTopicType.name + ' for ' + this.topicTransaction
-      this.topicTemplate = this.selectedTopicType.template
+      if(this.selectedTopicType){
+        this.topicName = this.selectedTopicType.name + ' for ' + this.topicTransaction
+        this.topicTemplate = this.selectedTopicType.template
 
-      this.topicVariables = []
-      for(let i = 0; i < this.selectedTopicType.variables.length; i++){
-        let variable_type = this.selectedTopicType.variables[i]
-        let variable = {
-          'name': variable_type.name,
-          'data_type':variable_type.data_type,
-          'place_holder': 'ex: ' + variable_type.example_value,
-          'value': ''
+        this.topicVariables = []
+        for(let i = 0; i < this.selectedTopicType.variables.length; i++){
+          let variable_type = this.selectedTopicType.variables[i]
+          let variable = {
+            'name': variable_type.name,
+            'data_type':variable_type.data_type,
+            'place_holder': 'ex: ' + variable_type.example_value,
+            'value': ''
+          }
+          this.topicVariables.push(variable)
         }
-        this.topicVariables.push(variable)
       }
-
     },    
     topicTransaction() {
       this.topicName = this.selectedTopicType.name + ' for ' + this.topicTransaction

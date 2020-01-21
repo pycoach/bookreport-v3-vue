@@ -91,7 +91,6 @@ const actions = {
     get(context, URL + '/project/' + id, handleTopicTypeLoad)
   },
   saveTopicType(context, payload) {
-    addIfPresent(payload, topicTypeData, 'entity_id')
     if (payload['entity_id']) {
       return put(context, payload, handleTopicTypeSave)
     } else {
