@@ -74,7 +74,6 @@ function handleUploadFile(context, response) {
 
 function handleGetSignedURL(context, response) {
   const signedUrl = response['data']
-  console.log('handleGetSignedURL', signedUrl)
   if (signedUrl['error']) {
     context.commit('apiError', signedUrl['error'])
   } 
@@ -172,7 +171,7 @@ const actions = {
         'upload_set_id': payload['entity_id'],
         'file_name': payload['fileName']
       };
-      // data = put(context, REQUEST_UPLOAD_SET_URL, payload)
+      data = put(context, REQUEST_UPLOAD_SET_URL, payload)
     } else {
       data = post(context, REQUEST_UPLOAD_SET_URL, payload, handleUploadFile)
     }

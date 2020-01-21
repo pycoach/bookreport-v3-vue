@@ -991,6 +991,7 @@ export default {
     queuecomplete() {
       if (this.uploading) {
         this.files = this.$refs.dropzone.dropzone.getAcceptedFiles();
+        this.uploading = false
         // this.cancelUpload()
       }
     },
@@ -1014,13 +1015,6 @@ export default {
         this.uploadSet = res;
       });
     },
-    checkForUpload() {
-      this.filesToProcess--;
-      if (this.filesToProcess < 1) {
-        console.log("Process queue");
-        this.$refs.dropzone.dropzone.processQueue()
-      }
-    },
     setFileUrls() {
       const fileCount = this.$refs.dropzone.dropzone.files.length;
       this.filesToProcess = fileCount;
@@ -1033,21 +1027,33 @@ export default {
         'fileName': file.name,
         'fullPath': file.fullPath || file.name,
         'contentType': file.type,
-        'Transactions': this.selectedTradeList,
+        'Transactions': this.selectedTransactionList,
         'DocumentTypes': this.selectedDocumentTypeList,
         'Trades': this.selectedTradeList,
         'UserID': this.user.user_id,
         'ProjectID': this.$route.params.id,
         'UploadSetID': this.uploadSet ? this.uploadSet.entity_id : null
       };
-      console.log('setFileUrl this.uploadSet', payload);
-      this.$store.dispatch('getSignedURL', payload).then(url => {
-        file.uploadURL = url;
-        if (done) done()
-      })
+      this.$store.dispatch('getSignedURL', payload)
+        .then(url => {
+          file.uploadURL = url.signed_url;
+          if (done) done()
+        })
+        .catch(err => {
+          if (done) done("Failed to get an S3 signed upload URL", err)
+        })
+    },
+    checkForUpload() {
+      this.filesToProcess--;
+      if (this.filesToProcess < 1) {
+        this.$refs.dropzone.dropzone.processQueue()
+      }
     },
     cancelUpload () {
       this.fileDialog = false;
+      this.selectedDocumentTypes = '';
+      this.selectedDocumentTransactions = '';
+      this.selectedDocumentTrades = '';
       this.$refs.dropzone.dropzone.removeAllFiles(true);
       this.uploading = false
     },
