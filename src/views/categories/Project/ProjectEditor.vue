@@ -444,8 +444,27 @@
      </v-tab-item>
 
      <v-tab-item key="3">
-         <v-layout row wrap class="">
-
+         <v-layout wrap>
+           <v-row>
+             <v-col md="12" xs="12">
+               <v-card>
+                 <v-toolbar>
+                   <v-card-title class="headline">
+                     Search
+                   </v-card-title>
+                 </v-toolbar>
+               </v-card>
+             </v-col>
+             <v-col md="12" xs="12">
+               <v-card>
+                 <v-toolbar>
+                   <v-card-title class="headline">
+                     Filter
+                   </v-card-title>
+                 </v-toolbar>
+               </v-card>
+             </v-col>
+           </v-row>
          </v-layout>
      </v-tab-item>
 
