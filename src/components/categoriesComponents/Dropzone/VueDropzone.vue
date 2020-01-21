@@ -39,8 +39,6 @@ export default {
 
     // Set signed upload URL for each file
     vm.dropzone.on('processing', file => {
-      console.log('Processing ')
-      console.log(file)
       vm.dropzone.options.url = file.uploadURL
     });
 

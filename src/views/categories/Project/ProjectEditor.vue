@@ -991,8 +991,7 @@ export default {
     queuecomplete() {
       if (this.uploading) {
         this.files = this.$refs.dropzone.dropzone.getAcceptedFiles();
-        this.uploading = false
-        // this.cancelUpload()
+        this.cancelUpload()
       }
     },
     async uploadFiles () {
