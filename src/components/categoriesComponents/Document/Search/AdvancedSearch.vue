@@ -1,5 +1,5 @@
 <template>
-  <v-layout row wrap>
+  <v-layout row wrap class="pa-2">
     <v-flex xs12 sm3>
       <v-text-field
         label="Project..."
@@ -38,7 +38,6 @@
         :close-on-content-click="false"
         transition="scale-transition"
         offset-y
-        full-width
         max-width="290px"
         min-width="290px"
       >
@@ -59,7 +58,7 @@
           actions
         >
           <v-btn text color="primary" @click="menuPickerStart = false">Cancel</v-btn>
-          <v-btn text color="primary">Save</v-btn>
+          <v-btn text color="primary" @click="menuPickerStart = false">Save</v-btn>
         </v-date-picker>
       </v-menu>
     </v-flex>
@@ -70,13 +69,12 @@
         :close-on-content-click="false"
         transition="scale-transition"
         offset-y
-        full-width
         max-width="290px"
         min-width="290px"
       >
         <template v-slot:activator="{ on }">
           <v-text-field
-            v-model="searchEndtDate"
+            v-model="searchEndDate"
             label="Pick start date"
             prepend-icon="event"
             single-line readonly
@@ -85,28 +83,37 @@
           </v-text-field>
         </template>
         <v-date-picker
-          v-model="searchEndtDate"
+          v-model="searchEndDate"
           no-title
           scrollable
           actions
         >
           <v-btn text color="primary" @click="menuPickerEnd = false">Cancel</v-btn>
-          <v-btn text color="primary">Save</v-btn>
+          <v-btn text color="primary" @click="menuPickerEnd = false">Save</v-btn>
         </v-date-picker>
       </v-menu>
+    </v-flex>
+    <v-flex>
+      <v-checkbox
+        label="Include archive"
+        v-model="searchIncludeArchive"
+        color="primary"
+        hide-details
+      />
     </v-flex>
   </v-layout>
 </template>
 
 <script>
 export default {
-  name: "AdvancedSearch",
+  name: 'AdvancedSearch',
   data () {
     return {
       searchStartDate: null,
       searchEndDate: null,
       menuPickerStart: false,
-      menuPickerEnd: false
+      menuPickerEnd: false,
+      searchIncludeArchive: false,
     }
   },
   beforeMount () {

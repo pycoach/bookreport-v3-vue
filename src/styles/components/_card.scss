@@ -94,6 +94,7 @@
          font-weight: bold;
          font-size: 19px;
          padding-left: 0 !important;
+         padding-right: 0 !important;
       }
    }
 
@@ -119,5 +120,13 @@
 .overview, .trades-transactions {
    .v-list {
       min-height: 40vh;
+   }
+}
+
+.v-dialog {
+   .v-card {
+      &::after {
+         content: none;
+      }
    }
 }

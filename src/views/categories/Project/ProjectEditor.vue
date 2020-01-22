@@ -502,40 +502,9 @@
      </v-tab-item>
 
      <v-tab-item key="3">
-         <v-layout wrap>
-             <v-row class="mb-6">
-                 <v-col sm="12">
-                     <v-btn class="btn-primary btn-primary--small" @click="onUploadFile">
-                         + Upload
-                     </v-btn>
-                 </v-col>
-             </v-row>
-         </v-layout>
-         <v-layout wrap>
-           <v-row>
-             <v-col md="12" xs="12">
-               <v-card>
-                 <v-toolbar>
-                   <v-card-title class="headline">
-                     Advanced Search
-                   </v-card-title>
-                 </v-toolbar>
-                 <v-container grid-list-xl fluid >
-                   <AdvancedSearch />
-                 </v-container>
-               </v-card>
-             </v-col>
-             <v-col md="12" xs="12">
-               <v-card>
-                 <v-toolbar>
-                   <v-card-title class="headline">
-                     Filter
-                   </v-card-title>
-                 </v-toolbar>
-               </v-card>
-             </v-col>
-           </v-row>
-         </v-layout>
+         <Search />
+         <FiltersList />
+         <Documents @onUploadClick="onUploadFile" />
      </v-tab-item>
 
      <v-tab-item key="4">
@@ -593,10 +562,12 @@ import { mapGetters } from 'vuex'
 import QuickEdit from 'vue-quick-edit';
 import Dropzone from '../../../components/categoriesComponents/Dropzone/VueDropzone';
 import moment from 'moment'
-import AdvancedSearch from "../../../components/categoriesComponents/Document/AdvancedSearch";
+import Search from "../../../components/categoriesComponents/Document/Search/Search";
+import FiltersList from "../../../components/categoriesComponents/Document/Filter";
+import Documents from "../../../components/categoriesComponents/Document/Documents";
 export default {
   name: 'ProjectEditor',
-  components: { QuickEdit, Dropzone, AdvancedSearch },
+  components: { QuickEdit, Dropzone, Search, FiltersList, Documents },
   props: ['id'],
   data() {
     return {

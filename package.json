@@ -7,6 +7,10 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "@fortawesome/fontawesome": "^1.1.0",
+    "@fortawesome/fontawesome-free-regular": "^5.0.2",
+    "@fortawesome/fontawesome-free-solid": "^5.0.2",
+    "@fortawesome/vue-fontawesome": "0.0.22",
     "auth0-js": "^9.11.3",
     "axios": "^0.19.0",
     "core-js": "^3.4.1",
