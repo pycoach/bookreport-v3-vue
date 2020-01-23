@@ -6,9 +6,20 @@
           <v-toolbar>
             <v-card-title class="headline d-flex justify-space-between">
               Documents
-              <v-btn class="btn-primary btn-primary--small" @click="$emit('onUploadClick')">
-                + Upload
-              </v-btn>
+              <div class="d-flex align-center">
+                <v-btn outline fab small text :disabled="!filesSelected">
+                  <v-icon>file_download</v-icon>
+                </v-btn>
+                <v-btn outline fab small text :disabled="!filesSelected">
+                  <v-icon>open_with</v-icon>
+                </v-btn>
+                <v-btn outline fab small text :disabled="!filesSelected">
+                  <v-icon>delete</v-icon>
+                </v-btn>
+                <v-btn class="btn-primary btn-primary--small ml-3" @click="$emit('onUploadClick')">
+                  + Upload New
+                </v-btn>
+              </div>
             </v-card-title>
           </v-toolbar>
           <v-data-table
@@ -27,9 +38,10 @@
                     <div class="d-flex align-center">
                       <v-checkbox
                         class="ma-0"
-                        primary
+                        color="dark"
                         hide-details
-                        v-model="selected"
+                        :value="selected.includes(item) && true"
+                        @change="selectItem($event, item)"
                       />
                     </div>
                   </td>
@@ -89,7 +101,15 @@ export default {
     FontAwesomeIcon
   },
   computed: {
-    ...mapGetters(['activeProject', 'user'])
+    ...mapGetters(['activeProject', 'user']),
+    getSelected () {
+      let selected;
+      return selected = this.selected.map(item => item.Name);
+    },
+    filesSelected () {
+      let selected = this.selected.map(item => item.Name);;
+      return selected.length > 0
+    }
   },
   data () {
     return {
@@ -258,6 +278,14 @@ export default {
       }
       return far.faFile
     },
+    selectItem (e, item) {
+      let indexOfItem = this.selected.indexOf(item);
+      if (indexOfItem < 0) {
+        this.selected.push(item);
+      } else {
+        this.selected.splice(indexOfItem, 1)
+      }
+    }
   }
 }
 </script>
