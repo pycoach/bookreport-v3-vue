@@ -370,7 +370,7 @@
               <v-divider/> 
               <v-tabs-items v-model="topicTypeTab">
                 <v-tab-item key="topic-1">
-                  <tiptap-vuetify v-model="topicTypeTemplate" :extensions="extensions"/>
+                  <ckeditor :editor="editor" v-model="topicTypeTemplate" :config="editorConfig"></ckeditor>
                 </v-tab-item>
                 <v-tab-item key="topic-2">                           
                   <div class="tiptap-vuetify-editor__content" v-html="topicTypeTemplate"/>
@@ -467,7 +467,7 @@
               <v-divider/> 
               <v-tabs-items v-model="topicTab">
                 <v-tab-item key="topic-1">
-                  <tiptap-vuetify v-model="topicTemplate" :extensions="extensions"/>
+                  <ckeditor :editor="editor" v-model="topicTemplate" :config="editorConfig"></ckeditor>
                 </v-tab-item>
                 <v-tab-item key="topic-2">                           
                   <div class="tiptap-vuetify-editor__content" v-html="topicTemplate"/>
@@ -851,34 +851,14 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import QuickEdit from 'vue-quick-edit';
-
-import {
-  // component
-  TiptapVuetify,
-  // extensions
-  Heading,
-  Bold,
-  Italic,
-  Strike,
-  Underline,
-  Code,
-  Paragraph,
-  BulletList,
-  OrderedList,
-  ListItem,
-  Link,
-  Blockquote,
-  HardBreak,
-  HorizontalRule,
-  History
-} from "tiptap-vuetify";
+import QuickEdit from 'vue-quick-edit'
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 
 import Dropzone from '../../../components/categoriesComponents/Dropzone/VueDropzone';
 import moment from 'moment'
 export default {
   name: 'ProjectEditor',
-  components: { QuickEdit, TiptapVuetify, Dropzone },
+  components: { QuickEdit, Dropzone },
   props: ['id'],
   data() {
     return {
@@ -1054,34 +1034,6 @@ export default {
       documents: [],
       documentClient: null,
 
-
-      extensions: [
-      History,
-      Blockquote,
-      Link,
-      Underline,
-      Strike,
-      Italic,
-      ListItem, // if you need to use a list (BulletList, OrderedList)
-      BulletList,
-      OrderedList,
-      [
-        Heading,
-        {
-          // Options that fall into the tiptap's extension
-          options: {
-            levels: [1, 2, 3]
-          }
-        }
-      ],
-      Bold,
-      Link,
-      Code,
-      HorizontalRule,
-      Paragraph,
-      HardBreak // line break on Shift + Ctrl + Enter
-    ],   
-
       fileDialog: false,
       files: [],
       documentTypes: ["Fund - Financial","Fund - Memo", "Investment - Financial", "Investment - Legal",
@@ -1093,7 +1045,13 @@ export default {
       selectedDocumentTrades: [],
       uploadSet: null,
       filesToProcess: 0,
-      uploading: false
+      uploading: false,
+
+      editor: ClassicEditor,
+      editorData: '<p>Content of the editor.</p>',
+      editorConfig: {
+          // The configuration of the editor.
+      }
 
     }
   },
