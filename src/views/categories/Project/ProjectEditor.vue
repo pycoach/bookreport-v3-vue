@@ -238,6 +238,64 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog persistent v-model="fileDialog" max-width="500">
+      <v-card>
+        <v-card-title class="headline">Upload Files</v-card-title>
+        <v-container grid-list-xl fluid >
+          <v-layout row wrap>
+            <v-flex xs12 md12>
+                <v-select
+                  v-model="selectedDocumentTypes"
+                  :items="documentTypes"
+                  label="Document Type(s)"
+                  multiple chips deletable-chips clearable dense
+                />
+            </v-flex>
+            <v-flex xs12 md12>
+                <v-combobox
+                  v-model="selectedDocumentTransactions"
+                  :items="documentTransactions"
+                  label="Transactions"
+                  multiple chips small-chips deletable-chips clearable dense
+                />
+            </v-flex>
+            <v-flex xs12 md12>
+                <v-combobox
+                  v-model="selectedDocumentTrades"
+                  :items="documentTrades"
+                  label="Trades"
+                  multiple chips small-chips deletable-chips clearable dense
+                />
+            </v-flex>
+            <v-flex xs12 md12>
+                <Dropzone
+                  ref="dropzone"
+                  @queuecomplete="queuecomplete"
+                />
+            </v-flex>
+          </v-layout>
+        </v-container>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn 
+            color="primary" 
+            text 
+            @click="cancelUpload"
+          >
+            CANCEL
+          </v-btn>
+          <v-btn
+            class="ml-5 btn-primary btn-primary--small"
+            text
+            :disabled="uploading"
+            :loading="uploading"
+            @click="uploadFiles"
+          >
+            UPLOAD
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-dialog persistent v-model="topicTypeDialog" max-width="80%">
       <v-card>
         <v-card-title class="headline">{{topicTypeEditMode}} Topic Type</v-card-title>
@@ -691,15 +749,9 @@
      </v-tab-item>
 
      <v-tab-item key="3">
-         <v-layout wrap>
-             <v-row class="mb-6">
-                 <v-col sm="12">
-                     <v-btn class="btn-primary btn-primary--small" @click="onUploadFile">
-                         + Upload
-                     </v-btn>
-                 </v-col>
-             </v-row>
-         </v-layout>
+         <Search />
+         <FiltersList />
+         <Documents @onUploadClick="onUploadFile" />
      </v-tab-item>
 
      <v-tab-item key="4">
@@ -851,14 +903,16 @@
 
 <script>
 import { mapGetters } from 'vuex'
-import QuickEdit from 'vue-quick-edit'
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
-
+import QuickEdit from 'vue-quick-edit';
 import Dropzone from '../../../components/categoriesComponents/Dropzone/VueDropzone';
 import moment from 'moment'
+import Search from "../../../components/categoriesComponents/Document/Search/Search";
+import FiltersList from "../../../components/categoriesComponents/Document/Filter";
+import Documents from "../../../components/categoriesComponents/Document/Documents";
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 export default {
   name: 'ProjectEditor',
-  components: { QuickEdit, Dropzone },
+  components: { QuickEdit, Dropzone, Search, FiltersList, Documents },
   props: ['id'],
   data() {
     return {
