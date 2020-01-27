@@ -11,6 +11,8 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css'
 // Importing all css styles
 import './lib/globalCss'
 
+import CKEditor from '@ckeditor/ckeditor5-vue'
+
 router.beforeEach((to, from, next) => {
   const auth = new AuthService()
   const authenticated = auth.authenticated
@@ -48,6 +50,7 @@ router.afterEach((to, from) => {
 Vue.config.productionTip = false
 
 Vue.use(Notifications, { velocity })
+Vue.use( CKEditor )
 
 new Vue({
   router,
