@@ -358,65 +358,6 @@
                     </div>
                   </td>
                 </tr>
-    <v-dialog persistent v-model="fileDialog" max-width="500">
-      <v-card>
-        <v-card-title class="headline">Upload Files</v-card-title>
-        <v-container grid-list-xl fluid >
-          <v-layout row wrap>
-            <v-flex xs12 md12>
-                <v-select
-                  v-model="selectedDocumentTypes"
-                  :items="documentTypes"
-                  label="Document Type(s)"
-                  multiple chips deletable-chips clearable dense
-                />
-            </v-flex>
-            <v-flex xs12 md12>
-                <v-combobox
-                  v-model="selectedDocumentTransactions"
-                  :items="documentTransactions"
-                  label="Transactions"
-                  multiple chips small-chips deletable-chips clearable dense
-                />
-            </v-flex>
-            <v-flex xs12 md12>
-                <v-combobox
-                  v-model="selectedDocumentTrades"
-                  :items="documentTrades"
-                  label="Trades"
-                  multiple chips small-chips deletable-chips clearable dense
-                />
-            </v-flex>
-            <v-flex xs12 md12>
-                <Dropzone
-                  ref="dropzone"
-                  @queuecomplete="queuecomplete"
-                />
-            </v-flex>
-          </v-layout>
-        </v-container>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn 
-            color="primary" 
-            text 
-            @click="cancelUpload"
-          >
-            CANCEL
-          </v-btn>
-          <v-btn
-            class="ml-5 btn-primary btn-primary--small"
-            text
-            :disabled="uploading"
-            :loading="uploading"
-            @click="uploadFiles"
-          >
-            UPLOAD
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
               </table>
             </v-flex>
             <v-flex xs12 md12>
@@ -545,7 +486,64 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
+    <v-dialog persistent v-model="fileDialog" max-width="500">
+      <v-card>
+        <v-card-title class="headline">Upload Files</v-card-title>
+        <v-container grid-list-xl fluid >
+          <v-layout row wrap>
+            <v-flex xs12 md12>
+              <v-select
+                      v-model="selectedDocumentTypes"
+                      :items="documentTypes"
+                      label="Document Type(s)"
+                      multiple chips deletable-chips clearable dense
+              />
+            </v-flex>
+            <v-flex xs12 md12>
+              <v-combobox
+                      v-model="selectedDocumentTransactions"
+                      :items="documentTransactions"
+                      label="Transactions"
+                      multiple chips small-chips deletable-chips clearable dense
+              />
+            </v-flex>
+            <v-flex xs12 md12>
+              <v-combobox
+                      v-model="selectedDocumentTrades"
+                      :items="documentTrades"
+                      label="Trades"
+                      multiple chips small-chips deletable-chips clearable dense
+              />
+            </v-flex>
+            <v-flex xs12 md12>
+              <Dropzone
+                      ref="dropzone"
+                      @queuecomplete="queuecomplete"
+              />
+            </v-flex>
+          </v-layout>
+        </v-container>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+                  color="primary"
+                  text
+                  @click="cancelUpload"
+          >
+            CANCEL
+          </v-btn>
+          <v-btn
+                  class="ml-5 btn-primary btn-primary--small"
+                  text
+                  :disabled="uploading"
+                  :loading="uploading"
+                  @click="uploadFiles"
+          >
+            UPLOAD
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
   <!-- Layout -->
   <v-tabs 
@@ -1124,7 +1122,7 @@ export default {
     }    
   },
   computed: {
-    ...mapGetters(['activeProject', 'user', 'trades', 'transactions', 'topic_types','topics']),
+    ...mapGetters(['activeProject', 'user', 'trades', 'transactions', 'topic_types','topics', 'searchLastPayload']),
       filteredTrades() {
         return this.trades.filter(trade => {
               
@@ -1591,6 +1589,7 @@ export default {
     queuecomplete() {
       if (this.uploading) {
         this.files = this.$refs.dropzone.dropzone.getAcceptedFiles();
+        this.$store.dispatch('loadDocuments', this.searchLastPayload);
         this.cancelUpload()
       }
     },

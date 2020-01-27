@@ -12,16 +12,27 @@
 </template>
 
 <script>
+import {mapGetters} from 'vuex';
 export default {
   name: 'BasicSearch',
   data () {
     return {
       searchQuery: null,
+      timer: null
     }
   },
+  computed: {
+    ...mapGetters(['activeProject', 'user', 'searchOptions'])
+  },
   methods: {
-    onSearch(e) {
-      console.log(e)
+    onSearch(value) {
+      if (this.timer) clearTimeout(this.timer);
+      this.timer = setTimeout(() => {
+        this.$store.dispatch('loadDocuments', { 
+          project_id: this.activeProject.entity_id, 
+          basic: value 
+        })
+      }, 300);
     }
   }
 }
