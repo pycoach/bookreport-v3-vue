@@ -9,7 +9,8 @@ const REQUEST_UPLOAD_SET_URL = '/upload-set'
 const REQUEST_FILE_UPLOAD_URL = '/signings3'
 const state = {
   projects: [],
-  activeProject: {}
+  activeProject: {},
+  activeProjectIsLoading: false
 }
 
 const status = {
@@ -22,6 +23,9 @@ const getters = {
   },
   activeProject: state => {
     return state.activeProject
+  },
+  activeProjectIsLoading: state => {
+    return state.activeProjectIsLoading
   }
 }
 
@@ -52,6 +56,7 @@ function handleProjectLoad(context, response) {
 }
 
 function handleProjectSave(context, response) {
+  context.commit('setActiveProjectLoading', false);
   const  project = response['data']
   if (project['error']) {
     context.commit('apiError', project['error'])
@@ -121,6 +126,7 @@ function handleProjectDelete(context, id, response) {
 }
 
 function handleGetProject(context, response) {
+  context.commit('setActiveProjectLoading', false);
   const project = response['data']
   if (project['error']) {
     context.commit('apiError', project['error'])
@@ -144,6 +150,7 @@ const actions = {
     get(context, URL + '/user_id/' + id, handleProjectLoad)
   },
   async saveProject(context, payload) {
+    context.commit('setActiveProjectLoading', true);
     const projectData = {
       'version': payload['version'],
       'user_id': payload['user_id'],
@@ -190,6 +197,7 @@ const actions = {
     apiDelete(context, URL, id, handleProjectDelete)
   },
   getProject(context, id) {
+    context.commit('setActiveProjectLoading', true);
     get(context, URL + '/' + id, handleGetProject)
   }
 }
@@ -228,6 +236,9 @@ const mutations = {
   },
   setActiveProject(state, project) {
     state.activeProject = project
+  },
+  setActiveProjectLoading(state, isLoading) {
+    state.activeProjectIsLoading = isLoading
   },
   uploadSetSuccess(state, project) {
     Vue.notify({

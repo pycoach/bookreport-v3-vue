@@ -7,13 +7,13 @@
             <v-card-title class="headline d-flex justify-space-between">
               Documents
               <div class="d-flex align-center">
-                <v-btn outline fab small text :disabled="!filesSelected">
+                <v-btn fab small text :disabled="!filesSelected">
                   <v-icon>file_download</v-icon>
                 </v-btn>
-                <v-btn outline fab small text :disabled="!filesSelected">
+                <v-btn fab small text :disabled="!filesSelected">
                   <v-icon>open_with</v-icon>
                 </v-btn>
-                <v-btn outline fab small text :disabled="!filesSelected">
+                <v-btn fab small text :disabled="!filesSelected">
                   <v-icon>delete</v-icon>
                 </v-btn>
                 <v-btn class="btn-primary btn-primary--small ml-3" @click="$emit('onUploadClick')">
@@ -25,11 +25,14 @@
           <v-data-table
             v-model="selected"
             :headers="headers"
-            :items="items"
+            :items="getDocuments"
+            :server-items-length="getDocumentsCount"
             :single-select="singleSelect"
             :options.sync="options"
-            item-key="EntityID"
+            :loading="documentsLoading"
+            item-key="entity_id"
             show-select
+            hide-default-footer
           >
             <template v-slot:body="{ items }">
               <tbody>
@@ -67,17 +70,22 @@
                     </v-menu>
                   </td>
                   <td>
-                    <font-awesome-icon :icon="getIcon(item.Extension)" size="lg" pull="left" class="mr-2" />
-                    {{ item.Name }}
+                    <font-awesome-icon :icon="getIcon(item.extension)" size="lg" pull="left" class="mr-2" />
+                    {{ item.name }}
                   </td>
-                  <td>{{item.DocumentTypes | commaList}}</td>
-                  <td>{{item.Trades | commaList}}</td>
-                  <td>{{item.Transactions | commaList}}</td>
-                  <td>{{formatDate(item.ChangedOn)}}</td>
+                  <td>{{item.document_types | commaList}}</td>
+                  <td>{{item.trades | commaList}}</td>
+                  <td>{{item.transactions | commaList}}</td>
+                  <td>{{formatDate(item.changed_on)}}</td>
                 </tr>
               </tbody>
             </template>
           </v-data-table>
+          <v-pagination 
+            v-model="options.page" 
+            :length="Math.ceil( getDocumentsCount / options.itemsPerPage || 1)"
+            :total-visible="4"
+          />
         </v-card>
       </v-col>
     </v-row>
@@ -101,13 +109,13 @@ export default {
     FontAwesomeIcon
   },
   computed: {
-    ...mapGetters(['activeProject', 'user']),
+    ...mapGetters(['activeProject', 'user', 'searchOptions', 'searchLastPayload', 'getDocuments', 'getDocumentsCount', 'documentsLoading']),
     getSelected () {
       let selected;
       return selected = this.selected.map(item => item.Name);
     },
     filesSelected () {
-      let selected = this.selected.map(item => item.Name);;
+      let selected = this.selected.map(item => item.Name);
       return selected.length > 0
     }
   },
@@ -144,81 +152,10 @@ export default {
           value: "date"
         }
       ],
-      items: [
-        {
-          Archived: null,
-          FolderID: '',
-          ChangedOn: '2020-01-18T06:49:36.925309+00:00',
-          Extension: 'pdf',
-          Transactions: ['Test', 'Re'],
-          ProjectID: '99096323556048649143987667e2e502',
-          HasDuplicateFilenames: false,
-          Trades: ['Test', 'Re'],
-          ChangedBy: '3402092ffbe447f8ac30627e586edf8d',
-          DocumentTypes: ['Fund - Financial', 'Fund - Memo', 'Investment - Financial', 'Investment - Legal', 'Investment - Memo'],
-          Name: 'BookReport v3 Documentation v1.0.1',
-          ProjectName: 'Test',
-          EntityID: 'be49950cc3f04456a9ded27ba67f1e17',
-          FolderName: '',
-          HasPreview: true,
-          Size: 177745
-        }, {
-          Archived: null,
-          FolderID: '',
-          ChangedOn: '2020-01-18T06:49:36.775296+00:00',
-          Extension: 'xlsx',
-          Transactions: ['Test', 'Re'],
-          ProjectID: '99096323556048649143987667e2e502',
-          HasDuplicateFilenames: false,
-          Trades: ['Test', 'Re'],
-          ChangedBy: '3402092ffbe447f8ac30627e586edf8d',
-          DocumentTypes: ['Fund - Financial', 'Fund - Memo', 'Investment - Financial', 'Investment - Legal', 'Investment - Memo'],
-          Name: 'SampleData',
-          ProjectName: 'Test',
-          EntityID: 'a56ba3a906314c8686658002234099e5',
-          FolderName: '',
-          HasPreview: false,
-          Size: 65801
-        }, {
-          Archived: null,
-          FolderID: '',
-          ChangedOn: '2020-01-16T14:06:45.691482+00:00',
-          Extension: 'pdf',
-          Transactions: ['Test', 'Re', 'T'],
-          ProjectID: '99096323556048649143987667e2e502',
-          HasDuplicateFilenames: false,
-          Trades: ['Test', 'Re', 'T'],
-          ChangedBy: '3402092ffbe447f8ac30627e586edf8d',
-          DocumentTypes: ['Fund - Financial', 'Fund - Memo', 'Investment - Financial', 'Investment - Legal', 'Investment - Memo'],
-          Name: 'Reveles MVP Overview',
-          ProjectName: 'Test',
-          EntityID: '6fc74ada93ae4e41bcfa444cd68a6410',
-          FolderName: '',
-          HasPreview: true,
-          Size: 40507
-        }, {
-          Archived: null,
-          FolderID: '',
-          ChangedOn: '2020-01-18T06:49:37.799123+00:00',
-          Extension: 'xlsx',
-          Transactions: ['Test', 'Re'],
-          ProjectID: '99096323556048649143987667e2e502',
-          HasDuplicateFilenames: false,
-          Trades: ['Test', 'Re'],
-          ChangedBy: '3402092ffbe447f8ac30627e586edf8d',
-          DocumentTypes: ['Fund - Financial', 'Fund - Memo', 'Investment - Financial', 'Investment - Legal', 'Investment - Memo'],
-          Name: 'Beijerprislista',
-          ProjectName: 'Test',
-          EntityID: '2f3e1e000bf74b03b21e384bd30116b3',
-          FolderName: '',
-          HasPreview: false,
-          Size: 868958
-        }
-      ],
       options: {
         page: 1,
         sortBy: ['date'],
-        itemsPerPage: 100
+        itemsPerPage: 15
       },
       menu: [
         { title: 'Archive', action: 'archive' },
@@ -226,17 +163,8 @@ export default {
         { title: 'Download', action: 'download' },
         { title: 'Move', action: 'move' },
         { title: 'Re-process', action: 'reprocess' }
-      ],
+      ]
     }
-  },
-  beforeMount() {
-    const payload = {
-      CurrentPage: this.options.page,
-      PageSize: this.options.itemsPerPage,
-      ProjectID: this.activeProject.entity_id,
-      isProjectFilesOnly: true
-    };
-    this.$store.dispatch('loadDocuments', payload)
   },
   filters: {
     commaList (value) {
@@ -285,6 +213,18 @@ export default {
       } else {
         this.selected.splice(indexOfItem, 1)
       }
+    }
+  },
+  watch: {
+    'options': {
+      handler: function (newOptions) {
+        this.$store.commit('setOptions', newOptions);
+        this.$store.dispatch('loadDocuments', {
+          ...this.searchLastPayload,
+          project_id: this.activeProject.entity_id
+        });
+      },
+      deep: true
     }
   }
 }
