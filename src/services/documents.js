@@ -4,13 +4,11 @@ import api from 'Api'
 const URL = '/search';
 const state = {
   searchType: 'basic',
-  searchOptions: {
-    page: 1,
-    sortBy: ['date'],
-    itemsPerPage: 15
-  },
+  projectId: '',
+  searchOptions: {},
   searchLastPayload: {},
   documents: [],
+  filesCount: 0,
   isLoading: false
 };
 
@@ -26,6 +24,9 @@ const getters = {
   },
   getDocuments: state => {
     return state.documents
+  },
+  getDocumentsCount: state => {
+    return state.filesCount
   },
   documentsLoading: state => {
     return state.isLoading
@@ -43,7 +44,8 @@ function handleDocumentLoad(context, response) {
   if (documents['error']) {
     context.commit('apiError', documents['error'])
   } else {
-    context.commit('documentsLoaded', documents.files)
+    context.commit('setDocuments', documents.files)
+    context.commit('setFilesCount', documents.total_files.value)
   }
 }
 
@@ -55,7 +57,7 @@ const actions = {
       is_project_files_only: true,
       file_size: null
     };
-    // delete the property when the value is empty
+    // Delete the property when the value is empty
     for (let key in newPayload) {
       if (newPayload[key] === '') delete newPayload[key]
     }
@@ -66,14 +68,17 @@ const actions = {
 };
 
 const mutations = {
-  documentsLoaded(state, documents) {
+  setDocuments(state, documents) {
     state.documents = documents;
   },
-  changeSearchType(state, type) {
+  setSearchType(state, type) {
     state.searchType = type
   },
   setOptions(state, newOptions) {
     state.searchOptions = newOptions
+  },
+  setFilesCount(state, filesCount) {
+    state.filesCount = filesCount
   },
   setLastPayload(state, payload) {
     state.searchLastPayload = payload;

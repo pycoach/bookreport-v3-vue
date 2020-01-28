@@ -26,11 +26,13 @@
             v-model="selected"
             :headers="headers"
             :items="getDocuments"
+            :server-items-length="getDocumentsCount"
             :single-select="singleSelect"
             :options.sync="options"
             :loading="documentsLoading"
             item-key="entity_id"
             show-select
+            hide-default-footer
           >
             <template v-slot:body="{ items }">
               <tbody>
@@ -79,6 +81,11 @@
               </tbody>
             </template>
           </v-data-table>
+          <v-pagination 
+            v-model="options.page" 
+            :length="Math.ceil( getDocumentsCount / options.itemsPerPage || 1)"
+            :total-visible="4"
+          />
         </v-card>
       </v-col>
     </v-row>
@@ -102,7 +109,7 @@ export default {
     FontAwesomeIcon
   },
   computed: {
-    ...mapGetters(['activeProject', 'user', 'searchOptions', 'searchLastPayload', 'getDocuments', 'documentsLoading']),
+    ...mapGetters(['activeProject', 'user', 'searchOptions', 'searchLastPayload', 'getDocuments', 'getDocumentsCount', 'documentsLoading']),
     getSelected () {
       let selected;
       return selected = this.selected.map(item => item.Name);
@@ -156,11 +163,8 @@ export default {
         { title: 'Download', action: 'download' },
         { title: 'Move', action: 'move' },
         { title: 'Re-process', action: 'reprocess' }
-      ],
+      ]
     }
-  },
-  beforeMount() {
-    this.$store.dispatch('loadDocuments', { project_id: this.activeProject.entity_id })
   },
   filters: {
     commaList (value) {
@@ -215,7 +219,10 @@ export default {
     'options': {
       handler: function (newOptions) {
         this.$store.commit('setOptions', newOptions);
-        this.$store.dispatch('loadDocuments', this.searchLastPayload);
+        this.$store.dispatch('loadDocuments', {
+          ...this.searchLastPayload,
+          project_id: this.activeProject.entity_id
+        });
       },
       deep: true
     }

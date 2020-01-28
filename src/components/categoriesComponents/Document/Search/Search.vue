@@ -59,7 +59,7 @@ export default {
   },
   methods: {
     onTypeChange (newType) {
-      this.$store.commit('changeSearchType', newType)
+      this.$store.commit('setSearchType', newType)
     }
   }
 }

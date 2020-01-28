@@ -1,14 +1,16 @@
 <template>
-  <v-layout row wrap class="pa-2">
-    <v-flex xs12 sm12>
-      <v-text-field
-        label="Search..."
-        prepend-icon="search"
-        @input="onSearch"
-        v-model="searchQuery" 
-      />
-    </v-flex>
-  </v-layout>
+  <v-form ref="form" @submit.prevent="true">
+    <v-layout row wrap class="pa-2">
+      <v-flex xs12 sm12>
+        <v-text-field
+          label="Search..."
+          prepend-icon="search"
+          @input="onSearch"
+          v-model="searchQuery" 
+        />
+      </v-flex>
+    </v-layout>
+  </v-form>
 </template>
 
 <script>
@@ -24,6 +26,9 @@ export default {
   computed: {
     ...mapGetters(['activeProject', 'user', 'searchOptions'])
   },
+  beforeDestroy() {
+    this.resetForm()
+  },
   methods: {
     onSearch(value) {
       if (this.timer) clearTimeout(this.timer);
@@ -32,7 +37,10 @@ export default {
           project_id: this.activeProject.entity_id, 
           basic: value 
         })
-      }, 300);
+      }, 500);
+    },
+    resetForm () {
+      this.$refs.form.reset()
     }
   }
 }
