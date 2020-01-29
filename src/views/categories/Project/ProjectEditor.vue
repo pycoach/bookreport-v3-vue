@@ -1064,7 +1064,8 @@ export default {
     }    
   },
   computed: {
-    ...mapGetters(['activeProject', 'user', 'trades', 'transactions', 'topic_types','topics', 'searchLastPayload', 'activeProjectIsLoading']),
+    ...mapGetters(['activeProject', 'user', 'trades', 'transactions', 'topic_types','topics', 'activeProjectIsLoading']),
+    ...mapGetters('ProjectDocuments', ['searchLastPayload']),
       filteredTrades() {
         return this.trades.filter(trade => {
               
@@ -1531,7 +1532,7 @@ export default {
     queuecomplete() {
       if (this.uploading) {
         this.files = this.$refs.dropzone.dropzone.getAcceptedFiles();
-        this.$store.dispatch('loadDocuments', {
+        this.$store.dispatch('ProjectDocuments/loadDocuments', {
           ...this.searchLastPayload,
           project_id: this.activeProject.entity_id
         });

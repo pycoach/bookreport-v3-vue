@@ -130,7 +130,7 @@ export default {
     getDocuments () {
       if (this.timer) clearTimeout(this.timer);
       this.timer = setTimeout(() => {
-        this.$store.dispatch('loadDocuments', {
+        this.$store.dispatch('ProjectDocuments/loadDocuments', {
           project: this.project,
           name: this.name,
           body: this.content,
