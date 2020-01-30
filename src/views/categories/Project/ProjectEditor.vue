@@ -3,7 +3,7 @@
      <div class="d-flex justify-space-between base-y-padding">
       <div class="d-flex align-center">
        <img style="cursor: pointer" class="mr-4" src="../../../assets/icons/back.svg" alt="" @click="$router.push('/project')">
-      <quick-edit  v-on:input="saveProject" class="top-header " v-model="name" :emptyText="editMode == 'Create'  ?  'Create Project' : 'Loading'">
+      <quick-edit  v-on:input="saveProject" class="top-header " :value="name" @input="$store.commit('ProjectEditor/setName', $event)" :emptyText="editMode === 'Create'  ?  'Create Project' : 'Loading'">
         
         <template v-slot:button-cancel >
          <img class="close-icon" src="../../../assets/icons/close.svg" alt="">
@@ -141,103 +141,103 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-dialog persistent v-model="informationDialog" max-width="500">
-      <v-card>
-        <v-card-title class="headline">Request Information</v-card-title>
-        <v-container grid-list-xl fluid >
-          <v-layout row wrap>
-            <v-flex xs12 md12>
-              <v-text-field label="Subject"
-                clearable
-                v-model="informationSubject">
-              </v-text-field>
-            </v-flex>
-            <v-flex xs12 md12>
-              <v-select
-                :items="clients"
-                item-text="name"
-                v-model="informationClient"
-                label="To"
-                return-object
-              ></v-select>
-            </v-flex>
-            <v-flex xs12 md12>
-              <v-textarea label="Body"
-                v-model="informationBody"
-                outlined
-                auto-grow
-                rows="4"
-                row-height="30">
-              </v-textarea>
-            </v-flex>            
-          </v-layout>
-        </v-container>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="informationDialog=false">
-            CANCEL
-          </v-btn>
-          <v-btn class="ml-5 btn-primary btn-primary--small" text @click="onSaveInformation">
-            SAVE
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-    <v-dialog persistent v-model="documentDialog" max-width="500">
-      <v-card>
-        <v-card-title class="headline">Request Document</v-card-title>
-        <v-container grid-list-xl fluid >
-          <v-layout row wrap>
-            <v-flex xs12 md12>
-              <v-text-field label="Subject"
-                clearable
-                v-model="documentSubject">
-              </v-text-field>
-            </v-flex>
-            <v-flex xs12 md12>
-              <v-select
-                :items="clients"
-                item-text="name"
-                v-model="documentClient"
-                label="To"
-                return-object
-              ></v-select>
-            </v-flex>
-            <v-flex xs12 md12>
-              <v-combobox
-                v-model="documents"
-                :items="[]"
-                label="Documents"
-                multiple
-                chips
-                :delimiters="[' ', ',']"
-              ></v-combobox>
-            </v-flex>
-            <v-flex xs12 md12>
-              <v-textarea label="Body"
-                v-model="documentBody"
-                outlined
-                auto-grow
-                rows="4"
-                row-height="30">
-              </v-textarea>
-            </v-flex>            
-          </v-layout>
-        </v-container>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-               
-          <v-btn color="primary" text @click="documentDialog=false">
-            CANCEL
-          </v-btn>
-          <v-btn class="ml-5 btn-primary btn-primary--small" text @click="onSaveDocument">
-            SAVE
-          </v-btn>
+<!--    <v-dialog persistent v-model="informationDialog" max-width="500">-->
+<!--      <v-card>-->
+<!--        <v-card-title class="headline">Request Information</v-card-title>-->
+<!--        <v-container grid-list-xl fluid >-->
+<!--          <v-layout row wrap>-->
+<!--            <v-flex xs12 md12>-->
+<!--              <v-text-field label="Subject"-->
+<!--                clearable-->
+<!--                v-model="informationSubject">-->
+<!--              </v-text-field>-->
+<!--            </v-flex>-->
+<!--            <v-flex xs12 md12>-->
+<!--              <v-select-->
+<!--                :items="clients"-->
+<!--                item-text="name"-->
+<!--                v-model="informationClient"-->
+<!--                label="To"-->
+<!--                return-object-->
+<!--              ></v-select>-->
+<!--            </v-flex>-->
+<!--            <v-flex xs12 md12>-->
+<!--              <v-textarea label="Body"-->
+<!--                v-model="informationBody"-->
+<!--                outlined-->
+<!--                auto-grow-->
+<!--                rows="4"-->
+<!--                row-height="30">-->
+<!--              </v-textarea>-->
+<!--            </v-flex>            -->
+<!--          </v-layout>-->
+<!--        </v-container>-->
+<!--        <v-card-actions>-->
+<!--          <v-spacer></v-spacer>-->
+<!--          <v-btn color="primary" text @click="informationDialog=false">-->
+<!--            CANCEL-->
+<!--          </v-btn>-->
+<!--          <v-btn class="ml-5 btn-primary btn-primary&#45;&#45;small" text @click="onSaveInformation">-->
+<!--            SAVE-->
+<!--          </v-btn>-->
+<!--        </v-card-actions>-->
+<!--      </v-card>-->
+<!--    </v-dialog>-->
+<!--    <v-dialog persistent v-model="documentDialog" max-width="500">-->
+<!--      <v-card>-->
+<!--        <v-card-title class="headline">Request Document</v-card-title>-->
+<!--        <v-container grid-list-xl fluid >-->
+<!--          <v-layout row wrap>-->
+<!--            <v-flex xs12 md12>-->
+<!--              <v-text-field label="Subject"-->
+<!--                clearable-->
+<!--                v-model="documentSubject">-->
+<!--              </v-text-field>-->
+<!--            </v-flex>-->
+<!--            <v-flex xs12 md12>-->
+<!--              <v-select-->
+<!--                :items="clients"-->
+<!--                item-text="name"-->
+<!--                v-model="documentClient"-->
+<!--                label="To"-->
+<!--                return-object-->
+<!--              ></v-select>-->
+<!--            </v-flex>-->
+<!--            <v-flex xs12 md12>-->
+<!--              <v-combobox-->
+<!--                v-model="documents"-->
+<!--                :items="[]"-->
+<!--                label="Documents"-->
+<!--                multiple-->
+<!--                chips-->
+<!--                :delimiters="[' ', ',']"-->
+<!--              ></v-combobox>-->
+<!--            </v-flex>-->
+<!--            <v-flex xs12 md12>-->
+<!--              <v-textarea label="Body"-->
+<!--                v-model="documentBody"-->
+<!--                outlined-->
+<!--                auto-grow-->
+<!--                rows="4"-->
+<!--                row-height="30">-->
+<!--              </v-textarea>-->
+<!--            </v-flex>            -->
+<!--          </v-layout>-->
+<!--        </v-container>-->
+<!--        <v-card-actions>-->
+<!--          <v-spacer></v-spacer>-->
+<!--               -->
+<!--          <v-btn color="primary" text @click="documentDialog=false">-->
+<!--            CANCEL-->
+<!--          </v-btn>-->
+<!--          <v-btn class="ml-5 btn-primary btn-primary&#45;&#45;small" text @click="onSaveDocument">-->
+<!--            SAVE-->
+<!--          </v-btn>-->
 
-                  
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+<!--                  -->
+<!--        </v-card-actions>-->
+<!--      </v-card>-->
+<!--    </v-dialog>-->
     <v-dialog persistent v-model="fileDialog" max-width="500">
       <v-card>
         <v-card-title class="headline">Upload Files</v-card-title>
@@ -500,85 +500,86 @@
     <v-tab :disabled="activeProjectIsLoading">Users</v-tab>
 
     <v-tab-item key="1" class="overview">
-       <v-row class="mb-6" >
-             <v-col sm="12" md="5" lg="5"   >
-                <v-card>
-                  <v-toolbar>
-                    <v-card-title v-if="editMode == 'Create'"
-                      class="headline">
-                      {{ editMode }} Project
-                    </v-card-title>
-                    <v-card-title v-else 
-                      class="headline">
-                      Description
-                    </v-card-title>
-                    <v-spacer></v-spacer>
-                      <v-btn v-if="!editDescriptionMode && editMode != 'Create'"  class="ml-5 btn-grey btn-grey--square"
-                             @click="editDescription">
-                         <img  src="../../../assets/icons/edit-pencil.svg" alt="">
-                      </v-btn>
-                  </v-toolbar>
-                  <v-container grid-list-xl fluid>
-                    <v-layout row wrap>   
-                      <v-flex xs12 md12 v-if="editMode == 'Create' || editDescriptionMode">
-                        <v-text-field label="Name"
-                          
-                          clearable
-                          class="px-3 mt-4"
-                          v-model="name">
-                        </v-text-field>
-                      </v-flex>
-                      <v-flex xs12 md12>
-                        <v-textarea ref="description" class="description px-3" :class="{'no-edit-mode': !editDescriptionMode && editMode == 'Edit'}" label="Description"
-                          v-model="description"
-                          outlined
-                          auto-grow
+      <Overview /> 
+<!--      <v-row class="mb-6" >-->
+<!--             <v-col sm="12" md="5" lg="5"   >-->
+<!--                <v-card>-->
+<!--                  <v-toolbar>-->
+<!--                    <v-card-title v-if="editMode == 'Create'"-->
+<!--                      class="headline">-->
+<!--                      {{ editMode }} Project-->
+<!--                    </v-card-title>-->
+<!--                    <v-card-title v-else -->
+<!--                      class="headline">-->
+<!--                      Description-->
+<!--                    </v-card-title>-->
+<!--                    <v-spacer></v-spacer>-->
+<!--                      <v-btn v-if="!editDescriptionMode && editMode != 'Create'"  class="ml-5 btn-grey btn-grey&#45;&#45;square"-->
+<!--                             @click="editDescription">-->
+<!--                         <img  src="../../../assets/icons/edit-pencil.svg" alt="">-->
+<!--                      </v-btn>-->
+<!--                  </v-toolbar>-->
+<!--                  <v-container grid-list-xl fluid>-->
+<!--                    <v-layout row wrap>   -->
+<!--                      <v-flex xs12 md12 v-if="editMode == 'Create' || editDescriptionMode">-->
+<!--                        <v-text-field label="Name"-->
+<!--                          -->
+<!--                          clearable-->
+<!--                          class="px-3 mt-4"-->
+<!--                          v-model="name">-->
+<!--                        </v-text-field>-->
+<!--                      </v-flex>-->
+<!--                      <v-flex xs12 md12>-->
+<!--                        <v-textarea ref="description" class="description px-3" :class="{'no-edit-mode': !editDescriptionMode && editMode == 'Edit'}" label="Description"-->
+<!--                          v-model="description"-->
+<!--                          outlined-->
+<!--                          auto-grow-->
 
-                          rows="4"
-                          row-height="30">
-                        </v-textarea>
-                      </v-flex>    
-                    </v-layout>
-                  </v-container>
-                  <v-card-actions v-if="editMode == 'Create' || editDescriptionMode" class="pa-5">
-                    <v-spacer></v-spacer>
-                    <v-btn v-if="editMode == 'Create'" color="primary" text @click="$router.push('/Project')">
-                      CANCEL
-                    </v-btn>
-                    <v-btn v-if="editMode == 'Edit'" color="primary" text @click="editDescriptionOff(true)">
-                      CANCEL
-                    </v-btn>
-                    <v-btn class="ml-5 btn-primary btn-primary--small" text @click="saveProject(); editDescriptionOff(false)">
-                      SAVE
-                    </v-btn>
-                  </v-card-actions>
-                </v-card>
-             </v-col>
-            <v-col sm="12" md="7" lg="7"  v-show="editMode == 'Edit'" >
-                    <v-card >
-                      <v-toolbar>
-                        <v-card-title>Info Requests</v-card-title>
-                        <v-spacer></v-spacer>
-                           <v-btn  class="ml-5 btn-primary btn-primary--small"
-                            @click="onRequestInformation">
-                              Request Info
-                            </v-btn>
-                             <v-btn  class="ml-5 btn-primary btn-primary--small"
-                             @click="onRequestDocument">
-                              Request Doc.
-                            </v-btn>
-                      </v-toolbar>
+<!--                          rows="4"-->
+<!--                          row-height="30">-->
+<!--                        </v-textarea>-->
+<!--                      </v-flex>    -->
+<!--                    </v-layout>-->
+<!--                  </v-container>-->
+<!--                  <v-card-actions v-if="editMode == 'Create' || editDescriptionMode" class="pa-5">-->
+<!--                    <v-spacer></v-spacer>-->
+<!--                    <v-btn v-if="editMode == 'Create'" color="primary" text @click="$router.push('/Project')">-->
+<!--                      CANCEL-->
+<!--                    </v-btn>-->
+<!--                    <v-btn v-if="editMode == 'Edit'" color="primary" text @click="editDescriptionOff(true)">-->
+<!--                      CANCEL-->
+<!--                    </v-btn>-->
+<!--                    <v-btn class="ml-5 btn-primary btn-primary&#45;&#45;small" text @click="saveProject(); editDescriptionOff(false)">-->
+<!--                      SAVE-->
+<!--                    </v-btn>-->
+<!--                  </v-card-actions>-->
+<!--                </v-card>-->
+<!--             </v-col>-->
+<!--            <v-col sm="12" md="7" lg="7"  v-show="editMode === 'Edit'" >-->
+<!--                    <v-card >-->
+<!--                      <v-toolbar>-->
+<!--                        <v-card-title>Info Requests</v-card-title>-->
+<!--                        <v-spacer></v-spacer>-->
+<!--                           <v-btn  class="ml-5 btn-primary btn-primary&#45;&#45;small"-->
+<!--                            @click="onRequestInformation">-->
+<!--                              Request Info-->
+<!--                            </v-btn>-->
+<!--                             <v-btn  class="ml-5 btn-primary btn-primary&#45;&#45;small"-->
+<!--                             @click="onRequestDocument">-->
+<!--                              Request Doc.-->
+<!--                            </v-btn>-->
+<!--                      </v-toolbar>-->
 
-                       <v-data-table
-                      :headers="headers"
-                      :items="desserts"
-                      :items-per-page="5"
-                      
-                    ></v-data-table>
+<!--                       <v-data-table-->
+<!--                      :headers="headers"-->
+<!--                      :items="desserts"-->
+<!--                      :items-per-page="5"-->
+<!--                      -->
+<!--                    ></v-data-table>-->
 
-                    </v-card>
-            </v-col>
-       </v-row>
+<!--                    </v-card>-->
+<!--            </v-col>-->
+<!--       </v-row>-->
      </v-tab-item>
      <v-tab-item key="2" class="trades-transactions">
             <v-row class="mb-6" v-show="editMode == 'Edit'">
@@ -842,17 +843,25 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState } from 'vuex';
 import QuickEdit from 'vue-quick-edit';
 import Dropzone from '../../../components/categoriesComponents/Dropzone/VueDropzone';
 import moment from 'moment'
+import Overview from '../../../components/categoriesComponents/Overview'
 import Search from "../../../components/categoriesComponents/Document/Search/Search";
 import FiltersList from "../../../components/categoriesComponents/Document/Filter";
 import Documents from "../../../components/categoriesComponents/Document/Documents";
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 export default {
   name: 'ProjectEditor',
-  components: { QuickEdit, Dropzone, Search, FiltersList, Documents },
+  components: { 
+    QuickEdit,
+    Overview,
+    Dropzone, 
+    Search, 
+    FiltersList, 
+    Documents 
+  },
   props: ['id'],
   data() {
     return {
@@ -941,15 +950,15 @@ export default {
             status: "PENDING",
           },
         ],
-      editMode: 'Create',    
-      name: '',
-      preservedName: '',
-      user_id: null,
-      users: [],
-      user_ids: [],
-      editDescriptionMode: false,
-      description: '',
-      preservedDescription: '',
+      // editMode: 'Create',    
+      // name: '',
+      // preservedName: '',
+      // user_id: null,
+      // users: [],
+      // user_ids: [],
+      // editDescriptionMode: false,
+      // description: '',
+      // preservedDescription: '',
 
       tradeName: '',
       tradeDescription: '',
@@ -1015,18 +1024,18 @@ export default {
       userRoles: ['provider admin', 'provider analyst', 'client manager', 'client analyst', 'participant'],
       activeUser: null,
 
-      informationDialog: false,
-      informationSubject: '',
-      informationBody: '',
-      clients: [],
-      informationClient: null,
+      // informationDialog: false,
+      // informationSubject: '',
+      // informationBody: '',
+      // clients: [],
+      // informationClient: null,
       
      
-      documentDialog: false,
-      documentSubject: '',
-      documentBody: '',
-      documents: [],
-      documentClient: null,
+      // documentDialog: false,
+      // documentSubject: '',
+      // documentBody: '',
+      // documents: [],
+      // documentClient: null,
 
       fileDialog: false,
       files: [],
@@ -1050,9 +1059,9 @@ export default {
     }
   },
   mounted() {
-    this.user_id = this.user.entity_id
+    this.$store.commit('ProjectEditor/setUserId', this.user.entity_id)
     if (this.id !== 'new') {
-      this.editMode = 'Edit'
+      this.$store.commit('ProjectEditor/setEditMode', 'Edit');
       this.$store.commit('setActiveProject', {user_id: this.user_id})
       this.$store.dispatch('getProject', this.id)
       this.$store.dispatch('loadTrades', this.id)
@@ -1060,12 +1069,14 @@ export default {
       this.$store.dispatch('loadTopicTypes', this.id)
       this.$store.dispatch('loadTopics', this.id)
     } else {
+      this.$store.commit('ProjectEditor/setEditMode', 'Create');
       this.$store.commit('setActiveProject', {user_id: this.user_id})
     }    
   },
   computed: {
     ...mapGetters(['activeProject', 'user', 'trades', 'transactions', 'topic_types','topics', 'activeProjectIsLoading']),
     ...mapGetters('ProjectDocuments', ['searchLastPayload']),
+    ...mapState('ProjectEditor', ['editMode', 'name', 'users', 'user_id', 'user_ids', 'description', 'clients']),
       filteredTrades() {
         return this.trades.filter(trade => {
               
@@ -1107,25 +1118,25 @@ export default {
   methods: {
     async saveProject() {
       var _this = this;
-      if (this.users.length == 0){
-        this.users = [{
+      if (this.users.length === 0){
+        this.$store.commit('ProjectEditor/setUsers', [{
           'user_id': this.user_id,
           'name': this.user.name,
           'role': 'provider admin'
-        },]
+        },])
       }
 
-      if (this.user_ids.length == 0) {
-        this.user_ids = [this.user_id,]
+      if (this.user_ids.length === 0) {
+        this.$store.commit('ProjectEditor/setUserIds', [this.user_id,])
       }
       this.setValues(this, this.activeProject)
 
       await this.$store.dispatch('saveProject', this.activeProject).then(function (project) {
-        
+
         if (!project['error'] && window.location.pathname != '/Projecteditor/' + project.entity_id ) {
           _this.$router.push('/Projecteditor/' + project.entity_id)
           _this.editMode = 'Edit'
-          
+
         }
       })
 
@@ -1414,26 +1425,26 @@ export default {
       this.userRole = user.role
       this.userEditMode = 'Edit'
     },
-    editDescription() {
-      this.editDescriptionMode = true;
-      const theElement = this.$refs.description.$el
-      this.preservedName = this.name
-      this.preservedDescription = this.description
-      const input = theElement.querySelector('input:not([type=hidden]),textarea:not([type=hidden])')
-       if (input) {
-            setTimeout(() => {
-              input.focus()
-            }, 0)
-          }
-    },
-    editDescriptionOff(revert) {
-      if (revert) {
-        this.description = this.preservedDescription
-        this.name =  this.preservedName
-      }
-      this.editDescriptionMode = false;
-    },
-    
+    // editDescription() {
+    //   this.editDescriptionMode = true;
+    //   const theElement = this.$refs.description.$el
+    //   this.preservedName = this.name
+    //   this.preservedDescription = this.description
+    //   const input = theElement.querySelector('input:not([type=hidden]),textarea:not([type=hidden])')
+    //    if (input) {
+    //         setTimeout(() => {
+    //           input.focus()
+    //         }, 0)
+    //       }
+    // },
+    // editDescriptionOff(revert) {
+    //   if (revert) {
+    //     this.description = this.preservedDescription
+    //     this.name =  this.preservedName
+    //   }
+    //   this.editDescriptionMode = false;
+    // },
+    //
     async deleteUser(user_id) {
       
       for(let i=0; i < this.activeProject.users.length; i++){
@@ -1484,46 +1495,46 @@ export default {
         }
       })        
     },
-    onRequestInformation(){
-      this.informationSubject = this.name + ' Information Request'
-      this.informationDialog = true
-    },
-    onSaveInformation() {
-      const payload = {
-        'subject': this.informationSubject,
-        'project_id': this.activeProject.entity_id,
-        'project_name': this.activeProject.name,
-        'body': this.informationBody,
-        'user_id': this.informationClient.user_id,
-        'user_name': this.informationClient.name
-      }
-
-      this.$store.dispatch('saveRequestInformation', payload)
-      this.informationDialog = false
-    },
-    onRequestDocument(){
-      this.documents = []
-      this.documentSubject = this.name + ' Document Request'
-      this.documentDialog = true
-    },
-    onSaveDocument() {
-      let document_list = {}
-      for(let i = 0; i < this.documents.length; i ++){
-        document_list[this.documents[i]] = 'requested'
-      }
-      const payload = {
-        'subject': this.documentSubject,
-        'project_id': this.activeProject.entity_id,
-        'project_name': this.activeProject.name,
-        'body': this.documentBody,
-        'documents': document_list,
-        'user_id': this.documentClient.user_id,
-        'user_name': this.documentClient.name
-      }
-
-      this.$store.dispatch('saveRequestDocument', payload)
-      this.documentDialog = false
-    },
+    // onRequestInformation(){
+    //   this.informationSubject = this.name + ' Information Request'
+    //   this.informationDialog = true
+    // },
+    // onSaveInformation() {
+    //   const payload = {
+    //     'subject': this.informationSubject,
+    //     'project_id': this.activeProject.entity_id,
+    //     'project_name': this.activeProject.name,
+    //     'body': this.informationBody,
+    //     'user_id': this.informationClient.user_id,
+    //     'user_name': this.informationClient.name
+    //   }
+    //
+    //   this.$store.dispatch('saveRequestInformation', payload)
+    //   this.informationDialog = false
+    // },
+    // onRequestDocument(){
+    //   this.documents = []
+    //   this.documentSubject = this.name + ' Document Request'
+    //   this.documentDialog = true
+    // },
+    // onSaveDocument() {
+    //   let document_list = {}
+    //   for(let i = 0; i < this.documents.length; i ++){
+    //     document_list[this.documents[i]] = 'requested'
+    //   }
+    //   const payload = {
+    //     'subject': this.documentSubject,
+    //     'project_id': this.activeProject.entity_id,
+    //     'project_name': this.activeProject.name,
+    //     'body': this.documentBody,
+    //     'documents': document_list,
+    //     'user_id': this.documentClient.user_id,
+    //     'user_name': this.documentClient.name
+    //   }
+    //
+    //   this.$store.dispatch('saveRequestDocument', payload)
+    //   this.documentDialog = false
+    // },
 
 
     onUploadFile() {
@@ -1603,33 +1614,32 @@ export default {
     },
   },
   watch: {
-    activeProject() {      
-      if(this.activeProject) {
-        this.name = this.activeProject.name
-        this.user_id = this.activeProject.user_id
-        this.description = this.activeProject.description
-        if(this.activeProject.users == undefined ){
-          this.activeProject.users = []
-          this.users = []
+    activeProject() {
+      if (this.activeProject) {
+        this.$store.commit('ProjectEditor/setName', this.activeProject.name);
+        this.$store.commit('ProjectEditor/setUserId', this.activeProject.user_id);
+        this.$store.commit('ProjectEditor/setDescription', this.activeProject.description);
+        if (this.activeProject.users === undefined) {
+          this.$store.commit('setActiveProject', { users: [] });
+          this.$store.commit('ProjectEditor/setUsers', []);
+        } else {
+          this.$store.commit('ProjectEditor/setUsers', this.activeProject.users);
         }
-        else {
-          this.users = this.activeProject.users
-        }
-
-        this.clients = []
-        for( let i = 0; i < this.activeProject.users.length; i ++) {
-          const user = this.activeProject.users[i]    
-          if(user.role == 'client manager' || user.role == 'client analyst' || user.role == 'participant'){
-            this.clients.push(user)
+      
+        const clients = [];
+        this.$store.commit('ProjectEditor/setClients', []);
+        for (let i = 0; i < this.activeProject.users.length; i++) {
+          const user = this.activeProject.users[i];
+          if (user.role === 'client manager' || user.role === 'client analyst' || user.role === 'participant') {
+            clients.push(user)
           }
         }
-
-        if(this.activeProject.user_ids == undefined ){
-          this.activeProject.user_ids = []
-          this.user_ids = []
-        }
-        else {
-          this.user_ids = this.activeProject.user_ids
+        this.$store.commit('ProjectEditor/setClients', clients);
+  
+        if (this.activeProject.user_ids === undefined) {
+          this.$store.commit('ProjectEditor/setUserIds', []);
+        } else {
+          this.$store.commit('ProjectEditor/setUserIds', this.activeProject.user_ids);
         }
       }
     },

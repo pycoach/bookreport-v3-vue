@@ -48,27 +48,28 @@
                       />
                     </div>
                   </td>
-                  <td>
-                    <v-menu offset-y>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                          icon
-                          v-bind="attrs"
-                          v-on="on"
-                        >
-                          <i class="material-icons">menu</i>
-                        </v-btn>
-                      </template>
+<!--                  // Actions Menu must be activated as soon as actions are ready-->
+<!--                  <td>-->
+<!--                    <v-menu offset-y>-->
+<!--                      <template v-slot:activator="{ on, attrs }">-->
+<!--                        <v-btn-->
+<!--                          icon-->
+<!--                          v-bind="attrs"-->
+<!--                          v-on="on"-->
+<!--                        >-->
+<!--                          <i class="material-icons">menu</i>-->
+<!--                        </v-btn>-->
+<!--                      </template>-->
 
-                      <v-list>
-                        <v-list-item v-for="(listItem, index) in menu" :key="index" @click="menuAction(item.action, item)">
-                          <v-list-item-title>
-                            {{listItem.title}}
-                          </v-list-item-title>
-                        </v-list-item>
-                      </v-list>
-                    </v-menu>
-                  </td>
+<!--                      <v-list>-->
+<!--                        <v-list-item v-for="(listItem, index) in menu" :key="index" @click="menuAction(item.action, item)">-->
+<!--                          <v-list-item-title>-->
+<!--                            {{listItem.title}}-->
+<!--                          </v-list-item-title>-->
+<!--                        </v-list-item>-->
+<!--                      </v-list>-->
+<!--                    </v-menu>-->
+<!--                  </td>-->
                   <td>
                     <font-awesome-icon :icon="getIcon(item.extension)" size="lg" pull="left" class="mr-2" />
                     {{ item.name }}
