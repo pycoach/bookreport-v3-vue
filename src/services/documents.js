@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import api from 'Api'
+import moment from "moment";
 
 const URL = '/search';
 const state = {
@@ -46,7 +47,6 @@ function post(context, URL, data, handler) {
 function handleDocumentLoad(context, response) {
   context.commit('setLoading', false);
   const documents = response['data'];
-  console.log('[Vuex] documents', documents);
   if (documents['error']) {
     context.commit('apiError', documents['error'])
   } else {
@@ -101,8 +101,17 @@ const mutations = {
   setLastPayload(state, payload) {
     state.searchLastPayload = {...state.searchLastPayload, ...payload};
   },
-  setFilterByUploadSet(state, filterByUploadSet) {
-    state.filterByUploadSet = filterByUploadSet;
+  setFilterByUploadSet(state, response) {
+    const uploadSets = [];
+    for (let key in response) {
+      uploadSets.push({
+        value: key,
+        count: response[key],
+        text: `${response[key]['changed_by']} ${moment(response[key]['start_time']).format('L')} (${response[key]['count']})`
+      })
+    }
+    uploadSets.splice(0, 0, {value: null, text: "All Upload Sets"});
+    state.filterByUploadSet = uploadSets;
   },
   setFilterByTrade(state, response) {
     const trades = [];

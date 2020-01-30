@@ -11,7 +11,9 @@
             </v-toolbar>
             <v-expansion-panels>
               <v-expansion-panel class="exclude-shadow">
-                <v-expansion-panel-header>No Filter applied</v-expansion-panel-header>
+                <v-expansion-panel-header>
+                  <span v-html="filterText()" />
+                </v-expansion-panel-header>
                 <v-expansion-panel-content>
                   <v-container fluid class="pt-0">
                     <v-layout row>
@@ -20,6 +22,7 @@
                           color="primary"
                           text
                           @click="resetForm"
+                          :disabled="documentsLoading"
                         >
                           <i class="material-icons">refresh</i>
                           Clear Filter
@@ -28,8 +31,11 @@
                       <v-flex xs4 class="px-4">
                         <v-select
                           v-model="uploadSet"
-                          item-text="desc"
-                          item-value="uploadSet"
+                          @change="getDocuments"
+                          :disabled="documentsLoading"
+                          :items="filterByUploadSet"
+                          item-text="text"
+                          item-value="value"
                           ref="uploadSetSelect"
                           label="All upload sets"
                           single-line
@@ -135,7 +141,7 @@
 </template>
 
 <script>
-  import {mapGetters, mapState} from 'vuex';
+import {mapGetters, mapState} from 'vuex';
 export default {
   name: 'FiltersList',
   data () {
@@ -161,10 +167,11 @@ export default {
     getDocuments () {
       this.$store.dispatch('ProjectDocuments/loadDocuments', {
         project_id: this.activeProject.entity_id,
+        upload_set: this.uploadSet,
         trade: this.trade,
         transaction: this.transaction,
         document_types: this.documentType,
-        file_size: this.size,
+        file_size: this.size || null,
         extension: this.type,
         supported: this.supported,
         duplicate: this.duplicate
@@ -173,6 +180,66 @@ export default {
     resetForm () {
       this.$refs.form.reset();
       this.getDocuments();
+    },
+    filterText () {
+      let text = '';
+      let first = true;
+    
+      if (this.uploadSet) {
+        if (!first) text = text + ', ';
+        let index = this.filterByUploadSet.findIndex(item => item.value === this.uploadSet);
+        text = text + `<strong>Upload Set:</strong> ${this.filterByUploadSet[index] && this.filterByUploadSet[index]['text']}`;
+        first = false
+      }
+    
+      if (this.duplicate) {
+        if (!first) text = text + ', ';
+        text = `${text} <strong>${this.duplicate}</strong>`;
+        first = false
+      }
+    
+      if (this.trade) {
+        if (!first) text = text + ', ';
+        text = text + `<strong>Trade:</strong> ${this.trade}`;
+        first = false
+      }
+    
+      if (this.transaction) {
+        if (!first) text = text + ', ';
+        text = text + `<strong>Transaction:</strong> ${this.transaction}`;
+        first = false
+      }
+    
+      if (this.documentType) {
+        if (!first) text = text + ', ';
+        text = text + `<strong>Document Type:</strong> ${this.documentType}`;
+        first = false
+      }
+    
+      if (this.size && this.size >= 0) {
+        if (!first) text = text + ', ';
+        let index = this.filterByFileSizes.findIndex(item => item.value === this.size);
+        text = text + `<strong>Size:</strong> ${this.filterByFileSizes[index] && this.filterByFileSizes[index]['text']}`;
+        first = false
+      }
+    
+      if (this.type) {
+        if (!first) text = text + ', ';
+        text = text + `<strong>File Type:</strong> ${this.type}`;
+        first = false
+      }
+    
+      if (this.supported) {
+        if (!first) text = text + ', ';
+        text = `${text} <strong>${this.supported}</strong> file types only`;
+        first = false
+      }
+    
+      if (text.length > 0) {
+        return text
+      }
+    
+      return '<strong>No Filter Applied</strong>'
     }
   }
 }

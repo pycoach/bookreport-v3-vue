@@ -6,6 +6,7 @@
           v-model="project"
           label="Project..."
           prepend-icon="search"
+          :disabled="documentsLoading"
           @input="getDocuments"
         />
       </v-flex>
@@ -14,6 +15,7 @@
           v-model="name"
           label="Name..."
           prepend-icon="search"
+          :disabled="documentsLoading"
           @input="getDocuments"
         />
       </v-flex>
@@ -22,6 +24,7 @@
           v-model="content"
           label="Content..."
           prepend-icon="search"
+          :disabled="documentsLoading"
           @input="getDocuments"
         />
       </v-flex>
@@ -42,6 +45,7 @@
               prepend-icon="event"
               single-line readonly
               v-on="on"
+              :disabled="documentsLoading"
             >
             </v-text-field>
           </template>
@@ -52,7 +56,7 @@
             actions
             @change="getDocuments"
           >
-            <v-btn text color="primary" @click="menuPickerStart = false">Cancel</v-btn>
+            <v-btn text color="primary" @click="searchStartDate = ''">Clear</v-btn>
             <v-btn text color="primary" @click="menuPickerStart = false">Save</v-btn>
           </v-date-picker>
         </v-menu>
@@ -74,6 +78,7 @@
               prepend-icon="event"
               single-line readonly
               v-on="on"
+              :disabled="documentsLoading"
             >
             </v-text-field>
           </template>
@@ -84,7 +89,7 @@
             actions
             @change="getDocuments"
           >
-            <v-btn text color="primary" @click="menuPickerEnd = false">Cancel</v-btn>
+            <v-btn text color="primary" @click="searchEndDate = ''">Clear</v-btn>
             <v-btn text color="primary" @click="menuPickerEnd = false">Save</v-btn>
           </v-date-picker>
         </v-menu>
@@ -96,6 +101,7 @@
           color="primary"
           hide-details
           @change="getDocuments"
+          :disabled="documentsLoading"
         />
       </v-flex>
     </v-layout>
@@ -124,7 +130,8 @@ export default {
     this.resetForm()
   },
   computed: {
-    ...mapGetters(['activeProject'])
+    ...mapGetters(['activeProject']),
+    ...mapGetters('ProjectDocuments', ['documentsLoading']),
   },
   methods: {
     getDocuments () {
