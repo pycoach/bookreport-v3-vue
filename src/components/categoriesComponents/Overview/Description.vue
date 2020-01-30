@@ -53,7 +53,7 @@
         <v-btn v-if="editMode === 'Edit'" color="primary" text @click="editDescriptionOff(true)">
           CANCEL
         </v-btn>
-        <v-btn class="ml-5 btn-primary btn-primary--small" text @click="saveProject(); editDescriptionOff(false)">
+        <v-btn class="ml-5 btn-primary btn-primary--small" text @click="saveProject()">
           SAVE
         </v-btn>
       </v-card-actions>
@@ -66,7 +66,7 @@ import {mapGetters, mapState} from "vuex";
 export default {
 name: 'Description',
   computed: {
-    ...mapState('ProjectEditor', ['editMode', 'name', 'users', 'user_id', 'user_ids', 'description']),
+    ...mapState('ProjectEditor', ['editMode', 'name', 'users', 'user_id', 'user_ids', 'description', 'clients']),
     ...mapGetters(['activeProject', 'user', 'trades', 'transactions', 'topic_types','topics', 'activeProjectIsLoading'])
   },
   data() {
@@ -84,10 +84,10 @@ name: 'Description',
           'user_id': this.user_id,
           'name': this.user.name,
           'role': 'provider admin'
-        }]);
+        },]);
       }
       if (this.user_ids.length === 0) {
-        this.$store.commit('ProjectEditor/setUserIds', [this.user_id]);
+        this.$store.commit('ProjectEditor/setUserIds', [this.user_id,]);
       }
       this.setValues(this, this.activeProject);
       await this.$store.dispatch('saveProject', this.activeProject).then(function (project) {
