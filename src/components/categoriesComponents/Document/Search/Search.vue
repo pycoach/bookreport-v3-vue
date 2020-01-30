@@ -55,11 +55,11 @@ export default {
     BasicSearch
   },
   computed: {
-    ...mapGetters(['searchType'])
+    ...mapGetters('ProjectDocuments', ['searchType'])
   },
   methods: {
     onTypeChange (newType) {
-      this.$store.commit('setSearchType', newType)
+      this.$store.commit('ProjectDocuments/setSearchType', newType)
     }
   }
 }

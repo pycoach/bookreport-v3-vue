@@ -109,7 +109,8 @@ export default {
     FontAwesomeIcon
   },
   computed: {
-    ...mapGetters(['activeProject', 'user', 'searchOptions', 'searchLastPayload', 'getDocuments', 'getDocumentsCount', 'documentsLoading']),
+    ...mapGetters(['activeProject', 'user']),
+    ...mapGetters('ProjectDocuments', ['searchOptions', 'searchLastPayload', 'getDocuments', 'getDocumentsCount', 'documentsLoading']),
     getSelected () {
       let selected;
       return selected = this.selected.map(item => item.Name);
@@ -218,8 +219,8 @@ export default {
   watch: {
     'options': {
       handler: function (newOptions) {
-        this.$store.commit('setOptions', newOptions);
-        this.$store.dispatch('loadDocuments', {
+        this.$store.commit('ProjectDocuments/setOptions', newOptions);
+        this.$store.dispatch('ProjectDocuments/loadDocuments', {
           ...this.searchLastPayload,
           project_id: this.activeProject.entity_id
         });

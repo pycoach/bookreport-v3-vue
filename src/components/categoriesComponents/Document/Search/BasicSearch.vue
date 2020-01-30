@@ -24,7 +24,8 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['activeProject', 'user', 'searchOptions'])
+    ...mapGetters(['activeProject', 'user']),
+    ...mapGetters('ProjectDocuments', ['searchOptions'])
   },
   beforeDestroy() {
     this.resetForm()
@@ -33,7 +34,7 @@ export default {
     onSearch(value) {
       if (this.timer) clearTimeout(this.timer);
       this.timer = setTimeout(() => {
-        this.$store.dispatch('loadDocuments', { 
+        this.$store.dispatch('ProjectDocuments/loadDocuments', { 
           project_id: this.activeProject.entity_id, 
           basic: value 
         })
