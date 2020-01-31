@@ -16,7 +16,7 @@
                 <v-btn fab small text :disabled="!filesSelected">
                   <v-icon>delete</v-icon>
                 </v-btn>
-                <v-btn class="btn-primary btn-primary--small ml-3" @click="$emit('onUploadClick')">
+                <v-btn class="btn-primary btn-primary--small ml-3" @click="openModal">
                   + Upload New
                 </v-btn>
               </div>
@@ -98,6 +98,7 @@ import moment from 'moment';
 import {mapGetters} from 'vuex';
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
 import * as far from '@fortawesome/fontawesome-free-regular/index';
+import { EventBus } from '../../../components/categoriesComponents/Document/eventBus.js';
 export default {
   name: 'Documents',
   props: {
@@ -176,6 +177,9 @@ export default {
     }
   },
   methods: {
+    openModal () {
+      EventBus.$emit('onUploadClick')
+    },
     formatDate (value){
       return moment(value).format('L')
     },

@@ -53,7 +53,13 @@
         <v-btn v-if="editMode === 'Edit'" color="primary" text @click="editDescriptionOff(true)">
           CANCEL
         </v-btn>
-        <v-btn class="ml-5 btn-primary btn-primary--small" text @click="emitSave(name, description)">
+        <v-btn 
+          class="ml-5 btn-primary btn-primary--small"
+          text
+          :disabled="activeProjectIsLoading"
+          :loading="activeProjectIsLoading"
+          @click="emitSave(name, description)"
+        >
           SAVE
         </v-btn>
       </v-card-actions>
@@ -62,10 +68,11 @@
 </template>
 
 <script>
-import {mapGetters, mapState} from "vuex";
+  import {mapGetters, mapState} from "vuex";
 export default {
 name: 'Description',
   computed: {
+    ...mapGetters(['activeProjectIsLoading']),
     ...mapState('ProjectEditor', ['editMode', 'name', 'description'])
   },
   data() {

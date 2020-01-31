@@ -24,66 +24,7 @@
         </quick-edit>
       </div>
     </div>
-
-    <!-- Dialogs -->
-    <v-dialog persistent v-model="fileDialog" max-width="500">
-      <v-card>
-        <v-card-title class="headline">Upload Files</v-card-title>
-        <v-container grid-list-xl fluid >
-          <v-layout row wrap>
-            <v-flex xs12 md12>
-                <v-select
-                  v-model="selectedDocumentTypes"
-                  :items="documentTypes"
-                  label="Document Type(s)"
-                  multiple chips deletable-chips clearable dense
-                />
-            </v-flex>
-            <v-flex xs12 md12>
-                <v-combobox
-                  v-model="selectedDocumentTransactions"
-                  :items="documentTransactions"
-                  label="Transactions"
-                  multiple chips small-chips deletable-chips clearable dense
-                />
-            </v-flex>
-            <v-flex xs12 md12>
-                <v-combobox
-                  v-model="selectedDocumentTrades"
-                  :items="documentTrades"
-                  label="Trades"
-                  multiple chips small-chips deletable-chips clearable dense
-                />
-            </v-flex>
-            <v-flex xs12 md12>
-                <Dropzone
-                  ref="dropzone"
-                  @queuecomplete="queuecomplete"
-                />
-            </v-flex>
-          </v-layout>
-        </v-container>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn 
-            color="primary" 
-            text 
-            @click="cancelUpload"
-          >
-            CANCEL
-          </v-btn>
-          <v-btn
-            class="ml-5 btn-primary btn-primary--small"
-            text
-            :disabled="uploading"
-            :loading="uploading"
-            @click="uploadFiles"
-          >
-            UPLOAD
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    
     <!-- Layout -->
     <v-tabs 
       :ripple="false"
@@ -97,20 +38,24 @@
       <v-tab :disabled="activeProjectIsLoading">Users</v-tab>
   
       <v-tab-item key="1" class="overview">
-        <Overview @onSave="saveProject($event)"/>
+        <v-row class="mb-6">
+          <Description @onSave="saveProject($event)" />
+          <Request />
+        </v-row>
       </v-tab-item>
   
       <v-tab-item key="2" class="trades-transactions">
         <v-row class="mb-6" v-show="editMode === 'Edit'">
-          <Trades/>
-          <Transactions/>
+          <Trades />
+          <Transactions />
         </v-row>
       </v-tab-item>
   
       <v-tab-item key="3">
         <Search/>
-        <FiltersList/>
-        <Documents @onUploadClick="onUploadFile"/>
+        <FiltersList />
+        <Documents />
+        <UploadDialog />
       </v-tab-item>
   
       <v-tab-item key="4">
@@ -123,14 +68,14 @@
   
       <v-tab-item key="6">
         <v-row class="mb-6" v-show="editMode === 'Edit'">
-          <TopicTypes/>
-          <Topics/>
+          <TopicTypes />
+          <Topics />
         </v-row>
       </v-tab-item>
   
       <v-tab-item key="7">
         <v-row class="mb-6" v-show="editMode === 'Edit'">
-          <Users/>
+          <Users />
         </v-row>
       </v-tab-item>
     </v-tabs>
@@ -141,13 +86,15 @@
 import { mapGetters, mapState } from 'vuex';
 import QuickEdit from 'vue-quick-edit';
 import Dropzone from '../../../components/categoriesComponents/Dropzone/VueDropzone';
-import moment from 'moment'
 import Overview from '../../../components/categoriesComponents/Overview'
+import Description from '../../../components/categoriesComponents/Overview/Description'
+import Request from '../../../components/categoriesComponents/Overview/Request'
 import Trades from '../../../components/categoriesComponents/TradesTransactions/Trades'
 import Transactions from '../../../components/categoriesComponents/TradesTransactions/Transactions'
 import TopicTypes from '../../../components/categoriesComponents/Topic/TopicTypes'
 import Topics from '../../../components/categoriesComponents/Topic/Topics'
 import Users from '../../../components/categoriesComponents/Users/Users'
+import UploadDialog from '../../../components/categoriesComponents/Document/uploadDialog'
 import Search from "../../../components/categoriesComponents/Document/Search/Search";
 import FiltersList from "../../../components/categoriesComponents/Document/Filter";
 import Documents from "../../../components/categoriesComponents/Document/Documents";
@@ -156,33 +103,20 @@ export default {
   components: { 
     QuickEdit,
     Overview,
+    Description,
+    Request,
     Trades,
     Transactions,
     TopicTypes,
     Topics,
     Users,
+    UploadDialog,
     Dropzone,
     Search,
     FiltersList,
     Documents
   },
   props: ['id'],
-  data() {
-    return {
-      fileDialog: false,
-      files: [],
-      documentTypes: ["Fund - Financial","Fund - Memo", "Investment - Financial", "Investment - Legal",
-        "Investment - Memo", "Investment - Value Model"],
-      selectedDocumentTypes: [],
-      documentTransactions: [],
-      selectedDocumentTransactions: [],
-      documentTrades: [],
-      selectedDocumentTrades: [],
-      uploadSet: null,
-      filesToProcess: 0,
-      uploading: false,
-    }
-  },
   mounted() {
     this.$store.commit('ProjectEditor/setUserId', this.user.entity_id);
     if (this.id !== 'new') {
@@ -201,17 +135,7 @@ export default {
   computed: {
     ...mapGetters(['activeProject', 'user', 'activeProjectIsLoading']),
     ...mapGetters('ProjectDocuments', ['searchLastPayload']),
-    ...mapState('ProjectEditor', ['editMode', 'name', 'users', 'user_id', 'user_ids', 'description', 'clients']),
-    selectedTradeList () {
-      return this.selectedDocumentTrades.join()
-    },
-    selectedTransactionList () {
-      return this.selectedDocumentTransactions.join()
-    },
-    selectedDocumentTypeList () {
-      return this.selectedDocumentTypes.join()
-    },
-
+    ...mapState('ProjectEditor', ['editMode', 'name', 'users', 'user_id', 'user_ids', 'description', 'clients'])
   },
   methods: {
     async saveProject(e) {
@@ -235,7 +159,7 @@ export default {
           _this.$router.push('/Projecteditor/' + project.entity_id);
           _this.$store.commit('ProjectEditor/setEditMode', 'Edit');
         }
-      })
+      });
     },
     setValues(source, destination) {      
       destination['version'] = source['version']
@@ -247,83 +171,7 @@ export default {
       destination['users'] = source['users']
       destination['user_ids'] = source['user_ids']
       destination['description'] = source['description']
-    },
- 
-    onUploadFile() {
-      this.fileDialog = true;
-    },
-    queuecomplete() {
-      if (this.uploading) {
-        this.files = this.$refs.dropzone.dropzone.getAcceptedFiles();
-        this.$store.dispatch('ProjectDocuments/loadDocuments', {
-          ...this.searchLastPayload,
-          project_id: this.activeProject.entity_id
-        });
-        this.cancelUpload()
-      }
-    },
-    async uploadFiles () {
-      let files = this.$refs.dropzone.dropzone.files;
-      if (files.length === 0) return;
-      const now = new Date();
-      let newUploadSet = {
-        'start_time_utc': moment.utc(now).format(),
-        'start_time_local': moment(now).format()
-      };
-      if (this.$route.params.id) newUploadSet['project_id'] = this.$route.params.id;
-      newUploadSet['files'] = files.map(file => {return file['name']});
-      newUploadSet['user_id'] = this.user.user_id;
-      await this.saveUploadSet(newUploadSet);
-      this.setFileUrls();
-      this.uploading = true;
-    },
-    async saveUploadSet(uploadSet){
-      await this.$store.dispatch('uploadDocumentFiles', uploadSet).then(res => {
-        this.uploadSet = res;
-      });
-    },
-    setFileUrls() {
-      const fileCount = this.$refs.dropzone.dropzone.files.length;
-      this.filesToProcess = fileCount;
-      for (let i = 0; i < fileCount; i++) {
-        this.setFileUrl(this.$refs.dropzone.dropzone.files[i], this.checkForUpload)
-      }
-    },
-    setFileUrl(file, done) {
-      const payload = {
-        'fileName': file.name,
-        'fullPath': file.fullPath || file.name,
-        'contentType': file.type,
-        'Transactions': this.selectedTransactionList,
-        'DocumentTypes': this.selectedDocumentTypeList,
-        'Trades': this.selectedTradeList,
-        'UserID': this.user.user_id,
-        'ProjectID': this.$route.params.id,
-        'UploadSetID': this.uploadSet ? this.uploadSet.entity_id : null
-      };
-      this.$store.dispatch('getSignedURL', payload)
-        .then(url => {
-          file.uploadURL = url.signed_url;
-          if (done) done()
-        })
-        .catch(err => {
-          if (done) done("Failed to get an S3 signed upload URL", err)
-        })
-    },
-    checkForUpload() {
-      this.filesToProcess--;
-      if (this.filesToProcess < 1) {
-        this.$refs.dropzone.dropzone.processQueue()
-      }
-    },
-    cancelUpload () {
-      this.fileDialog = false;
-      this.selectedDocumentTypes = '';
-      this.selectedDocumentTransactions = '';
-      this.selectedDocumentTrades = '';
-      this.$refs.dropzone.dropzone.removeAllFiles(true);
-      this.uploading = false
-    },
+    }
   },
   watch: {
     activeProject() {
