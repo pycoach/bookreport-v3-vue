@@ -53,7 +53,7 @@
         <v-btn v-if="editMode === 'Edit'" color="primary" text @click="editDescriptionOff(true)">
           CANCEL
         </v-btn>
-        <v-btn class="ml-5 btn-primary btn-primary--small" text @click="saveProject()">
+        <v-btn class="ml-5 btn-primary btn-primary--small" text @click="emitSave(name, description)">
           SAVE
         </v-btn>
       </v-card-actions>
@@ -66,7 +66,7 @@ import {mapGetters, mapState} from "vuex";
 export default {
 name: 'Description',
   computed: {
-    ...mapState('ProjectEditor', ['editMode', 'name', 'users', 'user_id', 'user_ids', 'description', 'clients']),
+    ...mapState('ProjectEditor', ['editMode', 'name', 'description']),
     ...mapGetters(['activeProject', 'user', 'trades', 'transactions', 'topic_types','topics', 'activeProjectIsLoading'])
   },
   data() {
@@ -77,25 +77,8 @@ name: 'Description',
     }
   },
   methods: {
-    async saveProject() {
-      var _this = this;
-      if (this.users.length === 0){
-        this.$store.commit('ProjectEditor/setUsers', [{
-          'user_id': this.user_id,
-          'name': this.user.name,
-          'role': 'provider admin'
-        },]);
-      }
-      if (this.user_ids.length === 0) {
-        this.$store.commit('ProjectEditor/setUserIds', [this.user_id,]);
-      }
-      this.setValues(this, this.activeProject);
-      await this.$store.dispatch('saveProject', this.activeProject).then(function (project) {
-        if (!project['error'] && window.location.pathname !== '/Projecteditor/' + project.entity_id ) {
-          _this.$router.push('/Projecteditor/' + project.entity_id);
-          _this.$store.commit('ProjectEditor/setEditMode', 'Edit');
-        }
-      })
+    emitSave (name, description) {
+      this.$emit('onSave', { name, description })
     },
     editDescription() {
       this.editDescriptionMode = true;
@@ -115,18 +98,7 @@ name: 'Description',
         this.$store.commit('ProjectEditor/setName', this.preservedName);
       }
       this.editDescriptionMode = false;
-    },
-    setValues(source, destination) {
-      destination['version'] = source['version'];
-      if (source['id'] !== 'new') {
-        destination['entity_id'] = source['id']
-      }
-      destination['name'] = source['name'];
-      destination['user_id'] = source['user_id'];
-      destination['users'] = source['users'];
-      destination['user_ids'] = source['user_ids'];
-      destination['description'] = source['description']
-    },
+    }
   }
 }
 </script>

@@ -1,9 +1,9 @@
 <template>
   <div class=''>
-     <div class="d-flex justify-space-between base-y-padding">
+    <div class="d-flex justify-space-between base-y-padding">
       <div class="d-flex align-center">
        <img style="cursor: pointer" class="mr-4" src="../../../assets/icons/back.svg" alt="" @click="$router.push('/project')">
-      <quick-edit  v-on:input="saveProject" class="top-header " :value="name" @input="$store.commit('ProjectEditor/setName', $event)" :emptyText="editMode === 'Create'  ?  'Create Project' : 'Loading'">
+      <quick-edit @input="saveProject({name: $event, description})" class="top-header" :value="name" :emptyText="editMode === 'Create'  ?  'Create Project' : 'Loading'">
         
         <template v-slot:button-cancel >
          <img class="close-icon" src="../../../assets/icons/close.svg" alt="">
@@ -403,7 +403,7 @@
     <v-tab :disabled="activeProjectIsLoading">Users</v-tab>
 
     <v-tab-item key="1" class="overview">
-      <Overview />
+      <Overview @onSave="saveProject($event)"/>
     </v-tab-item>
      <v-tab-item key="2" class="trades-transactions">
             <v-row class="mb-6" v-show="editMode == 'Edit'">
@@ -832,7 +832,8 @@ export default {
 
   },
   methods: {
-    async saveProject() {
+    async saveProject(e) {
+      this.$store.commit('ProjectEditor/setName', e.name);
       var _this = this;
       if (this.users.length === 0){
         this.$store.commit('ProjectEditor/setUsers', [{

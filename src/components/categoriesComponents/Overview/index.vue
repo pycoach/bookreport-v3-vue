@@ -1,6 +1,6 @@
 <template>
   <v-row class="mb-6">
-    <Description />
+    <Description @onSave="emitDescriptionSave($event)" />
     <Request />
   </v-row>
 </template>
@@ -13,6 +13,11 @@ export default {
   components: {
     Description,
     Request
+  },
+  methods: {
+    emitDescriptionSave(e) {
+      this.$emit('onSave', e);
+    }
   }
 }
 </script>
