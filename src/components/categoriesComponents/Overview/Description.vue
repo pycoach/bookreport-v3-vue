@@ -66,8 +66,7 @@ import {mapGetters, mapState} from "vuex";
 export default {
 name: 'Description',
   computed: {
-    ...mapState('ProjectEditor', ['editMode', 'name', 'description']),
-    ...mapGetters(['activeProject', 'user', 'trades', 'transactions', 'topic_types','topics', 'activeProjectIsLoading'])
+    ...mapState('ProjectEditor', ['editMode', 'name', 'description'])
   },
   data() {
     return {

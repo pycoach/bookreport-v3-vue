@@ -7,7 +7,8 @@ const state = {
   users: [],
   user_ids: [],
   description: '',
-  clients: []
+  clients: [],
+  userRole: 'provider admin'
 };
 
 const getters = {
@@ -39,6 +40,9 @@ const mutations = {
   },
   setClients (state, clients) {
     state.clients = clients
+  },
+  setUserRole (state, userRole) {
+    state.userRole = userRole
   }
 };
 
