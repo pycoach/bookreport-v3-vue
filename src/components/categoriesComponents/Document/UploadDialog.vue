@@ -6,32 +6,32 @@
         <v-layout row wrap>
           <v-flex xs12 md12>
             <v-select
-                    v-model="selectedDocumentTypes"
-                    :items="documentTypes"
-                    label="Document Type(s)"
-                    multiple chips deletable-chips clearable dense
+              v-model="selectedDocumentTypes"
+              :items="documentTypes"
+              label="Document Type(s)"
+              multiple chips deletable-chips clearable dense
             />
           </v-flex>
           <v-flex xs12 md12>
             <v-combobox
-                    v-model="selectedDocumentTransactions"
-                    :items="documentTransactions"
-                    label="Transactions"
-                    multiple chips small-chips deletable-chips clearable dense
+              v-model="selectedDocumentTransactions"
+              :items="documentTransactions"
+              label="Transactions"
+              multiple chips small-chips deletable-chips clearable dense
             />
           </v-flex>
           <v-flex xs12 md12>
             <v-combobox
-                    v-model="selectedDocumentTrades"
-                    :items="documentTrades"
-                    label="Trades"
-                    multiple chips small-chips deletable-chips clearable dense
+              v-model="selectedDocumentTrades"
+              :items="documentTrades"
+              label="Trades"
+              multiple chips small-chips deletable-chips clearable dense
             />
           </v-flex>
           <v-flex xs12 md12>
             <Dropzone
-                    ref="dropzone"
-                    @queuecomplete="queuecomplete"
+              ref="dropzone"
+              @queuecomplete="queuecomplete"
             />
           </v-flex>
         </v-layout>
@@ -39,18 +39,18 @@
       <v-card-actions>
         <v-spacer/>
         <v-btn
-                color="primary"
-                text
-                @click="cancelUpload"
+          color="primary"
+          text
+          @click="cancelUpload"
         >
           CANCEL
         </v-btn>
         <v-btn
-                class="ml-5 btn-primary btn-primary--small"
-                text
-                :disabled="uploading"
-                :loading="uploading"
-                @click="uploadFiles"
+          class="ml-5 btn-primary btn-primary--small"
+          text
+          :disabled="uploading"
+          :loading="uploading"
+          @click="uploadFiles"
         >
           UPLOAD
         </v-btn>
