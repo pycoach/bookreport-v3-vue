@@ -16,7 +16,7 @@
                 <v-btn fab small text :disabled="!filesSelected">
                   <v-icon>delete</v-icon>
                 </v-btn>
-                <v-btn class="btn-primary btn-primary--small ml-3" @click="$emit('onUploadClick')">
+                <v-btn class="btn-primary btn-primary--small ml-3" @click="openModal">
                   + Upload New
                 </v-btn>
               </div>
@@ -48,27 +48,28 @@
                       />
                     </div>
                   </td>
-                  <td>
-                    <v-menu offset-y>
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                          icon
-                          v-bind="attrs"
-                          v-on="on"
-                        >
-                          <i class="material-icons">menu</i>
-                        </v-btn>
-                      </template>
+<!--                  // Actions Menu must be activated as soon as actions are ready-->
+<!--                  <td>-->
+<!--                    <v-menu offset-y>-->
+<!--                      <template v-slot:activator="{ on, attrs }">-->
+<!--                        <v-btn-->
+<!--                          icon-->
+<!--                          v-bind="attrs"-->
+<!--                          v-on="on"-->
+<!--                        >-->
+<!--                          <i class="material-icons">menu</i>-->
+<!--                        </v-btn>-->
+<!--                      </template>-->
 
-                      <v-list>
-                        <v-list-item v-for="(listItem, index) in menu" :key="index" @click="menuAction(item.action, item)">
-                          <v-list-item-title>
-                            {{listItem.title}}
-                          </v-list-item-title>
-                        </v-list-item>
-                      </v-list>
-                    </v-menu>
-                  </td>
+<!--                      <v-list>-->
+<!--                        <v-list-item v-for="(listItem, index) in menu" :key="index" @click="menuAction(item.action, item)">-->
+<!--                          <v-list-item-title>-->
+<!--                            {{listItem.title}}-->
+<!--                          </v-list-item-title>-->
+<!--                        </v-list-item>-->
+<!--                      </v-list>-->
+<!--                    </v-menu>-->
+<!--                  </td>-->
                   <td>
                     <font-awesome-icon :icon="getIcon(item.extension)" size="lg" pull="left" class="mr-2" />
                     {{ item.name }}
@@ -97,6 +98,7 @@ import moment from 'moment';
 import {mapGetters} from 'vuex';
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
 import * as far from '@fortawesome/fontawesome-free-regular/index';
+import { EventBus } from '../../../components/categoriesComponents/Document/eventBus.js';
 export default {
   name: 'Documents',
   props: {
@@ -175,6 +177,9 @@ export default {
     }
   },
   methods: {
+    openModal () {
+      EventBus.$emit('onUploadClick')
+    },
     formatDate (value){
       return moment(value).format('L')
     },
