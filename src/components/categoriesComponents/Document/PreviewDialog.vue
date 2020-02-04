@@ -5,13 +5,12 @@
         <v-btn icon dark @click="show = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
-        <v-toolbar-title>Preview - {{item.name}}</v-toolbar-title>
+        <v-toolbar-title>Preview - {{file.name}}</v-toolbar-title>
       </v-toolbar>
       <v-container class="mt-5">
         <v-row>
           <v-col cols="6">
-<!--            <h4>File - {{file}}</h4>-->
-<!--            <h2>{{getDocuments}}</h2>-->
+            <!--<h4>file - {{file}}</h4>-->
             <v-slider
               v-model="sliderValue"
               persistent-hint
@@ -21,21 +20,21 @@
               thumb-label="always"
               ticks
             />
-            <v-combobox
-              v-model="file.document_types"
+            <v-select
+              v-model="selectedDocumentTypes"
               :items="documentTypes"
               label="Transactions"
               multiple chips small-chips deletable-chips clearable dense
             />
             <v-combobox
               v-model="selectedTransactions"
-              :items="file.transactions"
+              :items="transactions"
               label="Transactions"
               multiple chips small-chips deletable-chips clearable dense
             />
             <v-combobox
               v-model="selectedTrades"
-              :items="file.trades"
+              :items="trades"
               label="Trades"
               multiple chips small-chips deletable-chips clearable dense
             />
@@ -51,8 +50,7 @@
         </v-row>
         <v-row>
           <v-col cols="12">
-            <h1>{{item.name}}</h1>
-<!--            <h1>{{item.entity_id}}</h1>-->
+            <!--<h1>{{item.entity_id}}</h1>-->
             <div id="page">
               <canvas id="image-display" ref="imageDisplayRef"></canvas>
             </div>
@@ -82,23 +80,30 @@ export default {
       documentTypes: ['Fund - Financial', 'Fund - Memo', 'Investment - Financial', 'Investment - Legal',
         'Investment - Memo', 'Investment - Value Model'],
       selectedDocumentTypes: [],
+      transactions: [],
       selectedTransactions: [],
+      trades: [],
       selectedTrades: []
     }
   },
   mounted() {
     EventBus.$on('onPreviewDocument', (item) => {
-      console.log('onPreviewDocument', item.entity_id);
+      console.log('onPreviewDocument', item.file_id);
       this.show = true;
       this.item = item;
     });
     EventBus.$on('onPreviewExcel', (item) => {
-      console.log('onPreviewExcel', item.entity_id);
+      console.log('onPreviewExcel', item.file_id);
     })
   },
   methods: {
     requestPreview () {
-      this.$store.dispatch('FilePreview/loadDocument', { id: this.item.entity_id })
+      const payload = {
+        id: this.file.file_id,
+        size: 'preview',
+        fileName: 'page_map.json'
+      };
+      this.$store.dispatch('FilePreview/loadPageMap', payload);
     },
     addKeyDown (event) {
       if (this.show && this.allowSpeedEntry) {
@@ -111,21 +116,44 @@ export default {
             break;
         }
       }
+    },
+    initDetails () {
+      this.selectedDocumentTypes = JSON.parse(JSON.stringify(this.file.document_types));
+      this.trades = JSON.parse(JSON.stringify(this.file.trades));
+      this.selectedTrades = JSON.parse(JSON.stringify(this.file.trades));
+      this.transactions = JSON.parse(JSON.stringify(this.file.transactions));
+      this.selectedTransactions = JSON.parse(JSON.stringify(this.file.transactions));
     }
   },
   created () {
     window.addEventListener('keydown', this.addKeyDown)
   },
   watch: {
-    item(newValue) {
-      console.log('newValue', newValue);
+    item () {
       for(let i = 0; i < this.getDocuments.length; i++) {
-        if (this.getDocuments[i].entity_id === this.item.entity_id) {
+        if (this.getDocuments[i].file_id === this.item.file_id) {
           this.file = this.getDocuments[i];
           break
         }
       }
+      this.initDetails();
       this.requestPreview()
+    },
+    selectedTrades (newTrades, oldTrades) {
+      if (newTrades.length) {
+        const index = newTrades.length - 1;
+        if (!oldTrades.includes(newTrades[index])) {
+          this.trades.push(newTrades[index])
+        }
+      }
+    },
+    selectedTransactions (newTransactions, oldTransactions) {
+      if (newTransactions.length) {
+        const index = newTransactions.length - 1;
+        if (!oldTransactions.includes(newTransactions[index])) {
+          this.transactions.push(newTransactions[index])
+        }
+      }
     }
   },
   destroyed () {

@@ -1,12 +1,13 @@
 import Vue from 'vue'
 import api from 'Api'
 
-const URL = '/search';
-const GET_END_POINT = (documentId) => {
-  return `/image/${documentId}/preview/page_map.json`
+const PAGE_MAP_END_POINT = (documentId, size, filename) => {
+  return `/image?document_id=${documentId}&size=${size}&filename=${filename}`
 };
+
 const state = {
-  searchType: 'basic'
+  file: {},
+  fileIsLoading: false
 };
 
 const getters = {
@@ -20,28 +21,30 @@ function post(context, URL, data, handler) {
   return api().post(URL, data).then(response => handler(context, response))
 }
 
-function handleDocumentLoad(context, response) {
-  // context.commit('setLoading', false);
-  const document = response['data'];
-  console.log(document);
-  // if (documents['error']) {
-    // context.commit('apiError', documents['error'])
-  // } else {
-    // context.commit('setDocuments', documents.files);
-  // }
+function handlePageMap(context, response) {
+  context.commit('setLoading', false);
+  const file = response['data'];
+  if (file['error']) {
+    alert()
+  } else {
+    context.commit('setPageMap', file);
+  }
+  return file
 }
 
 const actions = {
-  loadDocument(context, payload) {
-    console.log('GET_END_POINT(id)', GET_END_POINT(payload.id));
-    get(context, GET_END_POINT(payload.id), '', handleDocumentLoad)
+  loadPageMap(context, payload) {
+    get(context, PAGE_MAP_END_POINT(payload.id, payload.size, payload.fileName), handlePageMap)
   }
 };
 
 const mutations = {
-  // setDocuments(state, documents) {
-  //   state.documents = documents;
-  // }
+  setPageMap(state, file) {
+    state.file = file
+  },
+  setLoading(state, isLoading) {
+    state.fileIsLoading = isLoading
+  },
 };
 
 export default {
