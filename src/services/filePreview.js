@@ -2,12 +2,12 @@ import Vue from 'vue'
 import api from 'Api'
 
 const PAGE_MAP_END_POINT = (documentId, size, filename) => {
-  return `/image?document_id=${documentId}&size=${size}&filename=${filename}`
+  return `/image/${documentId}/${size}/${filename}`
 };
 
 const state = {
-  file: {},
-  fileIsLoading: false
+  pageMap: {},
+  isLoading: false
 };
 
 const getters = {
@@ -23,13 +23,19 @@ function post(context, URL, data, handler) {
 
 function handlePageMap(context, response) {
   context.commit('setLoading', false);
-  const file = response['data'];
-  if (file['error']) {
+  const pageMap = response['data'];
+  if (pageMap['error']) {
     alert()
   } else {
-    context.commit('setPageMap', file);
+    context.commit('setPageMap', pageMap);
   }
-  return file
+  return pageMap
+}
+
+function handlePageMap2(context, response) {
+  const image = response['data'];
+  console.log('image response', image)
+  return image
 }
 
 const actions = {
@@ -39,11 +45,11 @@ const actions = {
 };
 
 const mutations = {
-  setPageMap(state, file) {
-    state.file = file
+  setPageMap(state, pageMap) {
+    state.pageMap = pageMap
   },
   setLoading(state, isLoading) {
-    state.fileIsLoading = isLoading
+    state.isLoading = isLoading
   },
 };
 

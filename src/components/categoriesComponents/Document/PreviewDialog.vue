@@ -50,7 +50,7 @@
         </v-row>
         <v-row>
           <v-col cols="12">
-            <!--<h1>{{item.entity_id}}</h1>-->
+            <h1>{{ pageMap }}</h1>
             <div id="page">
               <canvas id="image-display" ref="imageDisplayRef"></canvas>
             </div>
@@ -62,12 +62,13 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+  import {mapGetters, mapState} from 'vuex';
 import { EventBus } from '../../../components/categoriesComponents/Document/eventBus.js';
 export default {
   name: 'PreviewDialog',
   computed: {
-    ...mapGetters('ProjectDocuments', ['getDocuments'])
+    ...mapGetters('ProjectDocuments', ['getDocuments']),
+    ...mapState('FilePreview', ['pageMap', 'isLoading'])
   },
   data() {
     return {
@@ -101,7 +102,7 @@ export default {
       const payload = {
         id: this.file.file_id,
         size: 'preview',
-        fileName: 'page_map.json'
+        fileName: 'sprite0.png'
       };
       this.$store.dispatch('FilePreview/loadPageMap', payload);
     },
@@ -138,7 +139,7 @@ export default {
       }
       this.initDetails();
       // Make the API request to bring the data 
-      // this.requestPreview()
+      this.requestPreview()
     },
     selectedTrades (newTrades, oldTrades) {
       if (newTrades.length) {
