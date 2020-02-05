@@ -137,7 +137,8 @@ export default {
         }
       }
       this.initDetails();
-      this.requestPreview()
+      // Make the API request to bring the data 
+      // this.requestPreview()
     },
     selectedTrades (newTrades, oldTrades) {
       if (newTrades.length) {
