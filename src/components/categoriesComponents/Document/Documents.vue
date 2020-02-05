@@ -16,7 +16,7 @@
                 <v-btn fab small text :disabled="!filesSelected">
                   <v-icon>delete</v-icon>
                 </v-btn>
-                <v-btn class="btn-primary btn-primary--small ml-3" @click="openModal">
+                <v-btn class="btn-primary btn-primary--small ml-3" @click="handleUploadDialog">
                   + Upload New
                 </v-btn>
               </div>
@@ -48,8 +48,16 @@
                       />
                     </div>
                   </td>
-<!--                  // Actions Menu must be activated as soon as actions are ready-->
-<!--                  <td>-->
+                  <td>
+                    <font-awesome-icon :icon="getIcon(item.extension)" size="lg" pull="left" class="mr-2" />
+                    {{ item.name }}
+                  </td>
+                  <td>{{item.document_types | commaList}}</td>
+                  <td>{{item.trades | commaList}}</td>
+                  <td>{{item.transactions | commaList}}</td>
+                  <td>{{formatDate(item.changed_on)}}</td>
+                  <!-- // Actions Menu must be activated as soon as actions are ready-->
+                  <td>
 <!--                    <v-menu offset-y>-->
 <!--                      <template v-slot:activator="{ on, attrs }">-->
 <!--                        <v-btn-->
@@ -60,7 +68,7 @@
 <!--                          <i class="material-icons">menu</i>-->
 <!--                        </v-btn>-->
 <!--                      </template>-->
-
+<!--    -->
 <!--                      <v-list>-->
 <!--                        <v-list-item v-for="(listItem, index) in menu" :key="index" @click="menuAction(item.action, item)">-->
 <!--                          <v-list-item-title>-->
@@ -69,15 +77,15 @@
 <!--                        </v-list-item>-->
 <!--                      </v-list>-->
 <!--                    </v-menu>-->
-<!--                  </td>-->
-                  <td>
-                    <font-awesome-icon :icon="getIcon(item.extension)" size="lg" pull="left" class="mr-2" />
-                    {{ item.name }}
+                    <v-btn 
+                      fab 
+                      small 
+                      text 
+                      @click="handlePreviewFileDialog(item)"
+                    >
+                      <v-icon>remove_red_eye</v-icon>
+                    </v-btn>
                   </td>
-                  <td>{{item.document_types | commaList}}</td>
-                  <td>{{item.trades | commaList}}</td>
-                  <td>{{item.transactions | commaList}}</td>
-                  <td>{{formatDate(item.changed_on)}}</td>
                 </tr>
               </tbody>
             </template>
@@ -128,9 +136,6 @@ export default {
       selected: [],
       headers: [
         {
-          sortable: false
-        },
-        {
           text: "Name",
           align: "left",
           value: "name"
@@ -153,6 +158,10 @@ export default {
         {
           text: "Date modified",
           value: "date"
+        },
+        {
+          text: "Actions",
+          value: "actions"
         }
       ],
       options: {
@@ -177,7 +186,7 @@ export default {
     }
   },
   methods: {
-    openModal () {
+    handleUploadDialog () {
       EventBus.$emit('onUploadClick')
     },
     formatDate (value){
@@ -218,6 +227,16 @@ export default {
         this.selected.push(item);
       } else {
         this.selected.splice(indexOfItem, 1)
+      }
+    },
+    handlePreviewFileDialog (item) {
+      const extension = item.extension.toLowerCase();
+      if (extension !== "zip") {
+        if (extension === "csv" || extension.includes("xls")) {
+          EventBus.$emit('onPreviewExcel', item);
+        } else {
+          EventBus.$emit('onPreviewDocument', item)
+        }
       }
     }
   },
