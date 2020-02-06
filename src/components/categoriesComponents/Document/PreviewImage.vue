@@ -1,6 +1,5 @@
 <template>
-  <div id="page">
-    {{isLoading}}
+  <div>
     <v-skeleton-loader
       v-if="isLoading"
       loading
@@ -8,13 +7,12 @@
       type="image"
       class="mx-auto"
     />
-    <img :src="image" width="100%" alt="" />
     <canvas id="image-display" ref="imageDisplayRef" />
   </div>
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import {mapState} from 'vuex';
 export default {
   name: 'PreviewImage',
   computed: {

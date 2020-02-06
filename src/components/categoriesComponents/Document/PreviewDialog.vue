@@ -12,15 +12,26 @@
           <v-col cols="6">
             <v-slider
               v-model="sliderValue"
+              :disabled="isLoading"
               persistent-hint
               step="1"
+              min="1"
               :max="pageMap.pages && pageMap.pages.length"
               inverse-label
               thumb-label="always"
               ticks
+              @change="renderCurrentPage"
             />
-            <PreviewImage />
-            <h4>{{ pageMap }}</h4>
+            <div class="preview-image">
+              <v-skeleton-loader
+                v-if="isLoading"
+                loading
+                type="image"
+                class="mx-auto"
+              />
+              <canvas v-show="!isLoading" id="imageDisplay" ref="imageDisplayRef" />
+            </div>
+            
             <v-select
               v-model="selectedDocumentTypes"
               :items="documentTypes"
@@ -47,11 +58,22 @@
               color="primary"
               class="ma-0 pa-0"
             />
+            <div class="d-flex mt-3">
+              <v-btn
+                v-for="(doc, index) in pageMap.pages && pageMap.pages"
+                color="default"
+                text
+                icon
+                small
+              >
+                <i class="material-icons">insert_drive_file</i>
+              </v-btn>
+            </div>
           </v-col>
         </v-row>
         <v-row>
           <v-col cols="12">
-            
+
           </v-col>
         </v-row>
       </v-container>
@@ -61,8 +83,8 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import { EventBus } from '../eventBus.js';
-import PreviewImage from './Image';
+import { EventBus } from './eventBus.js';
+import PreviewImage from './PreviewImage';
 export default {
   name: 'PreviewDialog',
   components: {
@@ -86,7 +108,7 @@ export default {
       transactions: [],
       selectedTransactions: [],
       trades: [],
-      selectedTrades: []
+      selectedTrades: [],
     }
   },
   mounted() {
@@ -106,9 +128,9 @@ export default {
         size: 'preview',
         fileName: 'page_map.json'
       };
-      this.$store.dispatch('FilePreview/loadPageMap', payload);
+      this.$store.dispatch('FilePreview/loadPageMap', payload)
     },
-    requestPreview () {
+    requestImage () {
       const payload = {
         id: this.file.file_id,
         size: 'preview',
@@ -134,7 +156,20 @@ export default {
       this.selectedTrades = JSON.parse(JSON.stringify(this.file.trades));
       this.transactions = JSON.parse(JSON.stringify(this.file.transactions));
       this.selectedTransactions = JSON.parse(JSON.stringify(this.file.transactions));
-    }
+    },
+    renderCurrentPage () {
+      const canvas = this.$refs.imageDisplayRef;
+      const ctx = canvas.getContext("2d");
+      const imageElement = new Image();
+      imageElement.onload = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.width = this.pageMap.pages[this.sliderValue - 1][2];
+        canvas.height = this.pageMap.pages[this.sliderValue - 1][3];
+        console.table('canvas.width', canvas.width, 'canvas.height', canvas.height);
+        ctx.drawImage(imageElement, 0, -this.pageMap.pages[this.sliderValue - 1][1]);
+      };
+      imageElement.src = this.image;
+    },
   },
   created () {
     window.addEventListener('keydown', this.addKeyDown)
@@ -149,7 +184,13 @@ export default {
       }
       this.initDetails();
       this.requestPageMap();
-      this.requestPreview()
+      this.requestImage();
+      this.$store.dispatch('FilePreview/loadDocumentEvent', this.file.file_id)
+    },
+    image (newImage) {
+      if (!newImage || this.isLoading) return;
+      this.sliderValue = 1;
+      this.renderCurrentPage()
     },
     selectedTrades (newTrades, oldTrades) {
       if (newTrades.length) {
@@ -174,6 +215,21 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style lang="scss">
+  .preview-image {
+    margin-bottom: 50px;
+    min-height: 500px;
+    .v-skeleton-loader__image {
+      min-height: 500px !important;
+    }
+  }
+  #imageDisplay {
+    border: 1px solid #949494;
+    overflow: hidden;
+    width: 100%;
+    min-height: 500px;
+  }
+  .v-slider--horizontal {
+    margin: 0 !important;
+  }
 </style>

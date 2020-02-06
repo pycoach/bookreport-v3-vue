@@ -1,5 +1,6 @@
 import api from 'Api'
 
+const DOC_EVENT_URL = '/document-event';
 const PAGE_MAP_END_POINT = (documentId, size, filename) => {
   return `/image/${documentId}/${size}/${filename}`
 };
@@ -13,38 +14,45 @@ const state = {
 const getters = {
 };
 
-function get(context, URL, handler) {
-  api().get(URL).then(response => handler(context, response))
-}
-
-function handlePageMap(context, response) {
-  context.commit('setLoading', false);
-  const pageMap = response['data'];
-  if (pageMap['error']) {
-    alert()
-  } else {
-    context.commit('setPageMap', pageMap);
-  }
-  return pageMap
-}
-
-function handleImage(context, response) {
-  context.commit('setLoading', false);
-  const image = response['data'].image || '';
-  if (image['error']) {
-    alert()
-  } else {
-    context.commit('setImage', image);
-  }
-  return image
-}
-
 const actions = {
-  loadPageMap(context, payload) {
-    get(context, PAGE_MAP_END_POINT(payload.id, payload.size, payload.fileName), handlePageMap)
+  async loadPageMap(context, payload) {
+    context.commit('setLoading', true);
+    let response;  
+    try {
+      response = await api().get(PAGE_MAP_END_POINT(payload.id, payload.size, payload.fileName))
+    } catch (e) {
+      // Handle error
+      return
+    }
+    context.commit('setLoading', false);
+    context.commit('setPageMap', response['data']);
+    return response['data']
   },
-  loadImage(context, payload) {
-    get(context, PAGE_MAP_END_POINT(payload.id, payload.size, payload.fileName), handleImage)
+  async loadImage(context, payload) {
+    context.commit('setLoading', true);
+    let response;
+    try {
+      response = await api().get(PAGE_MAP_END_POINT(payload.id, payload.size, payload.fileName))
+    } catch (e) {
+      // Handle error
+      return
+    }
+    context.commit('setLoading', false);
+    context.commit('setImage', response['data']['image']);
+    return response['data']
+  },
+  async loadDocumentEvent(context, payload) {
+    context.commit('setLoading', true);
+    let response;
+    try {
+      response = await api().get(`${DOC_EVENT_URL}/${payload}`)
+    } catch (e) {
+      // Handle error
+      return
+    }
+    console.log('loadDocumentEvent', response['data']);
+    context.commit('setLoading', false);
+    return response['data']
   }
 };
 

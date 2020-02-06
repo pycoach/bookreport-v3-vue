@@ -96,7 +96,7 @@ import TopicTypes from '../../../components/categoriesComponents/Topic/TopicType
 import Topics from '../../../components/categoriesComponents/Topic/Topics'
 import Users from '../../../components/categoriesComponents/Users/Users'
 import UploadDialog from '../../../components/categoriesComponents/Document/UploadDialog'
-import PreviewDialog from '../../../components/categoriesComponents/Document/PreviewDialog/Dialog';
+import PreviewDialog from '../../../components/categoriesComponents/Document/PreviewDialog';
 import Search from "../../../components/categoriesComponents/Document/Search/Search";
 import FiltersList from "../../../components/categoriesComponents/Document/Filter";
 import Documents from "../../../components/categoriesComponents/Document/Documents";
