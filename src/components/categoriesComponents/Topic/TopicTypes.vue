@@ -33,7 +33,8 @@
           <tbody >
           <tr v-for="(topicType, index) in filteredTopicTypes"  @click="editTopicType(topicType)" :key="index" >
             <td style="width: 40%">{{ topicType.name }}</td>
-            <td style="width: 60%">{{ topicType.description.length > 25 ? topicType.description.slice(0, 25) + '...' : topicType.description }}</td>
+            <td v-if="!topicType.description" style="width: 60%"></td>
+            <td v-else style="width: 60%">{{ topicType.description.length > 25 ? topicType.description.slice(0, 25) + '...' : topicType.description }}</td>
             <td>
               <v-btn icon @click.stop="deleteTopicType(topicType.entity_id)">
                 <img class="close-icon" src="../../../assets/icons/trash.svg" alt="">

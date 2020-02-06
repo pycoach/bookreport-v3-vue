@@ -92,7 +92,7 @@
                         clearable
                         v-model="topicDocumentType"
                         item-text="name"
-                        :items="['Financial', 'Experimental', 'Non-proficient']"
+                        :items="documentTypes"
               >
               </v-select>
             </v-flex>
@@ -177,6 +177,8 @@ export default {
       topicSearch:'',
       activeTopic: {},
       topicTab: null,
+      documentTypes: ["Fund - Financial","Fund - Memo", "Investment - Financial", "Investment - Legal",
+        "Investment - Memo", "Investment - Value Model"],
       editor: ClassicEditor,
       editorData: '<p>Content of the editor.</p>',
       editorConfig: {

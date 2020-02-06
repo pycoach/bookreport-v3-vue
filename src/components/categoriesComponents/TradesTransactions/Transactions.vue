@@ -31,7 +31,8 @@
           <tbody>
           <tr v-for="(transaction, index) in filteredTransactions"  @click="editTransaction(transaction)" :key="transaction.entity_id" >
             <td style="width: 40%">{{ transaction.name }}</td>
-            <td style="width: 60%">{{ transaction.description.length > 25 ? transaction.description.slice(0, 25) + '...' : transaction.description }}</td>
+            <td v-if="!transaction.description" style="width: 60%"></td>
+            <td v-else style="width: 60%">{{ transaction.description.length > 25 ? transaction.description.slice(0, 25) + '...' : transaction.description }}</td>
             <td>
               <v-btn icon @click.stop="deleteTransaction(transaction.entity_id)">
                 <img class="close-icon" src="../../../assets/icons/trash.svg" alt="">

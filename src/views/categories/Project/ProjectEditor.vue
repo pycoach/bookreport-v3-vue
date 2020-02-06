@@ -59,7 +59,7 @@
       </v-tab-item>
   
       <v-tab-item key="4">
-        <v-layout row wrap></v-layout>
+        <Reports />
       </v-tab-item>
   
       <v-tab-item key="5">
@@ -98,6 +98,7 @@ import UploadDialog from '../../../components/categoriesComponents/Document/uplo
 import Search from "../../../components/categoriesComponents/Document/Search/Search";
 import FiltersList from "../../../components/categoriesComponents/Document/Filter";
 import Documents from "../../../components/categoriesComponents/Document/Documents";
+import Reports from "../../../components/categoriesComponents/Report/Reports";
 export default {
   name: 'ProjectEditor',
   components: { 
@@ -114,7 +115,8 @@ export default {
     Dropzone,
     Search,
     FiltersList,
-    Documents
+    Documents,
+    Reports,
   },
   props: ['id'],
   mounted() {
