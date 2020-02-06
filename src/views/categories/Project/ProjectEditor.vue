@@ -56,6 +56,7 @@
         <FiltersList />
         <Documents />
         <UploadDialog />
+        <PreviewDialog />
       </v-tab-item>
   
       <v-tab-item key="4">
@@ -94,7 +95,8 @@ import Transactions from '../../../components/categoriesComponents/TradesTransac
 import TopicTypes from '../../../components/categoriesComponents/Topic/TopicTypes'
 import Topics from '../../../components/categoriesComponents/Topic/Topics'
 import Users from '../../../components/categoriesComponents/Users/Users'
-import UploadDialog from '../../../components/categoriesComponents/Document/uploadDialog'
+import UploadDialog from '../../../components/categoriesComponents/Document/UploadDialog'
+import PreviewDialog from "../../../components/categoriesComponents/Document/PreviewDialog";
 import Search from "../../../components/categoriesComponents/Document/Search/Search";
 import FiltersList from "../../../components/categoriesComponents/Document/Filter";
 import Documents from "../../../components/categoriesComponents/Document/Documents";
@@ -112,6 +114,7 @@ export default {
     Topics,
     Users,
     UploadDialog,
+    PreviewDialog,
     Dropzone,
     Search,
     FiltersList,
