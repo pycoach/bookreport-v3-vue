@@ -10,16 +10,17 @@
       <v-container class="mt-5">
         <v-row>
           <v-col cols="6">
-            <!--<h4>file - {{file}}</h4>-->
             <v-slider
               v-model="sliderValue"
               persistent-hint
               step="1"
-              max="10"
+              :max="pageMap.pages && pageMap.pages.length"
               inverse-label
               thumb-label="always"
               ticks
             />
+            <PreviewImage />
+            <h4>{{ pageMap }}</h4>
             <v-select
               v-model="selectedDocumentTypes"
               :items="documentTypes"
@@ -50,10 +51,7 @@
         </v-row>
         <v-row>
           <v-col cols="12">
-            <h1>{{ pageMap }}</h1>
-            <div id="page">
-              <canvas id="image-display" ref="imageDisplayRef"></canvas>
-            </div>
+            
           </v-col>
         </v-row>
       </v-container>
@@ -62,20 +60,24 @@
 </template>
 
 <script>
-  import {mapGetters, mapState} from 'vuex';
-import { EventBus } from '../../../components/categoriesComponents/Document/eventBus.js';
+import { mapGetters, mapState } from 'vuex';
+import { EventBus } from '../eventBus.js';
+import PreviewImage from './Image';
 export default {
   name: 'PreviewDialog',
+  components: {
+    PreviewImage
+  },
   computed: {
     ...mapGetters('ProjectDocuments', ['getDocuments']),
-    ...mapState('FilePreview', ['pageMap', 'isLoading'])
+    ...mapState('FilePreview', ['pageMap', 'image', 'isLoading'])
   },
   data() {
     return {
       show: false,
       item: {},
       allowSpeedEntry: false,
-      sliderValue: 10,
+      sliderValue: 1,
       file: {},
       sprites: {},
       documentTypes: ['Fund - Financial', 'Fund - Memo', 'Investment - Financial', 'Investment - Legal',
@@ -98,13 +100,21 @@ export default {
     })
   },
   methods: {
+    requestPageMap () {
+      const payload = {
+        id: this.file.file_id,
+        size: 'preview',
+        fileName: 'page_map.json'
+      };
+      this.$store.dispatch('FilePreview/loadPageMap', payload);
+    },
     requestPreview () {
       const payload = {
         id: this.file.file_id,
         size: 'preview',
         fileName: 'sprite0.png'
       };
-      this.$store.dispatch('FilePreview/loadPageMap', payload);
+      this.$store.dispatch('FilePreview/loadImage', payload);
     },
     addKeyDown (event) {
       if (this.show && this.allowSpeedEntry) {
@@ -138,7 +148,7 @@ export default {
         }
       }
       this.initDetails();
-      // Make the API request to bring the data 
+      this.requestPageMap();
       this.requestPreview()
     },
     selectedTrades (newTrades, oldTrades) {

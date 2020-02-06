@@ -1,4 +1,3 @@
-import Vue from 'vue'
 import api from 'Api'
 
 const PAGE_MAP_END_POINT = (documentId, size, filename) => {
@@ -7,6 +6,7 @@ const PAGE_MAP_END_POINT = (documentId, size, filename) => {
 
 const state = {
   pageMap: {},
+  image: null,
   isLoading: false
 };
 
@@ -15,10 +15,6 @@ const getters = {
 
 function get(context, URL, handler) {
   api().get(URL).then(response => handler(context, response))
-}
-
-function post(context, URL, data, handler) {
-  return api().post(URL, data).then(response => handler(context, response))
 }
 
 function handlePageMap(context, response) {
@@ -32,15 +28,23 @@ function handlePageMap(context, response) {
   return pageMap
 }
 
-function handlePageMap2(context, response) {
-  const image = response['data'];
-  console.log('image response', image)
+function handleImage(context, response) {
+  context.commit('setLoading', false);
+  const image = response['data'].image || '';
+  if (image['error']) {
+    alert()
+  } else {
+    context.commit('setImage', image);
+  }
   return image
 }
 
 const actions = {
   loadPageMap(context, payload) {
     get(context, PAGE_MAP_END_POINT(payload.id, payload.size, payload.fileName), handlePageMap)
+  },
+  loadImage(context, payload) {
+    get(context, PAGE_MAP_END_POINT(payload.id, payload.size, payload.fileName), handleImage)
   }
 };
 
@@ -48,9 +52,12 @@ const mutations = {
   setPageMap(state, pageMap) {
     state.pageMap = pageMap
   },
+  setImage(state, image) {
+    state.image = image
+  },
   setLoading(state, isLoading) {
     state.isLoading = isLoading
-  },
+  }
 };
 
 export default {
