@@ -80,77 +80,13 @@
                 <v-container v-if="sub_type=='Report Section'"grid-list-xl fluid >
                   <v-layout row wrap>
                     <v-flex xs12 md12>
-                      <v-select label="Topic Type"                        
-                        v-model="selectedTopicType"
+                      <v-select label="Topic"                        
+                        v-model="selectedTopic"
                         item-text="name"
                         return-object
-                        :items="topic_types"
+                        :items="topics"
                       >
                       </v-select>
-                    </v-flex>
-                    <v-flex xs12 md12>
-                      <v-text-field label="Topic Name"
-                        v-model="topicName"
-                      >
-                      </v-text-field>
-                    </v-flex>
-                    <v-flex xs12 md12>
-                      <v-select label="Trade"
-                        v-model="topicTrade"
-                        item-text="name"
-                        :items="trades"
-                      >
-                      </v-select>
-                    </v-flex>
-                    <v-flex xs12 md12>
-                      <v-select label="Transaction"
-                        v-model="topicTransaction"
-                        item-text="name"
-                        :items="transactions"
-                      >
-                      </v-select>
-                    </v-flex>
-                    <v-flex xs12 md12>
-                      <v-select label="Document"
-                        v-model="topicDocumentType"
-                        :items="documentTypes"
-                      >
-                      </v-select>
-                    </v-flex>
-
-                    <v-flex xs12 md12>
-                      <table class="topictype-table" style="width:100%;">
-                        <tr>
-                          <th>Name</th>
-                          <th>Value</th>
-                        </tr>
-                        <tr v-for="(item, index) in topicVariables" :key="index">
-                          <td>
-                            <div>{{item.name}}</div>
-                          </td>
-                          <td>
-                            <v-text-field v-model="topicVariables[index].value" :label="item.place_holder"></v-text-field>
-                          </td>
-                        </tr>
-
-                      </table>
-                    </v-flex>
-
-                    <v-flex xs12 md12>
-                      <v-tabs grow v-model="topicTab">
-                        <v-tab>Template</v-tab>
-                        <v-tab>Preview</v-tab>
-                      </v-tabs>
-
-                      <v-divider/>
-                      <v-tabs-items v-model="topicTab">
-                        <v-tab-item key="topic-1">
-                          <ckeditor :editor="editor" v-model="topicTemplate" :config="editorConfig" />
-                        </v-tab-item>
-                        <v-tab-item key="topic-2">
-                          <div class="tiptap-vuetify-editor__content" v-html="topicTemplate"/>
-                        </v-tab-item>
-                      </v-tabs-items>
                     </v-flex>
                   </v-layout>
                 </v-container>
@@ -172,6 +108,37 @@
           </v-card>
         </v-dialog> 
 
+        <v-dialog persistent v-model="reportDialog" max-width="500">
+          <v-card>
+            <v-card-title class="headline">Create Report</v-card-title>
+            <v-container grid-list-xl fluid>
+              <v-layout row wrap>
+                <v-flex xs12 md12>
+                    <v-text-field 
+                      label="Name"
+                      clearable
+                      v-model="reportName"
+                    />                  
+                  </v-flex>                
+                </v-flex>
+              </v-layout>
+            </v-container>
+            <v-card-actions >
+              <v-spacer></v-spacer>
+              <v-btn color="primary" text @click="reportDialog=false">
+                Cancel
+              </v-btn>
+              <v-btn 
+                class="ml-5 btn-primary btn-primary--small" 
+                text 
+                @click="saveReport"
+              >
+                Save
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
         <v-layout wrap>
           <v-row> 
             <v-col sm="12" md="12" lg="12">
@@ -181,16 +148,24 @@
                   <v-spacer />
                   <v-btn class="ml-5 btn-primary btn-primary--small" @click="addReportObject">+ Add</v-btn>
                 </v-toolbar>
-                <v-container fluid>
-                  <draggable :list="report_objects" group="report" @change="log">
-                    <div
-                      class="list-group-item"
-                      v-for="(element, index) in report_objects"
-                      :key="element.name"
-                    >
-                      {{ element.name }} {{ index }}
-                    </div>
-                  </draggable>
+                <v-container fluid>                                  
+                  <v-list two-line>
+                    <draggable :list="report_objects" group="report" @change="changeReportObjects">    
+                      <template v-for="(report_object, index) in report_objects">
+                        <v-list-item
+                          :key="report_object.entity_id"
+                          @click="editReportObject(report_object)">
+
+                          <v-list-item-content>
+                            <v-list-item-title v-html="report_object.sub_type"></v-list-item-title>
+                          </v-list-item-content>
+                          <v-btn icon @click.stop="deleteReportObject(report_object.entity_id)">
+                            <img class="close-icon" src="../../../assets/icons/trash.svg" alt="">
+                          </v-btn>
+                        </v-list-item>                        
+                      </template>
+                    </draggable>
+                  </v-list>
                 </v-container>
               </v-card>
             </v-col>
@@ -200,16 +175,18 @@
                   <v-card-title>Topics</v-card-title>
                   <v-spacer />
                 </v-toolbar>
-                <v-container fluid> 
-                  <draggable class="list-group" :list="topics" group="report" @change="log">
-                    <div
-                      class="list-group-item"
-                      v-for="(element, index) in topics"
-                      :key="element.name"
-                    >
-                      {{ element.name }} {{ index }}
-                    </div>
-                  </draggable>                 
+                <v-container fluid>
+                  <v-list two-line>
+                    <draggable :list="topics" group="report" @change="changeTopics">    
+                      <template v-for="(topic, index) in topics">
+                        <v-list-item :key="topic.entity_id" @click="">
+                          <v-list-item-content>
+                            <v-list-item-title v-html="topic.name"></v-list-item-title>
+                          </v-list-item-content>
+                        </v-list-item>                        
+                      </template>
+                    </draggable>
+                  </v-list>                
                 </v-container>
               </v-card>
             </v-col>
@@ -219,26 +196,73 @@
 
       <v-col sm="12" md="6" lg="6">
       <v-layout wrap>
-          <v-row> 
+          <v-row v-if="Object.entries(activeReport).length == 0"> 
             <v-col sm="12" md="12" lg="12">
               <v-card height="100%">
                 <v-toolbar style="border: none">
-                  <v-card-title>Report</v-card-title>
+                  <v-card-title>Reports</v-card-title>
+                  <v-spacer />
+                  <v-btn class="ml-5 btn-primary btn-primary--small" @click="addReport">+ Add</v-btn>
                 </v-toolbar>
-                <v-container fluid>
-                  <draggable v-if="report" class="list-group" :list="report.report_objects" group="report" @change="log">
-                    <div
-                      class="list-group-item"
-                      v-for="(element, index) in report.report_objects"
-                      :key="element.name"
-                    >
-                      {{ element.name }} {{ index }}
-                    </div>
-                  </draggable>
+                <v-container grid-list-xl fluid>
+                  <v-simple-table>
+                    <template>
+                      <thead>
+                      <tr>
+                        <th class="text-left">Name</th>
+                        <th class="text-right">Action</th>
+                      </tr>
+                      </thead>
+                      <tbody>
+                      <tr v-for="(report, index) in reports"  @click="editReport(report)" :key="report.entity_id" >
+                        <td style="width: 90%">{{ report.name }}</td>
+                        <td>
+                          <v-btn icon @click.stop="deleteReport(report.entity_id)">
+                            <img class="close-icon" src="../../../assets/icons/trash.svg" alt="">
+                          </v-btn>
+                        </td>
+                      </tr>
+                      </tbody>
+                    </template>
+                  </v-simple-table>
                 </v-container>
               </v-card>
             </v-col>
           </v-row>
+          <v-row v-else> 
+            <v-col sm="12" md="12" lg="12">
+              <v-card height="100%">
+                <v-toolbar style="border: none">
+                  <img 
+                    style="cursor: pointer; width: 12px;" 
+                    class="mr-4" 
+                    src="../../../assets/icons/back.svg" 
+                    alt=""
+                    @click="closeReport"
+                  >
+                  <v-card-title>{{activeReport.name}}</v-card-title>
+                  <v-spacer />
+                </v-toolbar>
+                <v-container fluid>
+                  <v-list two-line>
+                    <draggable :list="activeReport.report_objects" group="report" @change="changeReports">    
+                      <template v-for="(report, index) in activeReport.report_objects">
+                        <v-list-item
+                          :key="report.entity_id"
+                          @click="">
+
+                          <v-list-item-content>
+                            <v-list-item-title v-if="report.sub_type" v-html="report.sub_type"></v-list-item-title>
+                            <v-list-item-title v-html="report.name"></v-list-item-title>
+                          </v-list-item-content>
+                        </v-list-item>                        
+                      </template>
+                    </draggable>
+                  </v-list>
+                </v-container>
+              </v-card>
+            </v-col>          
+          </v-row>          
         </v-layout>
       </v-col>
     </v-row>
@@ -248,7 +272,6 @@
 <script>
 import {mapGetters} from 'vuex';
 import draggable from "vuedraggable";
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 export default {
   name: 'Reports',
@@ -256,7 +279,21 @@ export default {
     draggable
   },
   computed: {
-    ...mapGetters(['activeProject', 'topic_types', 'topics', 'trades', 'transactions']),
+    ...mapGetters([
+      'activeProject', 
+      'topic_types', 
+      'topics', 
+      'trades', 
+      'transactions', 
+      'report_objects', 
+      'activeReport_object', 
+      'reports', 
+      'activeReport'
+    ]),
+  },
+  mounted(){
+    this.$store.dispatch('loadReports', this.activeProject.entity_id)
+    this.$store.dispatch('loadReport_objects', this.activeProject.entity_id)
   },
   data() {
     return {
@@ -268,96 +305,207 @@ export default {
       file_path: '',
       page_number_start_page: 0,
       page_number_start_number: 0,
-      selectedTopicType: null,
-      topicName: '',
-      topicTrade: '',
-      topicTransaction:'',
-      topicDocumentType: '',
-      topicVariables: [],
-      topicTab: null,
-      topicTemplate: '',
+      selectedTopic: null,
+
+      reportObjects: [],
       reportObjectdialog: false,
+
+      reportName: '',
+      reportDialog: false,
       reportObjectEditMode: 'Create',
-      report_objects: [],
-      report: null,
-      documentTypes: ["Fund - Financial","Fund - Memo", "Investment - Financial", "Investment - Legal",
-        "Investment - Memo", "Investment - Value Model"],
-      editor: ClassicEditor,
-      editorConfig: {
-        // The configuration of the editor.
-      }
+      documentTypes: ["Fund - Financial",
+        "Fund - Memo", 
+        "Investment - Financial", 
+        "Investment - Legal",
+        "Investment - Memo", 
+        "Investment - Value Model"],
     }
   },
   methods: {
     addReportObject() {
       this.reportObjectEditMode = 'Create';
+      this.sub_type = 'Chapter'
+      this.header_template = ''
+      this.footer_template = ''
+      this.body = ''
+      this.css = ''
+      this.file_path = ''
+      this.page_number_start_page = 0
+      this.page_number_start_number = 0
+      this.selectedTopic = null
+      
       this.reportObjectdialog = true
     },
     editReportObject(report_object) {
       this.reportObjectEditMode = 'Edit';
       this.reportObjectdialog = true
+
+      this.sub_type = report_object.sub_type
+      if(report_object.sub_type == 'Chapter'){        
+        this.header_template = report_object.header_template
+        this.footer_template = report_object.footer_template
+        this.page_number_start_page = report_object.page_number_start_page
+        this.page_number_start_number = report_object.page_number_start_number
+      }
+      else if(report_object.sub_type == 'Title'){
+        this.body = report_object.body
+        this.css = report_object.css
+      }
+      else if(report_object.sub_type == 'Graphic'){
+        this.file_path = report_object.file_path
+        this.css = report_object.css
+      }
+      else if(report_object.sub_type == 'Report Section'){
+        for(let i = 0; i < this.topics.length; i++){
+          if(report_object.topic_id == this.topics[i].entity_id){
+            this.selectedTopic = this.topics[i]
+          }
+        }
+      }
     },
     saveReportObject() {
       this.reportObjectdialog = false
+      let report_object = {
+        project_id: this.activeProject.entity_id,
+        sub_type: this.sub_type
+      }
+      if(this.sub_type == 'Chapter'){
+        report_object.header_template = this.header_template
+        report_object.footer_template = this.footer_template
+        report_object.page_number_start_page = parseInt(this.page_number_start_page)
+        report_object.page_number_start_number = parseInt(this.page_number_start_number)
+      }
+      else if(this.sub_type == 'Title'){
+        report_object.body = this.body
+        report_object.css = this.css
+      }
+      else if(this.sub_type == 'Graphic'){
+        report_object.file_path = this.file_path
+        report_object.css = this.css
+      }
+      else if(this.sub_type == 'Report Section'){
+        report_object.topic_id = this.selectedTopic.entity_id
+        report_object.trade = this.selectedTopic.trade
+        report_object.transaction = this.selectedTopic.transaction
+        report_object.template = this.selectedTopic.template
+        report_object.variables = this.selectedTopic.variables
+      }
+
+      this.$store.dispatch('saveReport_object', report_object)
     },
     deleteReportObject(id) {
+      this.$store.dispatch('deleteReport_object', id)
+    },
+    changeReportObjects(evt){    
+      console.log(evt)  
+      if(evt.added){   
+        let report_object = evt.added.element
+        delete report_object.entity_id
+        delete report_object.version
+        delete report_object.changed_on
+        this.$store.dispatch('saveReport_object', report_object)
+      }
+      else if(evt.removed){
+        let report_object = evt.removed.element
+        this.$store.dispatch('deleteReport_object', report_object.entity_id)
+      }
+      else if(evt.moved){
+
+      }
     },
     addReport() {
+      this.reportDialog = true
+      this.reportName = ''
     },
     editReport(report) {
+      this.$store.dispatch('getReport', report.entity_id)
     },
     saveReport() {
+      this.reportDialog = false
+      const report = {
+        project_id: this.activeProject.entity_id,
+        name: this.reportName,
+        report_objects: []
+      }
+      this.$store.dispatch('saveReport', report)
     },
     deleteReport(id) {
+      this.$store.dispatch('deleteReport', id)
     },
-    add: function() {
-      this.list.push({ name: "Juan" });
+    closeReport(){
+      this.$store.commit('setActiveReport', {})
     },
-    replace: function() {
-      this.list = [{ name: "Edgard" }];
+    changeReports(evt){
+      console.log(this.activeReport)
+      console.log(evt)
+      console.log(evt)  
+      if(evt.added){   
+        let new_report = this.activeReport
+        let new_report_objects = []
+        if(obj.report_objects.length == 0){
+          new_report_object = {
+            previous_id: '',
+            next_id: '',
+            id: evt.element.entity_id,
+            children: []
+          }
+          new_report_objects.push(new_report_object)          
+        }else{
+          if(evt.element.newIndex == 0){            
+            new_report_object = {
+              previous_id: '',
+              next_id: report_obj.report_objects[0].id,
+              id: evt.element.entity_id,
+              children: [],
+            }
+            new_report_objects.push(new_report_object)
+            new_report.report_objects[0].previous_id = evt.element.entity_id
+            
+            for(let i = 0; i < new_report.report_objects.length; i ++){
+              new_report_objects.push(new_report.report_objects[i])
+            }
+            new_report.report_objects = new_report_objects
+          }
+          else if(evt.element.newIndex == new_report.report_objects.length){
+            new_report_object = {
+              previous_id: new_report.report_objects[new_report.report_objects.length-1].entity_id,
+              next_id: '',
+              id: evt.element.entity_id,
+              children: [],
+            }
+            new_report.report_objects[new_report.report_objects.length-1].next_id = evt.element.entity_id
+            new_report.report_objects.push()
+
+          }
+        }
+        
+        this.$store.dispatch('saveReport_object', report_object)
+      }
+      else if(evt.removed){
+        let report_object = evt.removed.element
+        this.$store.dispatch('deleteReport_object', report_object.entity_id)
+      }
+      else if(evt.moved){
+
+      }
     },
-    clone: function(el) {
-      return {
-        name: el.name + " cloned"
-      };
+    changeTopics(evt){
+      console.log(this.topics)
+      console.log(evt)
     },
-    log: function(evt) {
-      window.console.log(evt);
-    }
   },
   watch: {
-    
-
-    selectedTopicType() {
-      if(this.selectedTopicType){
-        this.topicName = this.selectedTopicType.name + ' for ' + this.topicTransaction;
-        this.topicTemplate = this.selectedTopicType.template;
-      
-        this.topicVariables = [];
-        for(let i = 0; i < this.selectedTopicType.variables.length; i++){
-          let variable_type = this.selectedTopicType.variables[i];
-          let variable = {
-            'name': variable_type.name,
-            'data_type':variable_type.data_type,
-            'place_holder': 'ex: ' + variable_type.example_value,
-            'value': ''
-          };
-          this.topicVariables.push(variable)
-        }
-      }
+    report_objects() {
+      this.reportObjects = this.report_objects
     }
-
   }
 }
 </script>
 
 <style scoped>
 .list-group-item {
-  border-style: solid;
-  border-color: black;
-  margin: 2px;
 }
 .list-group {
-  margin: 2px;
+  margin: 4px;
 }
 </style>

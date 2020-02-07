@@ -131,7 +131,7 @@ export default {
       this.$store.dispatch('loadTrades', this.id)
       this.$store.dispatch('loadTransactions', this.id)
       this.$store.dispatch('loadTopicTypes', this.id)
-      this.$store.dispatch('loadTopics', this.id)
+      this.$store.dispatch('loadTopics', this.id)      
     } else {
       this.$store.commit('ProjectEditor/setEditMode', 'Create');
       this.$store.commit('setActiveProject', {user_id: this.user_id})

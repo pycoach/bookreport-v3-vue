@@ -82,19 +82,17 @@ function addIfPresent(source, destination, propertyName) {
 }
 
 const actions = {
-  loadReports(context, payload) {
+  loadReports(context, project_id) {
     if (status.reportsLoading) {
       return
     }
-    if ( payload ) {
+    if ( project_id ) {
       status.reportsLoading = true
-      get(context, URL + '/project/' + String(payload), handleReportLoad)
+      get(context, URL + '/project/' + project_id, handleReportLoad)
     }
   },
   saveReport(context, payload) {
     const reportData = {
-      'version': payload['version'],
-      'entity_id': payload['entity_id'], 
       'project_id': payload['project_id'],
       'name': payload['name'],
       'report_objects': payload['report_objects'],

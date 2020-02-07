@@ -82,31 +82,20 @@ function addIfPresent(source, destination, propertyName) {
 }
 
 const actions = {
-  loadReport_objects(context, entity_id) {
+  loadReport_objects(context, project_id) {
     if (status.report_objectsLoading) {
       return
     }
-    if ( entity_id ) {
+    if ( project_id ) {
       status.report_objectsLoading = true
-      get(context, URL + '/project/' + entity_id, handleReport_objectLoad)
+      get(context, URL + '/project/' + project_id, handleReport_objectLoad)
     }
   },
   saveReport_object(context, payload) {
-    const report_objectData = {
-      'version': payload['version'],
-      'entity_id': payload['entity_id'],  
-      'project_id': payload['project_id'],
-      'sub_type': payload['sub_type'],
-      'header_template': payload['header_template'],
-      'footer_template': payload['footer_template'],
-      'page_number_start_page': payload['page_number_start_page'],
-      'page_number_start_number': payload['page_number_start_number'],
-    }
-
     if (payload['entity_id']) {
-      put(context, report_objectData, handleReport_objectSave)
+      put(context, payload, handleReport_objectSave)
     } else {
-      post(context, URL, report_objectData, handleReport_objectSave)
+      post(context, URL, payload, handleReport_objectSave)
     }
   },
   deleteReport_object(context, id) {
@@ -118,7 +107,7 @@ const actions = {
 }
 
 const mutations = {
-  report_objectsLoaded(state, report_objects) {
+  report_objectsLoaded(state, report_objects) {    
     state.report_objects = []
     for (let i = 0; i < report_objects.length; i++) {
       state.report_objects.push(report_objects[i])
