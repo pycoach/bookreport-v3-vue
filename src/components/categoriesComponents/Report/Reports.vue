@@ -410,7 +410,6 @@ export default {
         this.$store.dispatch('deleteReport_object', report_object.entity_id)
       }
       else if(evt.moved){
-
       }
     },
     addReport() {
@@ -436,62 +435,101 @@ export default {
       this.$store.commit('setActiveReport', {})
     },
     changeReports(evt){
-      console.log(this.activeReport)
-      console.log(evt)
-      console.log(evt)  
-      if(evt.added){   
-        let new_report = this.activeReport
-        let new_report_objects = []
-        if(obj.report_objects.length == 0){
-          new_report_object = {
-            previous_id: '',
-            next_id: '',
-            id: evt.element.entity_id,
-            children: []
-          }
-          new_report_objects.push(new_report_object)          
-        }else{
-          if(evt.element.newIndex == 0){            
-            new_report_object = {
-              previous_id: '',
-              next_id: report_obj.report_objects[0].id,
-              id: evt.element.entity_id,
-              children: [],
-            }
-            new_report_objects.push(new_report_object)
-            new_report.report_objects[0].previous_id = evt.element.entity_id
-            
-            for(let i = 0; i < new_report.report_objects.length; i ++){
-              new_report_objects.push(new_report.report_objects[i])
-            }
-            new_report.report_objects = new_report_objects
-          }
-          else if(evt.element.newIndex == new_report.report_objects.length){
-            new_report_object = {
-              previous_id: new_report.report_objects[new_report.report_objects.length-1].entity_id,
-              next_id: '',
-              id: evt.element.entity_id,
-              children: [],
-            }
-            new_report.report_objects[new_report.report_objects.length-1].next_id = evt.element.entity_id
-            new_report.report_objects.push()
+      let new_report = this.activeReport
 
+      if(evt.added){        
+        let i = evt.added.newIndex
+        if(!new_report.report_objects[i].id){
+          new_report.report_objects[i].id = new_report.report_objects[i].entity_id
+
+          if(i == 0){
+            new_report.report_objects[i].previous_id = ''  
+
+            if(new_report.report_objects.length == 1){  
+              new_report.report_objects[i].next_id = '' 
+            }
+            else {
+              new_report.report_objects[i].next_id = new_report.report_objects[i+1].id
+              new_report.report_objects[i+1].previous_id = new_report.report_objects[i].id
+            }
           }
-        }
-        
-        this.$store.dispatch('saveReport_object', report_object)
+          else if(i == new_report.report_objects.length-1){
+            new_report.report_objects[i].previous_id = new_report.report_objects[i-1].id 
+            new_report.report_objects[i].next_id = ''
+
+            new_report.report_objects[i-1].next_id = new_report.report_objects[i].id              
+          }
+          else {
+            new_report.report_objects[i-1].next_id = new_report.report_objects[i].id 
+            new_report.report_objects[i].previous_id = new_report.report_objects[i-1].id 
+            new_report.report_objects[i].next_id = new_report.report_objects[i+1].id
+            new_report.report_objects[i+1].previous_id = new_report.report_objects[i].id 
+          }
+        }        
       }
       else if(evt.removed){
-        let report_object = evt.removed.element
-        this.$store.dispatch('deleteReport_object', report_object.entity_id)
+        let new_report = this.activeReport
+        let i = evt.removed.oldIndex
+        if(i == 0){
+          if(new_report.report_objects.length > 0){
+            new_report.report_objects[0].previous_id = ''
+          }                  
+        }
+        else if(i == new_report.report_objects.length){
+          new_report.report_objects[i-1].next_id = ''
+        }
+        else {
+          new_report.report_objects[i-1].next_id = new_report.report_objects[i].id
+          new_report.report_objects[i].previous_id = new_report.report_objects[i-1].id
+        }
       }
       else if(evt.moved){
+        old_index = evt.moved.oldIndex
+        new_index = evt.moved.newIndex
 
+        if((old_index == 0) && (new_index == 1)){
+          new_report.report_objects[0].previous_id = ''
+          new_report.report_objects[0].next_id = new_report.report_objects[1].id
+
+          new_report.report_objects[1].previous_id = new_report.report_objects[0].id
+          new_report.report_objects[1].next_id = ''
+        }
+        else {
+          if(old_index == 0){
+            new_report.report_objects[0].previous_id = ''            
+          }
+          else if(old_index == new_report.report_objects.length-1){
+            new_report.report_objects[old_index].next_id = ''
+          }
+          else {
+            new_report.report_objects[old_index-1].next_id = new_report.report_objects[old_index].id
+            new_report.report_objects[old_index].previous_id = new_report.report_objects[old_index-1].id
+          }
+
+          if(new_index == 0){
+            new_report.report_objects[0].previous_id = ''
+            new_report.report_objects[0].next_id = new_report.report_objects[1].id
+            new_report.report_objects[1].previous_id = new_report.report_objects[0].id
+          }
+          else if(new_index == new_report.report_objects.length-1){
+            new_report.report_objects[new_index].next_id = ''
+            new_report.report_objects[new_index].previous_id = new_report.report_objects[new_index-1].next_id
+            new_report.report_objects[new_index-1].next_id = new_report.report_objects[new_index].id
+
+          }
+          else{
+            new_report.report_objects[new_index-1].next_id = new_report.report_objects[new_index].id
+
+            new_report.report_objects[new_index].previous_id = new_report.report_objects[new_index-1].id
+            new_report.report_objects[new_index].next_id = new_report.report_objects[new_index+1].id
+
+            new_report.report_objects[new_index+1].previous_id = new_report.report_objects[new_index].id
+          }
+        }
       }
+      this.$store.dispatch('saveReport_object', new_report)
     },
     changeTopics(evt){
-      console.log(this.topics)
-      console.log(evt)
     },
   },
   watch: {
