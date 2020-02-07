@@ -12,7 +12,7 @@
           <v-col cols="6">
             <v-slider
               v-model="sliderValue"
-              :disabled="isLoading"
+              :disabled="isLoadingPreview"
               persistent-hint
               step="1"
               min="1"
@@ -20,33 +20,35 @@
               inverse-label
               thumb-label="always"
               ticks
-              @change="renderCurrentPage"
+              @change="requestDocumentType($event, 0)"
             />
             <div class="preview-image">
               <v-skeleton-loader
-                v-if="isLoading"
+                v-if="isLoadingPreview"
                 loading
                 type="image"
                 class="mx-auto"
               />
-              <canvas v-show="!isLoading" id="imageDisplay" ref="imageDisplayRef" />
+              <canvas v-show="!isLoadingPreview" id="imageDisplay" ref="imageDisplayRef" />
             </div>
-            
             <v-select
               v-model="selectedDocumentTypes"
               :items="documentTypes"
+              :disabled="isLoadingPreview"
               label="Transactions"
               multiple chips small-chips deletable-chips clearable dense
             />
             <v-combobox
               v-model="selectedTransactions"
               :items="transactions"
+              :disabled="isLoadingPreview"
               label="Transactions"
               multiple chips small-chips deletable-chips clearable dense
             />
             <v-combobox
               v-model="selectedTrades"
               :items="trades"
+              :disabled="isLoadingPreview"
               label="Trades"
               multiple chips small-chips deletable-chips clearable dense
             />
@@ -54,17 +56,28 @@
           <v-col cols="5" offset="1">
             <v-switch
               v-model="allowSpeedEntry"
+              :disabled="isLoadingPreview"
               label="'u' to skip pages and 'p' to process pages"
               color="primary"
               class="ma-0 pa-0"
             />
             <div class="d-flex mt-3">
+              <v-skeleton-loader
+                v-if="isLoadingDocumentEvent || isLoadingPreview"
+                v-for="doc in 5"
+                :key="Math.random(1, 9999)"
+                type="button"
+                class="doc-btn"
+              />
               <v-btn
-                v-for="(doc, index) in pageMap.pages && pageMap.pages"
+                v-if="!isLoadingDocumentEvent && !isLoadingPreview"
+                v-for="(doc, index) in pageMap.pages"
+                :key="Math.random(1, 9999)"
                 color="default"
                 text
                 icon
-                small
+                :class="[`doc-status-${getStatus(index + 1)}`, {'doc-active': sliderValue === index + 1 }]"
+                @mouseenter="requestDocumentType(index + 1, 0)"
               >
                 <i class="material-icons">insert_drive_file</i>
               </v-btn>
@@ -92,7 +105,7 @@ export default {
   },
   computed: {
     ...mapGetters('ProjectDocuments', ['getDocuments']),
-    ...mapState('FilePreview', ['pageMap', 'image', 'isLoading'])
+    ...mapState('FilePreview', ['pageMap', 'image', 'pageStatuses', 'isLoadingPreview', 'isLoadingDocumentEvent'])
   },
   data() {
     return {
@@ -113,7 +126,6 @@ export default {
   },
   mounted() {
     EventBus.$on('onPreviewDocument', (item) => {
-      console.log('onPreviewDocument', item.file_id);
       this.show = true;
       this.item = item;
     });
@@ -128,7 +140,7 @@ export default {
         size: 'preview',
         fileName: 'page_map.json'
       };
-      this.$store.dispatch('FilePreview/loadPageMap', payload)
+      return this.$store.dispatch('FilePreview/loadPageMap', payload)
     },
     requestImage () {
       const payload = {
@@ -142,10 +154,23 @@ export default {
       if (this.show && this.allowSpeedEntry) {
         switch(event.code) {
           case 'KeyU':
-            console.log('KeyU');
+            // Checks if it is the last page
+            if (this.sliderValue === this.pageMap.pages.length) return;
+            this.sliderValue++;
+  
+            // Makes the next page Unread
+            this.requestDocumentType(this.sliderValue, 0);
             break;
           case 'KeyP':
-            console.log('KeyP');
+            // Makes current page Processed
+            this.requestDocumentType(this.sliderValue, 3);
+            
+            // Checks if it is the last page
+            if (this.sliderValue === this.pageMap.pages.length) return;
+            this.sliderValue++;
+            
+            // Makes the next page Unread
+            this.requestDocumentType(this.sliderValue, 0);
             break;
         }
       }
@@ -158,6 +183,7 @@ export default {
       this.selectedTransactions = JSON.parse(JSON.stringify(this.file.transactions));
     },
     renderCurrentPage () {
+      if (!this.show) return;
       const canvas = this.$refs.imageDisplayRef;
       const ctx = canvas.getContext("2d");
       const imageElement = new Image();
@@ -165,17 +191,37 @@ export default {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         canvas.width = this.pageMap.pages[this.sliderValue - 1][2];
         canvas.height = this.pageMap.pages[this.sliderValue - 1][3];
-        console.table('canvas.width', canvas.width, 'canvas.height', canvas.height);
         ctx.drawImage(imageElement, 0, -this.pageMap.pages[this.sliderValue - 1][1]);
       };
       imageElement.src = this.image;
     },
+    requestDocumentType (pageIndex = 1, eventType = 0) {
+      this.sliderValue = pageIndex;
+      const payload = {
+        file_id: this.file.file_id,
+        page_index: pageIndex,
+        event_type: eventType
+      };
+      return this.$store.dispatch('FilePreview/loadDocumentEvent', payload)
+    },
+    getStatus (pageIndex) {
+      let status;
+      switch(this.pageStatuses[pageIndex]) {
+        case 0:
+          status = 'unread';
+          break;
+        case 3:
+          status = 'processed';
+          break;
+      }
+      return status
+    }
   },
   created () {
     window.addEventListener('keydown', this.addKeyDown)
   },
   watch: {
-    item () {
+    async item () {
       for(let i = 0; i < this.getDocuments.length; i++) {
         if (this.getDocuments[i].file_id === this.item.file_id) {
           this.file = this.getDocuments[i];
@@ -183,13 +229,17 @@ export default {
         }
       }
       this.initDetails();
-      this.requestPageMap();
-      this.requestImage();
-      this.$store.dispatch('FilePreview/loadDocumentEvent', this.file.file_id)
+      await this.requestPageMap();
+      await this.requestImage();
+      await this.requestDocumentType();
+      this.$store.dispatch('FilePreview/loadPageStatus', this.file.file_id);
     },
     image (newImage) {
-      if (!newImage || this.isLoading) return;
+      if (!newImage || this.isLoadingPreview) return;
       this.sliderValue = 1;
+      this.renderCurrentPage()
+    },
+    sliderValue () {
       this.renderCurrentPage()
     },
     selectedTrades (newTrades, oldTrades) {
@@ -218,18 +268,31 @@ export default {
 <style lang="scss">
   .preview-image {
     margin-bottom: 50px;
-    min-height: 500px;
+    min-height: 750px;
     .v-skeleton-loader__image {
-      min-height: 500px !important;
+      min-height: 750px !important;
     }
   }
   #imageDisplay {
     border: 1px solid #949494;
     overflow: hidden;
     width: 100%;
-    min-height: 500px;
+    min-height: 750px;
   }
   .v-slider--horizontal {
     margin: 0 !important;
+  }
+  .doc-btn {
+    width: 40px;
+    margin-left: 0 !important;
+    margin-right: 10px !important;;
+  }
+  .doc-status-processed {
+    color: green !important;
+  }
+  .doc-active {
+    &:before {
+      opacity: 0.2 !important;
+    }
   }
 </style>
