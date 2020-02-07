@@ -31,27 +31,6 @@
               />
               <canvas v-show="!isLoadingPreview" id="imageDisplay" ref="imageDisplayRef" />
             </div>
-            <v-select
-              v-model="selectedDocumentTypes"
-              :items="documentTypes"
-              :disabled="isLoadingPreview"
-              label="Transactions"
-              multiple chips small-chips deletable-chips clearable dense
-            />
-            <v-combobox
-              v-model="selectedTransactions"
-              :items="transactions"
-              :disabled="isLoadingPreview"
-              label="Transactions"
-              multiple chips small-chips deletable-chips clearable dense
-            />
-            <v-combobox
-              v-model="selectedTrades"
-              :items="trades"
-              :disabled="isLoadingPreview"
-              label="Trades"
-              multiple chips small-chips deletable-chips clearable dense
-            />
           </v-col>
           <v-col cols="5" offset="1">
             <v-switch
@@ -84,11 +63,6 @@
             </div>
           </v-col>
         </v-row>
-        <v-row>
-          <v-col cols="12">
-
-          </v-col>
-        </v-row>
       </v-container>
     </v-card>
   </v-dialog>
@@ -113,15 +87,7 @@ export default {
       item: {},
       allowSpeedEntry: false,
       sliderValue: 1,
-      file: {},
-      sprites: {},
-      documentTypes: ['Fund - Financial', 'Fund - Memo', 'Investment - Financial', 'Investment - Legal',
-        'Investment - Memo', 'Investment - Value Model'],
-      selectedDocumentTypes: [],
-      transactions: [],
-      selectedTransactions: [],
-      trades: [],
-      selectedTrades: [],
+      file: {}
     }
   },
   mounted() {
@@ -175,13 +141,6 @@ export default {
         }
       }
     },
-    initDetails () {
-      this.selectedDocumentTypes = JSON.parse(JSON.stringify(this.file.document_types));
-      this.trades = JSON.parse(JSON.stringify(this.file.trades));
-      this.selectedTrades = JSON.parse(JSON.stringify(this.file.trades));
-      this.transactions = JSON.parse(JSON.stringify(this.file.transactions));
-      this.selectedTransactions = JSON.parse(JSON.stringify(this.file.transactions));
-    },
     renderCurrentPage () {
       if (!this.show) return;
       const canvas = this.$refs.imageDisplayRef;
@@ -228,7 +187,6 @@ export default {
           break
         }
       }
-      this.initDetails();
       await this.requestPageMap();
       await this.requestImage();
       await this.requestDocumentType();
@@ -267,7 +225,6 @@ export default {
 
 <style lang="scss">
   .preview-image {
-    margin-bottom: 50px;
     min-height: 750px;
     .v-skeleton-loader__image {
       min-height: 750px !important;
