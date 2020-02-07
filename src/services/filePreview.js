@@ -1,50 +1,94 @@
-import Vue from 'vue'
 import api from 'Api'
 
+const DOC_EVENT_URL = '/document-event';
+const PAGE_STATUS_URL = '/page-status';
 const PAGE_MAP_END_POINT = (documentId, size, filename) => {
-  return `/image?document_id=${documentId}&size=${size}&filename=${filename}`
+  return `/image/${documentId}/${size}/${filename}`
 };
 
 const state = {
-  file: {},
-  fileIsLoading: false
+  pageMap: {},
+  image: null,
+  pageStatuses: {},
+  isLoadingPreview: false,
+  isLoadingDocumentEvent: false
 };
 
 const getters = {
 };
 
-function get(context, URL, handler) {
-  api().get(URL).then(response => handler(context, response))
-}
-
-function post(context, URL, data, handler) {
-  return api().post(URL, data).then(response => handler(context, response))
-}
-
-function handlePageMap(context, response) {
-  context.commit('setLoading', false);
-  const file = response['data'];
-  if (file['error']) {
-    alert()
-  } else {
-    context.commit('setPageMap', file);
-  }
-  return file
-}
-
 const actions = {
-  loadPageMap(context, payload) {
-    get(context, PAGE_MAP_END_POINT(payload.id, payload.size, payload.fileName), handlePageMap)
+  async loadPageMap(context, payload) {
+    context.commit('setLoadingPreview', true);
+    let response;  
+    try {
+      response = await api().get(PAGE_MAP_END_POINT(payload.id, payload.size, payload.fileName))
+    } catch (e) {
+      // Handle error
+      return
+    }
+    context.commit('setLoadingPreview', false);
+    context.commit('setPageMap', response['data']);
+    return response['data']
+  },
+  async loadImage(context, payload) {
+    context.commit('setLoadingPreview', true);
+    let response;
+    try {
+      response = await api().get(PAGE_MAP_END_POINT(payload.id, payload.size, payload.fileName))
+    } catch (e) {
+      // Handle error
+      return
+    }
+    context.commit('setLoadingPreview', false);
+    context.commit('setImage', response['data']['image']);
+    return response['data']
+  },
+  async loadPageStatus(context, payload) {
+    context.commit('setLoadingDocumentEvent', true);
+    let response;
+    try {
+      response = await api().get(`${PAGE_STATUS_URL}/${payload}`)
+    } catch (e) {
+      // Handle error
+      return
+    }
+    context.commit('setLoadingDocumentEvent', false);
+    context.commit('setPageStatus', response['data']);
+    return response['data']
+  }, 
+  async loadDocumentEvent(context, payload) {
+    let response;
+    try {
+      response = await api().post(`${DOC_EVENT_URL}`, {
+        document_id: payload.file_id, 
+        page_index: payload.page_index, 
+        event_type: payload.event_type
+      })
+    } catch (e) {
+      // Handle error
+      return
+    }
+    return response['data']
   }
 };
 
 const mutations = {
-  setPageMap(state, file) {
-    state.file = file
+  setPageMap(state, pageMap) {
+    state.pageMap = pageMap
   },
-  setLoading(state, isLoading) {
-    state.fileIsLoading = isLoading
+  setImage(state, image) {
+    state.image = image
   },
+  setPageStatus(state, statuses) {
+    state.pageStatuses = statuses
+  },
+  setLoadingPreview(state, isLoading) {
+    state.isLoadingPreview = isLoading
+  },
+  setLoadingDocumentEvent(state, isLoading) {
+    state.isLoadingDocumentEvent = isLoading
+  }
 };
 
 export default {
