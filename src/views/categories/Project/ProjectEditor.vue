@@ -60,7 +60,7 @@
       </v-tab-item>
   
       <v-tab-item key="4">
-        <v-layout row wrap></v-layout>
+        <Reports />
       </v-tab-item>
   
       <v-tab-item key="5">
@@ -100,6 +100,7 @@ import PreviewDialog from '../../../components/categoriesComponents/Document/Pre
 import Search from "../../../components/categoriesComponents/Document/Search/Search";
 import FiltersList from "../../../components/categoriesComponents/Document/Filter";
 import Documents from "../../../components/categoriesComponents/Document/Documents";
+import Reports from "../../../components/categoriesComponents/Report/Reports";
 export default {
   name: 'ProjectEditor',
   components: { 
@@ -117,7 +118,8 @@ export default {
     Dropzone,
     Search,
     FiltersList,
-    Documents
+    Documents,
+    Reports,
   },
   props: ['id'],
   mounted() {
@@ -129,7 +131,7 @@ export default {
       this.$store.dispatch('loadTrades', this.id)
       this.$store.dispatch('loadTransactions', this.id)
       this.$store.dispatch('loadTopicTypes', this.id)
-      this.$store.dispatch('loadTopics', this.id)
+      this.$store.dispatch('loadTopics', this.id)      
     } else {
       this.$store.commit('ProjectEditor/setEditMode', 'Create');
       this.$store.commit('setActiveProject', {user_id: this.user_id})
