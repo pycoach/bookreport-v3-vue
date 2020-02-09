@@ -242,6 +242,7 @@
                   >
                   <v-card-title>{{activeReport.name}}</v-card-title>
                   <v-spacer />
+                  <v-btn class="ml-5 btn-primary btn-primary--small" @click="downloadReport">Download</v-btn>
                 </v-toolbar>
                 <v-container fluid>
                   <v-list two-line>
@@ -528,6 +529,9 @@ export default {
         }
       }
       this.$store.dispatch('saveReport_object', new_report)
+    },
+    downloadReport() {
+      this.$store.dispatch('downloadReport', this.activeReport.entity_id)
     },
     changeTopics(evt){
     },
