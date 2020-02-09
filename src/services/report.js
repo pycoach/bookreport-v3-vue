@@ -3,6 +3,7 @@ import Vue from 'vue'
 import api from 'Api'
 
 const URL = '/report'
+const DOWNLOAD_URL = '/generate-word-doc'
 
 const state = {
   reports: [],
@@ -108,6 +109,17 @@ const actions = {
   },
   getReport(context, id) {
     get(context, URL + '/' + id, handleGetReport)
+  },
+  downloadReport(context, entity_id){
+    let url = DOWNLOAD_URL + '/' + entity_id;
+    api().get(url).then(response => {
+      const reportData = response["data"];
+      if (reportData["error"]) {
+          context.commit('apiError', reportData["error"])
+      } else {
+          context.commit('reportDownloaded', reportData);
+      }
+  });
   }
 }
 
@@ -145,6 +157,45 @@ const mutations = {
   },
   setActiveReport(state, report) {
     state.activeReport = report
+  },
+  reportDownloaded(state, reportData){
+
+    const byteCharacters = atob(reportData);
+        const byteArrays = [];
+        const sliceSize = 512;
+
+        for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+            const slice = byteCharacters.slice(offset, offset + sliceSize);
+
+            const byteNumbers = new Array(slice.length);
+            for (let i = 0; i < slice.length; i++) {
+                byteNumbers[i] = slice.charCodeAt(i);
+            }
+
+            const byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+        }
+
+        const newBlob = new Blob(byteArrays, { type: "application/octet-stream" });
+
+        // IE doesn't allow using a blob object directly as link href
+        // instead it is necessary to use msSaveOrOpenBlob
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveOrOpenBlob(newBlob);
+            return;
+        }
+
+        // For other browsers:
+        // Create a link pointing to the ObjectURL containing the blob.
+        const data = window.URL.createObjectURL(newBlob);
+        let link = document.createElement('a');
+        link.href = data;
+        link.download = "report.docx";
+        link.click();
+        setTimeout(function () {
+            // For Firefox it is necessary to delay revoking the ObjectURL
+            window.URL.revokeObjectURL(data);
+        }, 100);        
   }
 }
 
