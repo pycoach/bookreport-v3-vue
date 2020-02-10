@@ -93,15 +93,10 @@ const actions = {
     }
   },
   saveReport(context, payload) {
-    const reportData = {
-      'project_id': payload['project_id'],
-      'name': payload['name'],
-      'report_objects': payload['report_objects'],
-    }
     if (payload['entity_id']) {
-      put(context, reportData, handleReportSave)
+      put(context, payload, handleReportSave)
     } else {
-      post(context, URL, reportData, handleReportSave)
+      post(context, URL, payload, handleReportSave)
     }
   },
   deleteReport(context, id) {
