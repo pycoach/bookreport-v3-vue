@@ -11,7 +11,7 @@
         <v-row>
           <v-col cols="6">
             <v-slider
-              v-model="sliderValue"
+              v-model="pageIndex"
               :disabled="isLoadingPreview"
               persistent-hint
               step="1"
@@ -29,7 +29,12 @@
                 type="image"
                 class="mx-auto"
               />
-              <canvas v-show="!isLoadingPreview" id="imageDisplay" ref="imageDisplayRef" />
+              <canvas
+                ref="imageDisplayRef"
+                id="imageDisplay"
+                v-show="!isLoadingPreview"
+                @click="showFullsize"
+              />
             </div>
           </v-col>
           <v-col cols="5" offset="1">
@@ -55,8 +60,9 @@
                 color="default"
                 text
                 icon
-                :class="[`doc-status-${getStatus(index + 1)}`, {'doc-active': sliderValue === index + 1 }]"
+                :class="[`doc-status-${getStatus(index + 1)}`, {'doc-active': pageIndex === index + 1 }]"
                 @mouseenter="requestDocumentType(index + 1, 0)"
+                @click="showFullsize"
               >
                 <i class="material-icons">insert_drive_file</i>
               </v-btn>
@@ -71,22 +77,21 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import { EventBus } from './eventBus.js';
-import PreviewImage from './PreviewImage';
 export default {
   name: 'PreviewDialog',
-  components: {
-    PreviewImage
-  },
   computed: {
     ...mapGetters('ProjectDocuments', ['getDocuments']),
-    ...mapState('FilePreview', ['pageMap', 'image', 'pageStatuses', 'isLoadingPreview', 'isLoadingDocumentEvent'])
+    ...mapState('FilePreview', ['pageMap', 'image', 'pageStatuses', 'isLoadingPreview', 'isLoadingDocumentEvent']),
+    url () {
+      return '/file/viewer/' + this.item.file_id + '/' + this.pageIndex
+    }
   },
   data() {
     return {
       show: false,
       item: {},
       allowSpeedEntry: false,
-      sliderValue: 1,
+      pageIndex: 1,
       file: {}
     }
   },
@@ -121,22 +126,22 @@ export default {
         switch(event.code) {
           case 'KeyU':
             // Checks if it is the last page
-            if (this.sliderValue === this.pageMap.pages.length) return;
-            this.sliderValue++;
+            if (this.pageIndex === this.pageMap.pages.length) return;
+            this.pageIndex++;
   
             // Makes the next page Unread
-            this.requestDocumentType(this.sliderValue, 0);
+            this.requestDocumentType(this.pageIndex, 0);
             break;
           case 'KeyP':
             // Makes current page Processed
-            this.requestDocumentType(this.sliderValue, 3);
+            this.requestDocumentType(this.pageIndex, 3);
             
             // Checks if it is the last page
-            if (this.sliderValue === this.pageMap.pages.length) return;
-            this.sliderValue++;
+            if (this.pageIndex === this.pageMap.pages.length) return;
+            this.pageIndex++;
             
             // Makes the next page Unread
-            this.requestDocumentType(this.sliderValue, 0);
+            this.requestDocumentType(this.pageIndex, 0);
             break;
         }
       }
@@ -148,14 +153,14 @@ export default {
       const imageElement = new Image();
       imageElement.onload = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        canvas.width = this.pageMap.pages[this.sliderValue - 1][2];
-        canvas.height = this.pageMap.pages[this.sliderValue - 1][3];
-        ctx.drawImage(imageElement, 0, -this.pageMap.pages[this.sliderValue - 1][1]);
+        canvas.width = this.pageMap.pages[this.pageIndex - 1][2];
+        canvas.height = this.pageMap.pages[this.pageIndex - 1][3];
+        ctx.drawImage(imageElement, 0, -this.pageMap.pages[this.pageIndex - 1][1]);
       };
       imageElement.src = this.image;
     },
     requestDocumentType (pageIndex = 1, eventType = 0) {
-      this.sliderValue = pageIndex;
+      this.pageIndex = pageIndex;
       const payload = {
         file_id: this.file.file_id,
         page_index: pageIndex,
@@ -169,11 +174,17 @@ export default {
         case 0:
           status = 'unread';
           break;
+        case 1:
+          status = 'read';
+          break;
         case 3:
           status = 'processed';
           break;
       }
       return status
+    },
+    showFullsize () {
+      window.open(this.url)
     }
   },
   created () {
@@ -194,27 +205,11 @@ export default {
     },
     image (newImage) {
       if (!newImage || this.isLoadingPreview) return;
-      this.sliderValue = 1;
+      this.pageIndex = 1;
       this.renderCurrentPage()
     },
-    sliderValue () {
+    pageIndex () {
       this.renderCurrentPage()
-    },
-    selectedTrades (newTrades, oldTrades) {
-      if (newTrades.length) {
-        const index = newTrades.length - 1;
-        if (!oldTrades.includes(newTrades[index])) {
-          this.trades.push(newTrades[index])
-        }
-      }
-    },
-    selectedTransactions (newTransactions, oldTransactions) {
-      if (newTransactions.length) {
-        const index = newTransactions.length - 1;
-        if (!oldTransactions.includes(newTransactions[index])) {
-          this.transactions.push(newTransactions[index])
-        }
-      }
     }
   },
   destroyed () {
@@ -228,6 +223,9 @@ export default {
     min-height: 750px;
     .v-skeleton-loader__image {
       min-height: 750px !important;
+    }
+    canvas {
+      cursor: pointer;
     }
   }
   #imageDisplay {
@@ -246,6 +244,9 @@ export default {
   }
   .doc-status-processed {
     color: green !important;
+  }
+  .doc-status-read {
+    color: orange !important;
   }
   .doc-active {
     &:before {

@@ -8,6 +8,7 @@ const ResetPassword = () => import('Views/session/ResetPassword')
 const About = () => import('Views/About')
 const Dashboard = () => import('Views/Dashboard')
 const ProfileEditor = () => import('Views/ProfileEditor')
+const FileViewer = () => import('Views/FileViewer')
 
 Vue.use(Router)
 
@@ -122,6 +123,17 @@ const router =  new Router({
         requiresAuth: true,
         title: 'Edit Profile'
       }
+    },
+    {
+      path: '/file/viewer/:id/:pageIndex',
+      name: 'fileviewer',
+      component: FileViewer,
+      meta: {
+        hideNavigation: true,
+        requiresAuth: true,
+        title: 'File Viewer',
+      },
+      props: true
     }
   ]
 })
