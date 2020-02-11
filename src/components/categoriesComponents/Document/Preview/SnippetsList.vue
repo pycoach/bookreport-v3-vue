@@ -1,0 +1,27 @@
+<template>
+  <div>
+    <div v-for="snippet in snippets" :key="snippet.EntityID">
+      <SnippetItem :item="snippet" />
+    </div>
+  </div>
+</template>
+
+<script>
+import SnippetItem from './SnippetItem';
+export default {
+  name: 'SnippetsList',
+  components: {
+    SnippetItem
+  },
+  props: {
+    snippets: {
+      type: [Array, Object],
+      default: null
+    }
+  }
+}
+</script>
+
+<style scoped>
+
+</style>

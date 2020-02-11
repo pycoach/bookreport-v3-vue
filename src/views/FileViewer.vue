@@ -40,30 +40,48 @@
             type="image"
             class="mx-auto"
           />
-          <div id="imageCanvas" />
-          <canvas v-show="!isLoadingPreview" id="imageDisplay" ref="imageDisplayRef" />
+          <div class="canvas-wrapper">
+            <div id="imageCanvas" ref="imageWrapperRef" />
+            <canvas v-show="!isLoadingPreview" id="image-display" ref="imageDisplayRef" />
+          </div>
         </div>
       </v-col>
       <v-col cols="5">
-        <v-skeleton-loader
-          v-if="isLoadingPreview"
-          loading
-          type="image"
-          class="mx-auto"
-        />
+        <div class="snippets-wrapper">
+          <template v-if="isLoadingPreview || isLoadingSnippets">
+            <v-skeleton-loader
+              v-for="(_, index) in 5"
+              :v-key="index"
+              loading
+              type="image"
+              class="mx-auto snippet-skeleton"
+            />
+          </template>
+          <SnippetsList
+            v-else
+            :snippets="allSnippets"
+          />
+        </div>
       </v-col>
     </v-row>
+    {{snippetData}}
   </v-container>
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import Konva from 'konva'
+import SnippetsList from '../components/categoriesComponents/Document/Preview/SnippetsList';
 export default {
   name: 'fileViewer',
+  components: {
+    SnippetsList
+  },
   props: ['id', 'pageIndex'],
   computed: {
     ...mapState('FilePreview', ['pageMap', 'image', 'pageStatuses', 'isLoadingPreview', 'isLoadingDocumentEvent']),
+    ...mapGetters('DocumentSnippets', ['getSnippets']),
+    ...mapState('DocumentSnippets', ['isLoadingSnippets']),
   },
   created () {
     this.currentPageIndex = parseInt(this.pageIndex);
@@ -106,22 +124,24 @@ export default {
         size: 'preview',
         fileName: 'sprite0.png'
       };
-      this.$store.dispatch('FilePreview/loadImage', payload);
+      return this.$store.dispatch('FilePreview/loadImage', payload);
     },
     renderCurrentPage () {
       const canvas = this.$refs.imageDisplayRef;
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext('2d');
       const imageElement = new Image();
       imageElement.onload = () => {
+        let canvasWidth = this.pageMap.pages[this.currentPageIndex - 1][2];
+        let canvasHeight = this.pageMap.pages[this.currentPageIndex - 1][3];
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        canvas.width = this.pageMap.pages[this.currentPageIndex - 1][2];
-        canvas.height = this.pageMap.pages[this.currentPageIndex - 1][3];
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
         ctx.drawImage(imageElement, 0, -this.pageMap.pages[this.currentPageIndex - 1][1]);
+        this.createStage(canvas);
+        this.createLayer();
+        this.stage.add(this.layer)
       };
       imageElement.src = this.image;
-      this.createStage(canvas);
-      this.createLayer();
-      this.stage.add(this.layer)
     },
     requestDocumentType (pageIndex, eventType = 1) {
       const payload = {
@@ -130,6 +150,12 @@ export default {
         event_type: eventType
       };
       return this.$store.dispatch('FilePreview/loadDocumentEvent', payload)
+    },
+    requestSnippets () {
+      return this.$store.dispatch('DocumentSnippets/loadSnippets', this.id).then((snippetData) => {
+        this.snippetData = snippetData
+        // this.addSnippetsToPage()
+      })
     },
     onNextPage () {
       if (this.pageMap.pages.length === this.currentPageIndex) return;
@@ -193,19 +219,21 @@ export default {
     },
     createStage: function (canvas) {
       const that = this;
-      let stage = new Konva.Stage({container: 'imageCanvas', width:(canvas.width * this.canvasRatio) + 20, height: canvas.height * this.canvasRatio});
+      const canvasWrapper = document.getElementById('imageCanvas');
+      let stage = new Konva.Stage({container: 'imageCanvas', width: canvasWrapper.clientWidth * this.canvasRatio, height: canvas.height * this.canvasRatio});
       stage.on('contentMousedown', function() {
+        console.log('contentMousedown');
         if (!that.selecting) {
           that.creatingSnippet = true;
           that.selectedSnippetId = '';
           let pointer = stage.getPointerPosition();
           let snippetId = String(Math.random(0, 999999)).replace(/-/g,'');
-          let rect = that.makeSnippet(pointer.x, pointer.y, 0, 0, snippetId);
-          that.newSnippet = rect;
+          that.newSnippet = that.makeSnippet(pointer.x, pointer.y, 0, 0, snippetId);
           that.layer.add(that.newSnippet)
         }
       });
       stage.on('contentMousemove', function() {
+        console.log('contentMousemove');
         if (that.creatingSnippet) {
           let x = that.newSnippet.getX();
           let y = that.newSnippet.getY();
@@ -233,96 +261,291 @@ export default {
       this.stage = stage
     },
     saveSnippetData: function (snippetData) {
-      let snippetList = this.snippets[this.pageIndex]
-    
+      let snippetList = this.snippets[this.currentPageIndex];
+      console.log('JS - snippetList', snippetList)
       if (snippetData.Width > 5 && snippetData.Height > 5) {
         for (let i=0;i < snippetList.length;i++) {
           if (snippetList[i].EntityID === snippetData.EntityID) {
             snippetList[i] = snippetData
-            console.log("Snippet " + snippetData.EntityID + " updated")
+            console.log("JS - snippet updated", snippetData);
+            // this.$store.dispatch('DocumentSnippets/updateSnippet', snippetData);
             // organizationFileService.updateSnippet(snippetData).then()
             break
           }
         }
         for (let i=0;i < this.allSnippets.length;i++) {
           if (this.allSnippets[i].EntityID === snippetData.EntityID) {
-            this.allSnippets.splice(i,1)
-            this.allSnippets.push(snippetData)
+            this.allSnippets.splice(i,1);
+            this.allSnippets.push(snippetData);
             return snippetData
           }
         }
-        snippetList.push(snippetData)
-        this.allSnippets.push(snippetData)
+        snippetList.push(snippetData);
+        this.allSnippets.push(snippetData);
+        console.log('JS - snippetData', snippetData);
+        this.$store.dispatch('DocumentSnippets/addNewSnippet', snippetData)
         // organizationFileService.createSnippet(snippetData).then()
-        // this.addPageEvent(2)
-        console.log("New snippet created")
-        console.log(snippetData)
-
+        this.requestDocumentType(this.currentPageIndex);
+        console.log("New snippet created");
+        console.log(snippetData);
+        console.log('this.allSnippets', this.allSnippets);
+        
         return snippetData
       }
     },
-    // saveSnippet (snippet) {
-    //   if (!this.snippets.hasOwnProperty(this.pageIndex)) {
-    //     this.snippets[this.pageIndex] = []
-    //   }
-    //   let snippetList = this.snippets[this.pageIndex]
-    //   let x = snippet.getX() / this.canvasRatio
-    //   let y = snippet.getY() / this.canvasRatio
-    //   let width = snippet.width() / this.canvasRatio
-    //   let height = snippet.height() / this.canvasRatio
-    //   let entityId = snippet.name()
-    //
-    //   let imageData = ''
-    //
-    //   if (width > 0 && height > 0) {
-    //     imageData = this.getSnippetImage(x, y, width, height)
-    //   }
-    //
-    //   let snippetData = {"EntityID": entityId, "DocumentID": this.id, "PageIndex": this.pageIndex,
-    //     "X": x, "Y": y, "Width": width, "Height": height, "ImageData": imageData}
-    //
-    //   this.saveSnippetData(snippetData)
-    //
-    //   return snippetData
-    // },
+    saveSnippet (snippet) {
+      if (!this.snippets.hasOwnProperty(this.currentPageIndex)) {
+        this.snippets[this.currentPageIndex] = []
+      }
+      let snippetList = this.snippets[this.currentPageIndex]
+      let x = snippet.getX() / this.canvasRatio
+      let y = snippet.getY() / this.canvasRatio
+      let width = snippet.width() / this.canvasRatio
+      let height = snippet.height() / this.canvasRatio
+      let entityId = snippet.name()
+
+      let imageData = ''
+
+      if (width > 0 && height > 0) {
+        imageData = this.getSnippetImage(x, y, width, height)
+      }
+
+      let snippetData = {"EntityID": entityId, "DocumentID": this.id, "PageIndex": this.currentPageIndex,
+        "X": x, "Y": y, "Width": width, "Height": height, "ImageData": imageData}
+
+      this.saveSnippetData(snippetData)
+
+      return snippetData
+    },
     createLayer: function () {
       const that = this;
       that.layer = new Konva.Layer()
     
-      // if (that.snippets.hasOwnProperty(that.pageIndex)) {
-      //   let snippetList = that.snippets[that.pageIndex]
-      //   console.log("Existing snippets found")
-      //   console.log(snippetList)
-      //
-      //   for (let i = 0; i < snippetList.length; i++) {
-      //     let snippet = snippetList[i]
-      //  
-      //     let rect = {}
-      //  
-      //     if (that.selectedSnippetId === snippet.EntityID) {
-      //       rect = that.makeResizableSnippet(snippet.X * that.canvasRatio,
-      //         snippet.Y * that.canvasRatio,
-      //         snippet.Width * that.canvasRatio,
-      //         snippet.Height * that.canvasRatio,
-      //         snippet.EntityID)
-      //     }
-      //     else {
-      //       rect = that.makeSnippet(snippet.X * that.canvasRatio,
-      //         snippet.Y * that.canvasRatio,
-      //         snippet.Width * that.canvasRatio,
-      //         snippet.Height * that.canvasRatio,
-      //         snippet.EntityID)
-      //     }
-      //     that.layer.add(rect)
-      //   }
-      // }
-      //
+      if (that.snippets.hasOwnProperty(that.currentPageIndex)) {
+        let snippetList = that.snippets[that.currentPageIndex]
+        console.log("Existing snippets found")
+        console.log(snippetList)
+
+        for (let i = 0; i < snippetList.length; i++) {
+          let snippet = snippetList[i]
+
+          let rect = {}
+
+          if (that.selectedSnippetId === snippet.EntityID) {
+            rect = that.makeResizableSnippet(snippet.X * that.canvasRatio,
+              snippet.Y * that.canvasRatio,
+              snippet.Width * that.canvasRatio,
+              snippet.Height * that.canvasRatio,
+              snippet.EntityID)
+          }
+          else {
+            rect = that.makeSnippet(snippet.X * that.canvasRatio,
+              snippet.Y * that.canvasRatio,
+              snippet.Width * that.canvasRatio,
+              snippet.Height * that.canvasRatio,
+              snippet.EntityID)
+          }
+          that.layer.add(rect)
+        }
+      }
+
       that.stage.add(that.layer)
-    }
+    },
+    getSnippetImage (x, y, width, height) {
+      const image_canvas = document.getElementById('image-display')
+      const image_context = image_canvas.getContext('2d')
+      return image_context.getImageData(x, y, width, height)
+    },
+    makeResizableSnippet: function (x, y, width, height, name) {
+      const that = this
+    
+      let options = {"width": width, "height": height}
+      options.stroke = 'orange'
+      options.strokeWidth = 2
+    
+      let rect = new Konva.Rect(options)
+    
+      function update(activeAnchor, that) {
+        let group = activeAnchor.getParent();
+      
+        let topLeft = group.get('.topLeft')[0];
+        let topRight = group.get('.topRight')[0];
+        let bottomRight = group.get('.bottomRight')[0];
+        let bottomLeft = group.get('.bottomLeft')[0];
+      
+        let anchorX = activeAnchor.getX();
+        let anchorY = activeAnchor.getY();
+      
+        // update anchor positions
+        switch (activeAnchor.getName()) {
+          case 'topLeft':
+            topRight.setY(anchorY);
+            bottomLeft.setX(anchorX);
+            break;
+          case 'topRight':
+            topLeft.setY(anchorY);
+            bottomRight.setX(anchorX);
+            break;
+          case 'bottomRight':
+            bottomLeft.setY(anchorY);
+            topRight.setX(anchorX);
+            break;
+          case 'bottomLeft':
+            bottomRight.setY(anchorY);
+            topLeft.setX(anchorX);
+            break;
+        }
+      
+        rect.position(topLeft.position());
+      
+        let width = topRight.getX() - topLeft.getX();
+        let height = bottomLeft.getY() - topLeft.getY();
+        if(width && height) {
+          rect.width(width);
+          rect.height(height);
+        }
+      }
+      function addAnchor(group, x, y, name, that) {
+        let stage = that.stage
+        let layer = that.layer
+      
+        let anchor = new Konva.Circle({
+          x: x,
+          y: y,
+          stroke: '#666',
+          fill: '#ddd',
+          strokeWidth: 2,
+          radius: 8,
+          name: name,
+          draggable: true,
+          dragOnTop: false
+        });
+      
+        anchor.on('mousedown', function () {
+          that.selecting = true
+        })
+        anchor.on('dragmove', function() {
+          update(this, that);
+          layer.draw();
+        });
+        anchor.on('mousedown touchstart', function() {
+          group.setDraggable(false);
+          this.moveToTop();
+        });
+        anchor.on('dragend', function() {
+          group.setDraggable(true);
+          update(this, that);
+          layer.draw();
+        });
+        // add hover styling
+        anchor.on('mouseover', function() {
+          let layer = this.getLayer();
+          document.body.style.cursor = 'pointer';
+          this.setStrokeWidth(4);
+          layer.draw();
+        });
+        anchor.on('mouseout', function() {
+          let layer = this.getLayer();
+          document.body.style.cursor = 'default';
+          this.setStrokeWidth(2);
+          layer.draw();
+        });
+      
+        group.add(anchor);
+      }
+    
+      let snippetGroup = new Konva.Group({
+        x: x,
+        y: y,
+        name: name,
+        draggable: true
+      })
+    
+      snippetGroup.on('dragend', function () {
+        let topLeft = this.get('.topLeft')[0]
+      
+        let x = (this.getX() + topLeft.getX()) / that.canvasRatio
+        let y = (this.getY() + topLeft.getY()) / that.canvasRatio
+        let adjustedWidth = rect.width() / that.canvasRatio
+        let adjustedHeight = rect.height() / that.canvasRatio
+        let name = this.name()
+      
+        let imageData = ''
+      
+        if (width > 0 && height > 0) {
+          imageData = that.getSnippetImage(x, y, adjustedWidth, adjustedHeight)
+        }
+      
+        let snippetData = {"EntityID": name, "DocumentID": that.id, "PageIndex": that.currentPageIndex,
+          "X": x, "Y": y, "Width": adjustedWidth, "Height": adjustedHeight, "ImageData": imageData}
+      
+        that.saveSnippetData(snippetData)
+        that.renderCurrentPage()
+      })
+    
+      let top = 0
+      let bottom = height
+      let left = 0
+      let right = width
+    
+      snippetGroup.add(rect)
+      addAnchor(snippetGroup, left, top, 'topLeft', that)
+      addAnchor(snippetGroup, right, top, 'topRight', that)
+      addAnchor(snippetGroup, right, bottom,'bottomRight', that)
+      addAnchor(snippetGroup, left, bottom, 'bottomLeft', that)
+    
+      return snippetGroup
+    },
+    addSnippetsToPage: function () {
+      console.log("Adding snippets to page")
+      for (let i=0; i < this.snippetData.length; i++) {
+        let snippet = this.snippetData[i]
+        let pageIndex = snippet["PageIndex"]
+        if (!this.snippets.hasOwnProperty(pageIndex)) {
+          this.snippets[pageIndex] = []
+        }
+        let x = snippet.X
+        let y = snippet.Y
+        let width = snippet.Width
+        let height = snippet.Height
+        let entityId = snippet.EntityID
+        let imageData = ''
+        if (width > 0 && height > 0) {
+          imageData = this.getSnippetImageData(pageIndex, x, y, width, height)
+        }
+        let snippetData = {"EntityID": entityId, "DocumentID": snippet["DocumentID"], "PageIndex": pageIndex,
+          "X": x, "Y": y, "Width": width, "Height": height, "ImageData": imageData}
+        this.snippets[pageIndex].push(snippetData)
+        this.allSnippets.push(snippetData)
+      }
+    
+      this.renderCurrentPage()
+    },
+    getSnippetImageData: function(pageIndex, x, y, width, height) {
+      const canvas = document.getElementById('image-temp')
+      const context = canvas.getContext('2d')
+    
+      let page_data = this.pages[this.id][pageIndex - 1]
+    
+      let spriteIndex = page_data[0]
+    
+      let sprite_image = this.sprites[this.id][spriteIndex]
+    
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      canvas.width = page_data[2];
+      canvas.height = page_data[3];
+    
+      context.drawImage(sprite_image, 0, page_data[1], page_data[2], page_data[3], 0, 0, canvas.width, canvas.height);
+    
+      let imageData = context.getImageData(x, y, width, height)
+    
+      return imageData
+    },
   },
   async mounted () {
     await this.requestPageMap();
     await this.requestImage();
+    await this.requestSnippets()
     await this.$store.dispatch('FilePreview/loadPageStatus', this.id);
     this.renderCurrentPage()
   },
@@ -332,8 +555,11 @@ export default {
       this.renderCurrentPage()
     },
     currentPageIndex () {
+      this.allSnippets = [];
+      this.snippets = [];
       this.requestDocumentType(this.currentPageIndex);
-      this.renderCurrentPage(this.currentPageIndex)
+      this.requestSnippets();
+      this.renderCurrentPage(this.currentPageIndex);
     }
   },
   destroyed () {
@@ -382,5 +608,23 @@ export default {
   }
   #imageCanvas {
     position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
+  .canvas-wrapper {
+    position: relative;
+    canvas {
+      /*width: 100%;*/
+    }
+  }
+  .snippets-wrapper {
+    .snippet-skeleton {
+      margin-bottom: 23px;
+      .v-skeleton-loader__image {
+        height: 166.5px;
+      }
+    }
   }
 </style>
