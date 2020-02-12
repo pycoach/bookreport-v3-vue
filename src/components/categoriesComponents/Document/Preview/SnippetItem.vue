@@ -1,10 +1,12 @@
 <template>
   <div>
-    <img src="" ref="snippetImage" />
+    <img src="" ref="snippetImage" width="100%" @click="onItemClick(item.page_index)" />
+<!--    <button @click.stop="handleDelete(item.entity_id)">Delete</button>-->
   </div>
 </template>
 
 <script>
+import { EventBus } from './eventBus.js'; 
 export default {
   name: 'SnippetItem',
   props: {
@@ -32,6 +34,13 @@ export default {
       image.draggable = false;
       this.$refs.snippetImage.src = image.src
     },
+    onItemClick (page_index) {
+      if (!page_index) return;
+      EventBus.$emit('handleSnippetPage', page_index)
+    },
+    handleDelete (entity_id) {
+      EventBus.$emit('handleSnippetDelete', entity_id)
+    }
   }
 }
 </script>

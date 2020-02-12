@@ -28,12 +28,11 @@ const actions = {
     return response['data']
   },
   async addNewSnippet(context, payload) {
-    console.log('addNewSnippet payload VUEX ---- ', payload);
     let response;
     try {
       response = await api().post(URL, {
         document_id: payload.DocumentID,
-        page_index: parseInt(payload.PageIndex),
+        page_index: parseInt(payload.page_index),
         x: payload.X,
         y: payload.Y,
         width: payload.Width,
@@ -50,12 +49,22 @@ const actions = {
     try {
       response = await api().put(URL, {
         document_id: payload.DocumentID,
-        page_index: parseInt(payload.PageIndex),
+        page_index: parseInt(payload.page_index),
         x: payload.X,
         y: payload.Y,
         width: payload.Width,
         height: payload.Height
       });
+    } catch (e) {
+      return
+    }
+    return response['data']
+  },
+  async deleteSnippet(context, entity_id) {
+    console.log('deleteSnippet payload VUEX ---- ', entity_id);
+    let response;
+    try {
+      response = await api().delete(URL + entity_id);
     } catch (e) {
       return
     }

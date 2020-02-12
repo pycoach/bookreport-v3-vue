@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-for="snippet in snippets" :key="snippet.EntityID">
+    <div v-for="snippet in snippets" :key="snippet.entity_id">
       <SnippetItem :item="snippet" />
     </div>
   </div>

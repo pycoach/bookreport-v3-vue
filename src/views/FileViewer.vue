@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols="7">
+      <v-col cols="9">
         <div class="preview-image-lg">
           <div class="d-flex justify-space-between align-center mb-5">
             <v-skeleton-loader
@@ -43,15 +43,16 @@
           <div class="canvas-wrapper">
             <div id="imageCanvas" ref="imageWrapperRef" />
             <canvas v-show="!isLoadingPreview" id="image-display" ref="imageDisplayRef" />
+            <canvas id="image-temp" style="display: none" />
           </div>
         </div>
       </v-col>
-      <v-col cols="5">
+      <v-col cols="3">
         <div class="snippets-wrapper">
           <template v-if="isLoadingPreview || isLoadingSnippets">
             <v-skeleton-loader
-              v-for="(_, index) in 5"
-              :v-key="index"
+              v-for="(_, index) in 7"
+              :key="index"
               loading
               type="image"
               class="mx-auto snippet-skeleton"
@@ -64,12 +65,12 @@
         </div>
       </v-col>
     </v-row>
-    {{snippetData}}
   </v-container>
 </template>
 
 <script>
 import { mapState, mapGetters } from 'vuex';
+import { EventBus } from '../components/categoriesComponents/Document/Preview/eventBus' 
 import Konva from 'konva'
 import SnippetsList from '../components/categoriesComponents/Document/Preview/SnippetsList';
 export default {
@@ -106,7 +107,8 @@ export default {
       snippetsLoaded: false,
       snippetData: [],
       pageProcessed: false,
-      processedEvents: []
+      processedEvents: [],
+      imageElement: ''
     }
   },
   methods: {
@@ -140,10 +142,12 @@ export default {
         this.createStage(canvas);
         this.createLayer();
         this.stage.add(this.layer)
+        this.imageElement = imageElement
       };
       imageElement.src = this.image;
     },
     requestDocumentType (pageIndex, eventType = 1) {
+      if (!pageIndex) return;
       const payload = {
         file_id: this.id,
         page_index: pageIndex,
@@ -154,7 +158,7 @@ export default {
     requestSnippets () {
       return this.$store.dispatch('DocumentSnippets/loadSnippets', this.id).then((snippetData) => {
         this.snippetData = snippetData
-        // this.addSnippetsToPage()
+        this.addSnippetsToPage()
       })
     },
     onNextPage () {
@@ -220,9 +224,8 @@ export default {
     createStage: function (canvas) {
       const that = this;
       const canvasWrapper = document.getElementById('imageCanvas');
-      let stage = new Konva.Stage({container: 'imageCanvas', width: canvasWrapper.clientWidth * this.canvasRatio, height: canvas.height * this.canvasRatio});
+      let stage = new Konva.Stage({container: 'imageCanvas', width: canvasWrapper.clientWidth, height: canvas.height});
       stage.on('contentMousedown', function() {
-        console.log('contentMousedown');
         if (!that.selecting) {
           that.creatingSnippet = true;
           that.selectedSnippetId = '';
@@ -233,7 +236,6 @@ export default {
         }
       });
       stage.on('contentMousemove', function() {
-        console.log('contentMousemove');
         if (that.creatingSnippet) {
           let x = that.newSnippet.getX();
           let y = that.newSnippet.getY();
@@ -248,7 +250,7 @@ export default {
         if (that.creatingSnippet) {
           let snippetData = that.saveSnippet(that.newSnippet)
           if (snippetData.Width > 5 && snippetData.Height > 5) {
-            that.selectedSnippetId = snippetData.EntityID
+            that.selectedSnippetId = snippetData.entity_id
           } else {
             that.selectedSnippetId = ''
             that.renderCurrentPage()
@@ -261,35 +263,30 @@ export default {
       this.stage = stage
     },
     saveSnippetData: function (snippetData) {
+      console.log('////////////////*/*/*/*/**//* snippetData', snippetData)
+      console.log('////////////////*/*/*/*/**//* snippetList', this.snippets[this.currentPageIndex])
       let snippetList = this.snippets[this.currentPageIndex];
-      console.log('JS - snippetList', snippetList)
       if (snippetData.Width > 5 && snippetData.Height > 5) {
-        for (let i=0;i < snippetList.length;i++) {
-          if (snippetList[i].EntityID === snippetData.EntityID) {
+        for (let i = 0; i < snippetList.length; i++) {
+          if (snippetList[i].entity_id === snippetData.entity_id) {
             snippetList[i] = snippetData
             console.log("JS - snippet updated", snippetData);
-            // this.$store.dispatch('DocumentSnippets/updateSnippet', snippetData);
+            this.$store.dispatch('DocumentSnippets/updateSnippet', snippetData)
             // organizationFileService.updateSnippet(snippetData).then()
             break
           }
         }
-        for (let i=0;i < this.allSnippets.length;i++) {
-          if (this.allSnippets[i].EntityID === snippetData.EntityID) {
+        for (let i = 0; i < this.allSnippets.length; i++) {
+          if (this.allSnippets[i].entity_id === snippetData.entity_id) {
             this.allSnippets.splice(i,1);
             this.allSnippets.push(snippetData);
             return snippetData
           }
         }
-        snippetList.push(snippetData);
+        // snippetList.push(snippetData);
         this.allSnippets.push(snippetData);
-        console.log('JS - snippetData', snippetData);
         this.$store.dispatch('DocumentSnippets/addNewSnippet', snippetData)
-        // organizationFileService.createSnippet(snippetData).then()
         this.requestDocumentType(this.currentPageIndex);
-        console.log("New snippet created");
-        console.log(snippetData);
-        console.log('this.allSnippets', this.allSnippets);
-        
         return snippetData
       }
     },
@@ -297,11 +294,10 @@ export default {
       if (!this.snippets.hasOwnProperty(this.currentPageIndex)) {
         this.snippets[this.currentPageIndex] = []
       }
-      let snippetList = this.snippets[this.currentPageIndex]
-      let x = snippet.getX() / this.canvasRatio
-      let y = snippet.getY() / this.canvasRatio
-      let width = snippet.width() / this.canvasRatio
-      let height = snippet.height() / this.canvasRatio
+      let x = snippet.getX()
+      let y = snippet.getY()
+      let width = snippet.width()
+      let height = snippet.height()
       let entityId = snippet.name()
 
       let imageData = ''
@@ -310,7 +306,7 @@ export default {
         imageData = this.getSnippetImage(x, y, width, height)
       }
 
-      let snippetData = {"EntityID": entityId, "DocumentID": this.id, "PageIndex": this.currentPageIndex,
+      let snippetData = {"entity_id": entityId, "DocumentID": this.id, "page_index": this.currentPageIndex,
         "X": x, "Y": y, "Width": width, "Height": height, "ImageData": imageData}
 
       this.saveSnippetData(snippetData)
@@ -327,23 +323,24 @@ export default {
         console.log(snippetList)
 
         for (let i = 0; i < snippetList.length; i++) {
-          let snippet = snippetList[i]
-
-          let rect = {}
-
-          if (that.selectedSnippetId === snippet.EntityID) {
-            rect = that.makeResizableSnippet(snippet.X * that.canvasRatio,
-              snippet.Y * that.canvasRatio,
-              snippet.Width * that.canvasRatio,
-              snippet.Height * that.canvasRatio,
-              snippet.EntityID)
-          }
-          else {
-            rect = that.makeSnippet(snippet.X * that.canvasRatio,
-              snippet.Y * that.canvasRatio,
-              snippet.Width * that.canvasRatio,
-              snippet.Height * that.canvasRatio,
-              snippet.EntityID)
+          let snippet = snippetList[i];
+          let rect = {};
+          if (that.selectedSnippetId === snippet.entity_id) {
+            rect = that.makeResizableSnippet(
+              snippet.x,
+              snippet.y,
+              snippet.width,
+              snippet.height,
+              snippet.entity_id
+            )
+          } else {
+            rect = that.makeSnippet(
+              snippet.x,
+              snippet.y,
+              snippet.width,
+              snippet.height,
+              snippet.entity_id
+            )
           }
           that.layer.add(rect)
         }
@@ -464,10 +461,10 @@ export default {
       snippetGroup.on('dragend', function () {
         let topLeft = this.get('.topLeft')[0]
       
-        let x = (this.getX() + topLeft.getX()) / that.canvasRatio
-        let y = (this.getY() + topLeft.getY()) / that.canvasRatio
-        let adjustedWidth = rect.width() / that.canvasRatio
-        let adjustedHeight = rect.height() / that.canvasRatio
+        let x = (this.getX() + topLeft.getX())
+        let y = (this.getY() + topLeft.getY())
+        let adjustedWidth = rect.width()
+        let adjustedHeight = rect.height()
         let name = this.name()
       
         let imageData = ''
@@ -476,7 +473,7 @@ export default {
           imageData = that.getSnippetImage(x, y, adjustedWidth, adjustedHeight)
         }
       
-        let snippetData = {"EntityID": name, "DocumentID": that.id, "PageIndex": that.currentPageIndex,
+        let snippetData = {"entity_id": name, "DocumentID": that.id, "page_index": that.currentPageIndex,
           "X": x, "Y": y, "Width": adjustedWidth, "Height": adjustedHeight, "ImageData": imageData}
       
         that.saveSnippetData(snippetData)
@@ -497,52 +494,76 @@ export default {
       return snippetGroup
     },
     addSnippetsToPage: function () {
-      console.log("Adding snippets to page")
-      for (let i=0; i < this.snippetData.length; i++) {
+      console.log("Adding snippets to page");
+      console.log("Snippets", this.snippets);
+      console.log("SnippetData", this.snippetData);
+      if (!this.snippetData.length) return
+      // this.allSnippets = [];
+      // this.snippets = [];
+      for (let i = 0; i < this.snippetData.length; i++) {
         let snippet = this.snippetData[i]
-        let pageIndex = snippet["PageIndex"]
+        let pageIndex = snippet["page_index"]
         if (!this.snippets.hasOwnProperty(pageIndex)) {
           this.snippets[pageIndex] = []
         }
-        let x = snippet.X
-        let y = snippet.Y
-        let width = snippet.Width
-        let height = snippet.Height
-        let entityId = snippet.EntityID
+        let x = snippet.x
+        let y = snippet.y
+        let width = snippet.width
+        let height = snippet.height
+        let entityId = snippet.entity_id
         let imageData = ''
         if (width > 0 && height > 0) {
           imageData = this.getSnippetImageData(pageIndex, x, y, width, height)
         }
-        let snippetData = {"EntityID": entityId, "DocumentID": snippet["DocumentID"], "PageIndex": pageIndex,
-          "X": x, "Y": y, "Width": width, "Height": height, "ImageData": imageData}
+        let snippetData = {'entity_id': entityId, 'document_id': snippet['document_id'], 'page_index': pageIndex,
+          'x': x, 'y': y, 'width': width, 'height': height, 'ImageData': imageData}
         this.snippets[pageIndex].push(snippetData)
         this.allSnippets.push(snippetData)
       }
-    
       this.renderCurrentPage()
     },
     getSnippetImageData: function(pageIndex, x, y, width, height) {
       const canvas = document.getElementById('image-temp')
       const context = canvas.getContext('2d')
-    
-      let page_data = this.pages[this.id][pageIndex - 1]
-    
-      let spriteIndex = page_data[0]
-    
-      let sprite_image = this.sprites[this.id][spriteIndex]
-    
+      let page_data = this.pageMap.pages[pageIndex - 1]
+      // let spriteIndex = page_data[0];
+      // console.log('spriteIndex', spriteIndex);
+      // console.log('this.sprites', this.sprites);
+      let sprite_image = this.imageElement
       context.clearRect(0, 0, canvas.width, canvas.height);
       canvas.width = page_data[2];
       canvas.height = page_data[3];
-    
       context.drawImage(sprite_image, 0, page_data[1], page_data[2], page_data[3], 0, 0, canvas.width, canvas.height);
-    
-      let imageData = context.getImageData(x, y, width, height)
-    
-      return imageData
+      return context.getImageData(x, y, width, height)
     },
+    deleteSnippet (entity_id) {
+      // this.$store.dispatch('DocumentSnippets/deleteSnippet', entity_id);
+      let snippetList = this.snippets[this.currentPageIndex];
+      console.log('snippetList', snippetList)
+      for (let i = 0; i < snippetList.length; i++){
+        let snippet = snippetList[i]
+        if (snippet.entity_id === entity_id) {
+          snippetList.splice(i, 1)
+          this.selectedSnippetId = ''
+          break
+        }
+      }
+      for (let i=0;i < this.allSnippets.length;i++){
+        let snippet = this.allSnippets[i]
+        if (snippet.entity_id === entity_id) {
+          this.allSnippets.splice(i, 1)
+          return
+        }
+      }
+    }
   },
   async mounted () {
+    EventBus.$on('handleSnippetPage', (pageIndex) => {
+      this.currentPageIndex = pageIndex
+    });
+    EventBus.$on('handleSnippetDelete', (entity_id) => {
+      this.deleteSnippet(entity_id)
+    });
     await this.requestPageMap();
     await this.requestImage();
     await this.requestSnippets()
@@ -555,11 +576,12 @@ export default {
       this.renderCurrentPage()
     },
     currentPageIndex () {
-      this.allSnippets = [];
-      this.snippets = [];
+      // this.allSnippets = [];
+      // this.snippets = [];
       this.requestDocumentType(this.currentPageIndex);
-      this.requestSnippets();
-      this.renderCurrentPage(this.currentPageIndex);
+      // this.requestSnippets();
+      this.renderCurrentPage();
+      // this.addSnippetsToPage()
     }
   },
   destroyed () {
@@ -620,10 +642,15 @@ export default {
     }
   }
   .snippets-wrapper {
+    max-height: 1160px;
+    overflow: auto;
     .snippet-skeleton {
       margin-bottom: 23px;
+      &:last-child {
+        margin-bottom: 0;
+      }
       .v-skeleton-loader__image {
-        height: 166.5px;
+        height: 146px;
       }
     }
   }
