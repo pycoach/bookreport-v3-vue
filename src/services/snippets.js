@@ -24,7 +24,6 @@ const actions = {
     }
     context.commit('SET_LOADING', false);
     context.commit('SET_SNIPPETS', response['data']);
-    console.log('loadSnippets VUEX --- ', response['data']);
     return response['data']
   },
   async addNewSnippet(context, payload) {
@@ -32,15 +31,17 @@ const actions = {
     try {
       response = await api().post(URL, {
         document_id: payload.DocumentID,
+        entity_id: payload.entity_id,
         page_index: parseInt(payload.page_index),
-        x: payload.X,
-        y: payload.Y,
-        width: payload.Width,
-        height: payload.Height
+        x: payload.x,
+        y: payload.y,
+        width: payload.width,
+        height: payload.height
       });
     } catch (e) {
       return
     }
+    context.commit('SET_SUCCESS_MESSAGE', 'New Snippet is saved');
     return response['data']
   },
   async updateSnippet(context, payload) {
@@ -49,25 +50,27 @@ const actions = {
     try {
       response = await api().put(URL, {
         document_id: payload.DocumentID,
+        entity_id: payload.entity_id,
         page_index: parseInt(payload.page_index),
-        x: payload.X,
-        y: payload.Y,
-        width: payload.Width,
-        height: payload.Height
+        x: payload.x,
+        y: payload.y,
+        width: payload.width,
+        height: payload.height
       });
     } catch (e) {
       return
     }
+    context.commit('SET_SUCCESS_MESSAGE', 'Snippet is updated');
     return response['data']
   },
   async deleteSnippet(context, entity_id) {
-    console.log('deleteSnippet payload VUEX ---- ', entity_id);
     let response;
     try {
       response = await api().delete(URL + entity_id);
     } catch (e) {
       return
     }
+    context.commit('SET_SUCCESS_MESSAGE', 'Snippet is deleted');
     return response['data']
   }
 };
@@ -78,6 +81,13 @@ const mutations = {
   },
   SET_LOADING(state, isLoading) {
     state.isLoadingSnippets = isLoading;
+  },
+  SET_SUCCESS_MESSAGE(state, message) {
+    Vue.notify({
+      group: 'loggedIn',
+      type: 'success',
+      text: message
+    })
   }
 };
 

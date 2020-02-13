@@ -72,6 +72,7 @@
 import { mapState, mapGetters } from 'vuex';
 import { EventBus } from '../components/categoriesComponents/Document/Preview/eventBus' 
 import Konva from 'konva'
+import uuid from 'uuid'
 import SnippetsList from '../components/categoriesComponents/Document/Preview/SnippetsList';
 export default {
   name: 'fileViewer',
@@ -159,6 +160,7 @@ export default {
       return this.$store.dispatch('DocumentSnippets/loadSnippets', this.id).then((snippetData) => {
         this.snippetData = snippetData
         this.addSnippetsToPage()
+        console.log('========this.snippets[this.currentPageIndex]', this.snippets[this.currentPageIndex])
       })
     },
     onNextPage () {
@@ -172,6 +174,9 @@ export default {
     getPageStatus () {
       let status;
       switch(this.pageStatuses[this.currentPageIndex]) {
+        case undefined:
+          status = '<div class="status status-unread"><i class="material-icons">insert_drive_file</i> Unread</div>';
+          break;
         case 0:
           status = '<div class="status status-unread"><i class="material-icons">insert_drive_file</i> Unread</div>';
           break;
@@ -230,7 +235,7 @@ export default {
           that.creatingSnippet = true;
           that.selectedSnippetId = '';
           let pointer = stage.getPointerPosition();
-          let snippetId = String(Math.random(0, 999999)).replace(/-/g,'');
+          let snippetId = String(uuid()).replace(/-/g,'');
           that.newSnippet = that.makeSnippet(pointer.x, pointer.y, 0, 0, snippetId);
           that.layer.add(that.newSnippet)
         }
@@ -249,7 +254,7 @@ export default {
       stage.on('contentMouseup', function() {
         if (that.creatingSnippet) {
           let snippetData = that.saveSnippet(that.newSnippet)
-          if (snippetData.Width > 5 && snippetData.Height > 5) {
+          if (snippetData.width > 5 && snippetData.height > 5) {
             that.selectedSnippetId = snippetData.entity_id
           } else {
             that.selectedSnippetId = ''
@@ -263,29 +268,34 @@ export default {
       this.stage = stage
     },
     saveSnippetData: function (snippetData) {
-      console.log('////////////////*/*/*/*/**//* snippetData', snippetData)
-      console.log('////////////////*/*/*/*/**//* snippetList', this.snippets[this.currentPageIndex])
+      let hasUpdated = false
       let snippetList = this.snippets[this.currentPageIndex];
-      if (snippetData.Width > 5 && snippetData.Height > 5) {
+      if (snippetData.width > 5 && snippetData.height > 5) {
         for (let i = 0; i < snippetList.length; i++) {
           if (snippetList[i].entity_id === snippetData.entity_id) {
-            snippetList[i] = snippetData
-            console.log("JS - snippet updated", snippetData);
+            alert('Update')
+            console.log('Update snippetData', snippetData)
+            const snippetIndex = snippetList.indexOf(snippetList[i]);
+            snippetList[snippetIndex] = snippetData
+            hasUpdated = true
             this.$store.dispatch('DocumentSnippets/updateSnippet', snippetData)
-            // organizationFileService.updateSnippet(snippetData).then()
             break
           }
         }
         for (let i = 0; i < this.allSnippets.length; i++) {
           if (this.allSnippets[i].entity_id === snippetData.entity_id) {
-            this.allSnippets.splice(i,1);
+            const snippetIndex = this.allSnippets.indexOf(this.allSnippets[i]);
+            this.allSnippets.splice(snippetIndex,1);
             this.allSnippets.push(snippetData);
             return snippetData
           }
         }
+        if (hasUpdated) return;
+        this.$store.dispatch('DocumentSnippets/addNewSnippet', snippetData)
         // snippetList.push(snippetData);
         this.allSnippets.push(snippetData);
-        this.$store.dispatch('DocumentSnippets/addNewSnippet', snippetData)
+        console.log('**************this.allSnippets', this.allSnippets)
+        console.log('**************snippetList', snippetList)
         this.requestDocumentType(this.currentPageIndex);
         return snippetData
       }
@@ -307,7 +317,7 @@ export default {
       }
 
       let snippetData = {"entity_id": entityId, "DocumentID": this.id, "page_index": this.currentPageIndex,
-        "X": x, "Y": y, "Width": width, "Height": height, "ImageData": imageData}
+        "x": x, "y": y, "width": width, "height": height, "ImageData": imageData}
 
       this.saveSnippetData(snippetData)
 
@@ -345,7 +355,6 @@ export default {
           that.layer.add(rect)
         }
       }
-
       that.stage.add(that.layer)
     },
     getSnippetImage (x, y, width, height) {
@@ -474,7 +483,7 @@ export default {
         }
       
         let snippetData = {"entity_id": name, "DocumentID": that.id, "page_index": that.currentPageIndex,
-          "X": x, "Y": y, "Width": adjustedWidth, "Height": adjustedHeight, "ImageData": imageData}
+          "x": x, "y": y, "width": adjustedWidth, "height": adjustedHeight, "ImageData": imageData}
       
         that.saveSnippetData(snippetData)
         that.renderCurrentPage()
@@ -494,9 +503,6 @@ export default {
       return snippetGroup
     },
     addSnippetsToPage: function () {
-      console.log("Adding snippets to page");
-      console.log("Snippets", this.snippets);
-      console.log("SnippetData", this.snippetData);
       if (!this.snippetData.length) return
       // this.allSnippets = [];
       // this.snippets = [];
@@ -537,24 +543,25 @@ export default {
       return context.getImageData(x, y, width, height)
     },
     deleteSnippet (entity_id) {
-      // this.$store.dispatch('DocumentSnippets/deleteSnippet', entity_id);
       let snippetList = this.snippets[this.currentPageIndex];
-      console.log('snippetList', snippetList)
       for (let i = 0; i < snippetList.length; i++){
         let snippet = snippetList[i]
         if (snippet.entity_id === entity_id) {
-          snippetList.splice(i, 1)
+          const snippetIndex = snippetList.indexOf(snippet);
+          snippetList.splice(snippetIndex, 1)
           this.selectedSnippetId = ''
           break
         }
       }
-      for (let i=0;i < this.allSnippets.length;i++){
+      for (let i = 0; i < this.allSnippets.length; i++){
         let snippet = this.allSnippets[i]
         if (snippet.entity_id === entity_id) {
-          this.allSnippets.splice(i, 1)
+          const snippetIndex = this.allSnippets.indexOf(snippet);
+          this.allSnippets.splice(snippetIndex, 1)
           return
         }
       }
+      this.renderCurrentPage()
     }
   },
   async mounted () {
@@ -576,13 +583,9 @@ export default {
       this.renderCurrentPage()
     },
     currentPageIndex () {
-      // this.allSnippets = [];
-      // this.snippets = [];
       this.requestDocumentType(this.currentPageIndex);
-      // this.requestSnippets();
       this.renderCurrentPage();
-      // this.addSnippetsToPage()
-    }
+    },
   },
   destroyed () {
     window.removeEventListener('keydown', this.addKeyDown)
@@ -639,19 +642,6 @@ export default {
     position: relative;
     canvas {
       /*width: 100%;*/
-    }
-  }
-  .snippets-wrapper {
-    max-height: 1160px;
-    overflow: auto;
-    .snippet-skeleton {
-      margin-bottom: 23px;
-      &:last-child {
-        margin-bottom: 0;
-      }
-      .v-skeleton-loader__image {
-        height: 146px;
-      }
     }
   }
 </style>
