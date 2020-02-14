@@ -123,7 +123,7 @@
                   <ckeditor :editor="editor" v-model="topicTypeTemplate" :config="editorConfig" />
                 </v-tab-item>
                 <v-tab-item key="topic-2">
-                  <div class="tiptap-vuetify-editor__content" v-html="topicTypeTemplate"/>
+                  <div class="tiptap-vuetify-editor__content" v-html="topicTypePreview"/>
                 </v-tab-item>
               </v-tabs-items>
             </v-flex>
@@ -176,6 +176,7 @@ export default {
       activeTopicType: {},
       topicTypeTab: null,
       topicTypeTemplate: '',
+      topicTypePreview: '',
       topic_type_headers: [
         { text: 'Name',value: 'name' },
         { text: 'Description', value: 'description' },
@@ -309,8 +310,8 @@ export default {
       }
       this.topicTypeVariables[this.topicTypeVariables.length-1].edit = true;
       this.activeTopicTypeVariable = {}
-    },
-  
+      this.updateTemplatePreview()
+    },  
     cancelTopicTypeVariable(variable) {
       for(let i = 0; i < this.topicTypeVariables.length; i ++){
         if(this.topicTypeVariables[i].id === variable.id){
@@ -319,6 +320,19 @@ export default {
       }
       this.topicTypeVariables[this.topicTypeVariables.length-1].edit = true;
       this.activeTopicTypeVariable = {}
+    },
+    updateTemplatePreview(){      
+      let topicTypeTemplate = this.topicTypeTemplate
+      for(let i = 0; i < this.topicTypeVariables.length; i++){
+       let topicTypeVariable = this.topicTypeVariables[i]        
+        topicTypeTemplate = topicTypeTemplate.replace('%%' + topicTypeVariable.name + '%%', topicTypeVariable.example_value)
+      }
+      this.topicTypePreview = topicTypeTemplate
+    }
+  },
+  watch: {
+    topicTypeTemplate(){
+      this.updateTemplatePreview()
     }
   }
 }
