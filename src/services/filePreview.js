@@ -10,6 +10,7 @@ const state = {
   pageMap: {},
   image: null,
   pageStatuses: {},
+  isLoadingPageStatus: false,
   isLoadingPreview: false,
   isLoadingDocumentEvent: false
 };
@@ -69,6 +70,7 @@ const actions = {
       // Handle error
       return
     }
+    context.commit('setLoadingDocumentEvent', false);
     return response['data']
   }
 };
@@ -82,6 +84,9 @@ const mutations = {
   },
   setPageStatus(state, statuses) {
     state.pageStatuses = statuses
+  },
+  setLoadingPageStatus(state, isLoading) {
+    state.isLoadingPageStatus = isLoading
   },
   setLoadingPreview(state, isLoading) {
     state.isLoadingPreview = isLoading

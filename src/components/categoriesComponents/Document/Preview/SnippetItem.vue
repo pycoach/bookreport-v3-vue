@@ -1,5 +1,5 @@
 <template>
-  <div :class="{ 'is-deleting': isDeleting }">
+  <div class="snippet-item" :class="{ 'is-deleting': isDeleting }">
     <img
       ref="snippetImage"
       src=""
@@ -22,7 +22,7 @@
         icon
         color="error"
         :disabled="isDeleting"
-        @click.stop="handleDelete(item.entity_id)"
+        @click.stop="handleDelete(item.entity_id, item.page_index)"
       >
         <v-icon>delete</v-icon>
       </v-btn>
@@ -68,12 +68,18 @@ export default {
       if (!page_index) return;
       EventBus.$emit('handleSnippetPage', page_index)
     },
-    handleDelete (entity_id) {
+    handleDelete (entity_id, page_index) {
       this.isDeleting = true;
       this.$store.dispatch('DocumentSnippets/deleteSnippet', entity_id).then(() => {
-        EventBus.$emit('handleSnippetDelete', entity_id);
+        EventBus.$emit('handleSnippetDelete', { entity_id, page_index });
         this.isDeleting = false
       })
+    }
+  },
+  watch: {
+    snippet () {
+      alert('ITEM')
+      this.renderImage()
     }
   }
 }

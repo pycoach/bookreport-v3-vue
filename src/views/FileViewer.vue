@@ -5,7 +5,7 @@
         <div class="preview-image-lg">
           <div class="d-flex justify-space-between align-center mb-5">
             <v-skeleton-loader
-              v-if="isLoadingPreview"
+              v-if="isLoadingPageStatus"
               loading
               type="chip"
               class="mx-0"
@@ -81,7 +81,7 @@ export default {
   },
   props: ['id', 'pageIndex'],
   computed: {
-    ...mapState('FilePreview', ['pageMap', 'image', 'pageStatuses', 'isLoadingPreview', 'isLoadingDocumentEvent']),
+    ...mapState('FilePreview', ['pageMap', 'image', 'pageStatuses', 'isLoadingPreview', 'isLoadingDocumentEvent', 'isLoadingPageStatus']),
     ...mapGetters('DocumentSnippets', ['getSnippets']),
     ...mapState('DocumentSnippets', ['isLoadingSnippets']),
   },
@@ -160,7 +160,6 @@ export default {
       return this.$store.dispatch('DocumentSnippets/loadSnippets', this.id).then((snippetData) => {
         this.snippetData = snippetData
         this.addSnippetsToPage()
-        console.log('========this.snippets[this.currentPageIndex]', this.snippets[this.currentPageIndex])
       })
     },
     onNextPage () {
@@ -196,6 +195,15 @@ export default {
           break;
         case 'ArrowRight':
           this.onNextPage();
+          break;
+        case 'Delete':
+          const details = {
+            entity_id: this.selectedSnippetId,
+            page_index: this.currentPageIndex
+          };
+          this.$store.dispatch('DocumentSnippets/deleteSnippet', this.selectedSnippetId).then(() => {
+            this.deleteSnippet(details);
+          });
           break;
       }
     },
@@ -268,16 +276,12 @@ export default {
       this.stage = stage
     },
     saveSnippetData: function (snippetData) {
-      let hasUpdated = false
       let snippetList = this.snippets[this.currentPageIndex];
       if (snippetData.width > 5 && snippetData.height > 5) {
         for (let i = 0; i < snippetList.length; i++) {
           if (snippetList[i].entity_id === snippetData.entity_id) {
-            alert('Update')
-            console.log('Update snippetData', snippetData)
-            const snippetIndex = snippetList.indexOf(snippetList[i]);
-            snippetList[snippetIndex] = snippetData
-            hasUpdated = true
+            alert()
+            snippetList[i] = snippetData
             this.$store.dispatch('DocumentSnippets/updateSnippet', snippetData)
             break
           }
@@ -285,17 +289,15 @@ export default {
         for (let i = 0; i < this.allSnippets.length; i++) {
           if (this.allSnippets[i].entity_id === snippetData.entity_id) {
             const snippetIndex = this.allSnippets.indexOf(this.allSnippets[i]);
-            this.allSnippets.splice(snippetIndex,1);
-            this.allSnippets.push(snippetData);
+            // this.allSnippets.splice(snippetIndex, 1);
+            // this.allSnippets.push(snippetData);
+            this.allSnippets[snippetIndex] = snippetData
             return snippetData
           }
         }
-        if (hasUpdated) return;
-        this.$store.dispatch('DocumentSnippets/addNewSnippet', snippetData)
-        // snippetList.push(snippetData);
+        snippetList.push(snippetData)
         this.allSnippets.push(snippetData);
-        console.log('**************this.allSnippets', this.allSnippets)
-        console.log('**************snippetList', snippetList)
+        this.$store.dispatch('DocumentSnippets/addNewSnippet', snippetData)
         this.requestDocumentType(this.currentPageIndex);
         return snippetData
       }
@@ -504,11 +506,9 @@ export default {
     },
     addSnippetsToPage: function () {
       if (!this.snippetData.length) return
-      // this.allSnippets = [];
-      // this.snippets = [];
       for (let i = 0; i < this.snippetData.length; i++) {
         let snippet = this.snippetData[i]
-        let pageIndex = snippet["page_index"]
+        let pageIndex = snippet['page_index']
         if (!this.snippets.hasOwnProperty(pageIndex)) {
           this.snippets[pageIndex] = []
         }
@@ -532,9 +532,6 @@ export default {
       const canvas = document.getElementById('image-temp')
       const context = canvas.getContext('2d')
       let page_data = this.pageMap.pages[pageIndex - 1]
-      // let spriteIndex = page_data[0];
-      // console.log('spriteIndex', spriteIndex);
-      // console.log('this.sprites', this.sprites);
       let sprite_image = this.imageElement
       context.clearRect(0, 0, canvas.width, canvas.height);
       canvas.width = page_data[2];
@@ -542,23 +539,18 @@ export default {
       context.drawImage(sprite_image, 0, page_data[1], page_data[2], page_data[3], 0, 0, canvas.width, canvas.height);
       return context.getImageData(x, y, width, height)
     },
-    deleteSnippet (entity_id) {
-      let snippetList = this.snippets[this.currentPageIndex];
+    deleteSnippet (details) {
+      let snippetList = this.snippets[details.page_index];
       for (let i = 0; i < snippetList.length; i++){
         let snippet = snippetList[i]
-        if (snippet.entity_id === entity_id) {
-          const snippetIndex = snippetList.indexOf(snippet);
-          snippetList.splice(snippetIndex, 1)
-          this.selectedSnippetId = ''
-          break
+        if (snippet.entity_id === details.entity_id) {
+          snippetList.splice(i, 1);
         }
       }
-      for (let i = 0; i < this.allSnippets.length; i++){
+      for (let i = 0; i < this.allSnippets.length; i++) {
         let snippet = this.allSnippets[i]
-        if (snippet.entity_id === entity_id) {
-          const snippetIndex = this.allSnippets.indexOf(snippet);
-          this.allSnippets.splice(snippetIndex, 1)
-          return
+        if (snippet.entity_id === details.entity_id) {
+          this.allSnippets.splice(i, 1);
         }
       }
       this.renderCurrentPage()
@@ -568,8 +560,8 @@ export default {
     EventBus.$on('handleSnippetPage', (pageIndex) => {
       this.currentPageIndex = pageIndex
     });
-    EventBus.$on('handleSnippetDelete', (entity_id) => {
-      this.deleteSnippet(entity_id)
+    EventBus.$on('handleSnippetDelete', (details) => {
+      this.deleteSnippet(details)
     });
     await this.requestPageMap();
     await this.requestImage();
@@ -585,7 +577,12 @@ export default {
     currentPageIndex () {
       this.requestDocumentType(this.currentPageIndex);
       this.renderCurrentPage();
-    },
+      this.selectedSnippetId = null;
+    }
+  },
+  allSnippets(old, news) {
+    console.log('old', old)
+    console.log('news', news)
   },
   destroyed () {
     window.removeEventListener('keydown', this.addKeyDown)

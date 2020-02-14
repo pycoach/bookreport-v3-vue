@@ -45,7 +45,6 @@ const actions = {
     return response['data']
   },
   async updateSnippet(context, payload) {
-    console.log('updateSnippet payload VUEX ---- ', payload);
     let response;
     try {
       response = await api().put(URL, {
