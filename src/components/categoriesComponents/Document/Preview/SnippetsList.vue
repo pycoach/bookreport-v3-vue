@@ -1,6 +1,11 @@
 <template>
   <div>
-    <SnippetItem v-for="(snippet, index) in snippetList" :key="snippet.entity_id" :item="snippet" />
+    <SnippetItem 
+      v-for="snippet in snippetList" 
+      :key="snippet.entity_id + snippet.x + snippet.y + snippet.width + snippet.height" 
+      :item="snippet"
+      :deletingSnippetIds="deletingSnippets"
+    />
   </div>
 </template>
 
@@ -8,7 +13,7 @@
 import SnippetItem from './SnippetItem';
 export default {
   name: 'SnippetsList',
-  props: ['snippets'],
+  props: ['snippets', 'deletingSnippets'],
   components: {
     SnippetItem
   },

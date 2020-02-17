@@ -17,15 +17,33 @@
       >
         From page {{item.page_index}}
       </v-btn>
-      <v-btn
-        x-small 
-        icon
-        color="error"
-        :disabled="isDeleting"
-        @click.stop="handleDelete(item.entity_id, item.page_index)"
-      >
-        <v-icon>delete</v-icon>
-      </v-btn>
+      <div>
+        <v-tooltip top>
+          <template v-slot:activator="{ on }">
+            <v-btn
+              x-small
+              icon
+              :disabled="isDeleting"
+              v-on="on"
+              :open-on-hover="false"
+              open-on-click
+              @click.stop="copyUrl(item.page_index)"
+            >
+              <v-icon>file_copy</v-icon>
+            </v-btn>
+          </template>
+          <span>Copy link</span>
+        </v-tooltip>
+        <v-btn
+          x-small
+          icon
+          color="error"
+          :disabled="isDeleting"
+          @click.stop="handleDelete(item.entity_id, item.page_index)"
+        >
+          <v-icon>delete</v-icon>
+        </v-btn>
+      </div>
     </div>
   </div>
 </template>
@@ -34,12 +52,7 @@
 import { EventBus } from './eventBus.js'; 
 export default {
   name: 'SnippetItem',
-  props: {
-    item: {
-      type: Object,
-      default: null
-    }
-  },
+  props: ['item', 'deletingSnippetIds'],
   data: () => {
     return {
       isDeleting: false  
@@ -74,12 +87,28 @@ export default {
         EventBus.$emit('handleSnippetDelete', { entity_id, page_index });
         this.isDeleting = false
       })
+    },
+    copyUrl (page_index) {
+      let el = document.createElement('input'), text = window.location.origin;
+      text = text + '/file/viewer/' + this.$route.params.id + '/' + page_index;
+      el.value = text;
+      el.setAttribute('readonly', '');
+      el.style.position = 'absolute';
+      el.style.left = '-9999px';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
     }
   },
   watch: {
     snippet () {
-      alert('ITEM')
       this.renderImage()
+    },
+    deletingSnippetIds () {
+      if (this.deletingSnippetIds.includes(this.item.entity_id)) {
+        this.isDeleting = true
+      }
     }
   }
 }
@@ -99,6 +128,9 @@ export default {
       margin-bottom: 23px;
       > div {
         transition: 0.3s;
+      }
+      img {
+        cursor: pointer;
       }
       img ~ div {
         padding: 5px;

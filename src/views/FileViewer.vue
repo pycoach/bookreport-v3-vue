@@ -5,7 +5,7 @@
         <div class="preview-image-lg">
           <div class="d-flex justify-space-between align-center mb-5">
             <v-skeleton-loader
-              v-if="isLoadingPageStatus"
+              v-if="isLoading"
               loading
               type="chip"
               class="mx-0"
@@ -61,7 +61,12 @@
           <SnippetsList
             v-else
             :snippets="allSnippets"
+            :deletingSnippets="deletingSnippets"
           />
+          <div v-if="(!allSnippets || !allSnippets.length) && !isLoading" class="font-weight-bold text-center">
+            <v-icon>work_off</v-icon>
+            <p>Snippets not found</p>
+          </div>
         </div>
       </v-col>
     </v-row>
@@ -81,7 +86,7 @@ export default {
   },
   props: ['id', 'pageIndex'],
   computed: {
-    ...mapState('FilePreview', ['pageMap', 'image', 'pageStatuses', 'isLoadingPreview', 'isLoadingDocumentEvent', 'isLoadingPageStatus']),
+    ...mapState('FilePreview', ['pageMap', 'image', 'pageStatuses', 'isLoadingPreview', 'isLoadingPageStatus']),
     ...mapGetters('DocumentSnippets', ['getSnippets']),
     ...mapState('DocumentSnippets', ['isLoadingSnippets']),
   },
@@ -109,7 +114,9 @@ export default {
       snippetData: [],
       pageProcessed: false,
       processedEvents: [],
-      imageElement: ''
+      imageElement: '',
+      isLoading: false,
+      deletingSnippets: []
     }
   },
   methods: {
@@ -201,7 +208,9 @@ export default {
             entity_id: this.selectedSnippetId,
             page_index: this.currentPageIndex
           };
+          this.deletingSnippets.push(details.entity_id)
           this.$store.dispatch('DocumentSnippets/deleteSnippet', this.selectedSnippetId).then(() => {
+            this.deletingSnippets.splice(this.deletingSnippets.indexOf(details.entity_id), 1);
             this.deleteSnippet(details);
           });
           break;
@@ -280,24 +289,26 @@ export default {
       if (snippetData.width > 5 && snippetData.height > 5) {
         for (let i = 0; i < snippetList.length; i++) {
           if (snippetList[i].entity_id === snippetData.entity_id) {
-            alert()
             snippetList[i] = snippetData
+            for (let i = 0; i < this.allSnippets.length; i++) {
+              if (this.allSnippets[i].entity_id === snippetData.entity_id) {
+                this.allSnippets[i] = snippetData
+              }
+            }
             this.$store.dispatch('DocumentSnippets/updateSnippet', snippetData)
             break
           }
         }
         for (let i = 0; i < this.allSnippets.length; i++) {
           if (this.allSnippets[i].entity_id === snippetData.entity_id) {
-            const snippetIndex = this.allSnippets.indexOf(this.allSnippets[i]);
-            // this.allSnippets.splice(snippetIndex, 1);
-            // this.allSnippets.push(snippetData);
-            this.allSnippets[snippetIndex] = snippetData
+            this.allSnippets.splice(i,1, snippetData)
             return snippetData
           }
         }
-        snippetList.push(snippetData)
         this.allSnippets.push(snippetData);
-        this.$store.dispatch('DocumentSnippets/addNewSnippet', snippetData)
+        this.$store.dispatch('DocumentSnippets/addNewSnippet', snippetData).then(() => {
+          snippetList.push(snippetData)
+        })
         this.requestDocumentType(this.currentPageIndex);
         return snippetData
       }
@@ -328,12 +339,8 @@ export default {
     createLayer: function () {
       const that = this;
       that.layer = new Konva.Layer()
-    
       if (that.snippets.hasOwnProperty(that.currentPageIndex)) {
         let snippetList = that.snippets[that.currentPageIndex]
-        console.log("Existing snippets found")
-        console.log(snippetList)
-
         for (let i = 0; i < snippetList.length; i++) {
           let snippet = snippetList[i];
           let rect = {};
@@ -563,10 +570,12 @@ export default {
     EventBus.$on('handleSnippetDelete', (details) => {
       this.deleteSnippet(details)
     });
+    this.isLoading = true;
     await this.requestPageMap();
     await this.requestImage();
-    await this.requestSnippets()
+    await this.requestSnippets();
     await this.$store.dispatch('FilePreview/loadPageStatus', this.id);
+    this.isLoading = false;
     this.renderCurrentPage()
   },
   watch: {
@@ -580,10 +589,6 @@ export default {
       this.selectedSnippetId = null;
     }
   },
-  allSnippets(old, news) {
-    console.log('old', old)
-    console.log('news', news)
-  },
   destroyed () {
     window.removeEventListener('keydown', this.addKeyDown)
   }
@@ -594,9 +599,9 @@ export default {
   .preview-image-lg {
     position: relative;
     overflow: hidden;
-    min-height: 862px;
+    min-height: 1100px;
     .v-skeleton-loader__image {
-      min-height: 862px !important;
+      min-height: 1100px !important;
     }
     .status {
       position: relative;
@@ -637,8 +642,5 @@ export default {
   }
   .canvas-wrapper {
     position: relative;
-    canvas {
-      /*width: 100%;*/
-    }
   }
 </style>
