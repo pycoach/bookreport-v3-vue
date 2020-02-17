@@ -108,7 +108,7 @@
                     <div>{{item.name}}</div>
                   </td>
                   <td>
-                    <v-text-field v-model="topicVariables[index].value" :label="item.place_holder"></v-text-field>
+                    <v-text-field v-model="topicVariables[index].value" :label="item.place_holder" @change="changeTopicVariables"></v-text-field>
                   </td>
                 </tr>
 
@@ -127,7 +127,7 @@
                   <ckeditor :editor="editor" v-model="topicTemplate" :config="editorConfig" />
                 </v-tab-item>
                 <v-tab-item key="topic-2">
-                  <div class="tiptap-vuetify-editor__content" v-html="topicTemplate"/>
+                  <div class="tiptap-vuetify-editor__content" v-html="topicTemplatePreview"/>
                 </v-tab-item>
               </v-tabs-items>
             </v-flex>
@@ -169,6 +169,7 @@ export default {
       topicTransaction: '',
       topicDocumentType: '',
       topicTemplate: '',
+      topicTemplatePreview: '',
       topicVariables: [],
       topicSnippetsIds: [],
       selectedTopicType: {},
@@ -251,6 +252,17 @@ export default {
         this.topicDialog = false;
       })
     },
+    updateTemplatePreview() {
+      let topicTemplate = this.topicTemplate
+      for(let i = 0; i < this.topicVariables.length; i++){
+       let topicVariable = this.topicVariables[i]        
+        topicTemplate = topicTemplate.replace('%%' + topicVariable.name + '%%', topicVariable.value)
+      }
+      this.topicTemplatePreview = topicTemplate
+    },
+    changeTopicVariables(){
+      this.updateTemplatePreview()
+    }
   },
   watch: {
     selectedTopicType() {
@@ -273,7 +285,10 @@ export default {
     },
     topicTransaction() {
       this.topicName = this.selectedTopicType.name + ' for ' + this.topicTransaction
-    }
+    },
+    topicTemplate() {
+      this.updateTemplatePreview()
+    }    
   }
 }
 </script>

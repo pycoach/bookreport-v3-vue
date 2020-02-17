@@ -94,7 +94,7 @@
             </v-container>
             <v-card-actions >
               <v-spacer></v-spacer>
-              <v-btn color="primary" text @click="reportObjectdialog=false">
+              <v-btn color="primary" text @click="cancelReportObject">
                 Cancel
               </v-btn>
               <v-btn 
@@ -150,7 +150,11 @@
                 </v-toolbar>
                 <v-container fluid>                                  
                   <v-list two-line>
-                    <draggable :list="report_objects" group="report" @change="changeReportObjects">    
+                    <draggable 
+                    :list="report_objects" 
+                    :group="{name: 'report', pull: 'clone', put:'false'}"
+                    :clone="cloneReportObject"
+                    >    
                       <template v-for="(report_object, index) in report_objects">
                         <v-list-item
                           :key="report_object.entity_id"
@@ -177,7 +181,10 @@
                 </v-toolbar>
                 <v-container fluid>
                   <v-list two-line>
-                    <draggable :list="topics" group="report" @change="changeTopics">    
+                    <draggable 
+                    :list="topics" 
+                    :group="{name: 'report', pull: 'clone', put:'false'}"
+                    :clone="cloneTopic">    
                       <template v-for="(topic, index) in topics">
                         <v-list-item :key="topic.entity_id" @click="">
                           <v-list-item-content>
@@ -287,7 +294,6 @@ export default {
       'trades', 
       'transactions', 
       'report_objects', 
-      'activeReport_object', 
       'reports', 
       'activeReport'
     ]),
@@ -309,6 +315,7 @@ export default {
       selectedTopic: null,
 
       reportObjects: [],
+      activeReportobject: {},
       reportObjectdialog: false,
 
       reportName: '',
@@ -325,6 +332,10 @@ export default {
   methods: {
     addReportObject() {
       this.reportObjectEditMode = 'Create';
+      this.activeReportobject = {
+        project_id: this.activeProject.entity_id,
+      }
+
       this.sub_type = 'Chapter'
       this.header_template = ''
       this.footer_template = ''
@@ -337,9 +348,11 @@ export default {
       
       this.reportObjectdialog = true
     },
-    editReportObject(report_object) {
+    editReportObject(report_object) {      
       this.reportObjectEditMode = 'Edit';
       this.reportObjectdialog = true
+
+      this.activeReportobject = Object.assign({}, report_object)
 
       this.sub_type = report_object.sub_type
       if(report_object.sub_type == 'Chapter'){        
@@ -370,6 +383,13 @@ export default {
         project_id: this.activeProject.entity_id,
         sub_type: this.sub_type
       }
+
+      if(this.activeReportobject.entity_id){
+        report_object.entity_id = this.activeReportobject.entity_id
+        report_object.version = this.activeReportobject.version
+        report_object.changed_on = this.activeReportobject.changed_on
+      }
+
       if(this.sub_type == 'Chapter'){
         report_object.header_template = this.header_template
         report_object.footer_template = this.footer_template
@@ -393,25 +413,22 @@ export default {
       }
 
       this.$store.dispatch('saveReport_object', report_object)
+      this.activeReportobject = {}
+    },
+    cancelReportObject(){
+      this.reportObjectdialog = false
+      this.activeReportobject = {}
+
     },
     deleteReportObject(id) {
       this.$store.dispatch('deleteReport_object', id)
     },
-    changeReportObjects(evt){    
-      console.log(evt)  
-      if(evt.added){   
-        let report_object = evt.added.element
-        delete report_object.entity_id
-        delete report_object.version
-        delete report_object.changed_on
-        this.$store.dispatch('saveReport_object', report_object)
-      }
-      else if(evt.removed){
-        let report_object = evt.removed.element
-        this.$store.dispatch('deleteReport_object', report_object.entity_id)
-      }
-      else if(evt.moved){
-      }
+    cloneReportObject(report_object) {
+      let cloned_object = Object.assign({}, report_object)
+      delete cloned_object.version
+      delete cloned_object.changed_on
+      cloned_object.children = []
+      return cloned_object
     },
     addReport() {
       this.reportDialog = true
@@ -442,6 +459,7 @@ export default {
         let i = evt.added.newIndex
         if(!new_report.report_objects[i].id){
           new_report.report_objects[i].id = new_report.report_objects[i].entity_id
+          delete new_report.report_objects[i].entity_id
 
           if(i == 0){
             new_report.report_objects[i].previous_id = ''  
@@ -485,10 +503,10 @@ export default {
         }
       }
       else if(evt.moved){
-        old_index = evt.moved.oldIndex
-        new_index = evt.moved.newIndex
+        const old_index = evt.moved.oldIndex
+        const new_index = evt.moved.newIndex
 
-        if((old_index == 0) && (new_index == 1)){
+        if(new_report.report_objects.length == 2){
           new_report.report_objects[0].previous_id = ''
           new_report.report_objects[0].next_id = new_report.report_objects[1].id
 
@@ -503,8 +521,14 @@ export default {
             new_report.report_objects[old_index].next_id = ''
           }
           else {
-            new_report.report_objects[old_index-1].next_id = new_report.report_objects[old_index].id
-            new_report.report_objects[old_index].previous_id = new_report.report_objects[old_index-1].id
+            if(new_index > old_index){
+              new_report.report_objects[old_index-1].next_id = new_report.report_objects[old_index].id
+              new_report.report_objects[old_index].previous_id = new_report.report_objects[old_index-1].id
+            }
+            else{
+              new_report.report_objects[old_index].next_id = new_report.report_objects[old_index+1].id
+              new_report.report_objects[old_index+1].previous_id = new_report.report_objects[old_index].id
+            }            
           }
 
           if(new_index == 0){
@@ -514,26 +538,29 @@ export default {
           }
           else if(new_index == new_report.report_objects.length-1){
             new_report.report_objects[new_index].next_id = ''
-            new_report.report_objects[new_index].previous_id = new_report.report_objects[new_index-1].next_id
+            new_report.report_objects[new_index].previous_id = new_report.report_objects[new_index-1].id
             new_report.report_objects[new_index-1].next_id = new_report.report_objects[new_index].id
 
           }
           else{
             new_report.report_objects[new_index-1].next_id = new_report.report_objects[new_index].id
-
             new_report.report_objects[new_index].previous_id = new_report.report_objects[new_index-1].id
             new_report.report_objects[new_index].next_id = new_report.report_objects[new_index+1].id
-
             new_report.report_objects[new_index+1].previous_id = new_report.report_objects[new_index].id
           }
         }
       }
-      this.$store.dispatch('saveReport_object', new_report)
+      this.$store.dispatch('saveReport', new_report)
     },
     downloadReport() {
       this.$store.dispatch('downloadReport', this.activeReport.entity_id)
     },
-    changeTopics(evt){
+    cloneTopic(topic){
+      let cloned_topic = Object.assign({}, topic)
+      delete cloned_topic.version
+      delete cloned_topic.changed_on
+      cloned_topic.children = []
+      return cloned_topic      
     },
   },
   watch: {
