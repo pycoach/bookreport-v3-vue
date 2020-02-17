@@ -185,7 +185,7 @@ const mutations = {
         const data = window.URL.createObjectURL(newBlob);
         let link = document.createElement('a');
         link.href = data;
-        link.download = "report.docx";
+        link.download = state.activeReport.name + ".docx";
         link.click();
         setTimeout(function () {
             // For Firefox it is necessary to delay revoking the ObjectURL
