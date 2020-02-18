@@ -355,6 +355,8 @@ export default {
       this.reportObjectEditMode = 'Edit';
       this.reportObjectdialog = true
 
+      console.log(report_object)
+
       this.activeReportobject = Object.assign({}, report_object)
 
       this.sub_type = report_object.sub_type
@@ -423,8 +425,25 @@ export default {
       this.activeReportobject = {}
 
     },
-    deleteReportObject(id) {
-      this.$store.dispatch('deleteReport_object', id)
+    deleteReportObject(object) {     
+      let report_objects = this.activeReport.report_objects
+      for(let i = 0; i < report_objects.length; i++)
+      {
+        if(report_objects[i].id == object.id){
+          if(i > 0){
+            report_objects[i-1].next_id = report_objects[i].next_id
+          }
+
+          if(i < report_objects.length - 1){
+            report_objects[i+1].previous_id = report_objects[i].previous_id
+          }
+          report_objects.splice(i, 1)  
+          break        
+        }
+      }
+
+      this.$store.dispatch('saveReport', this.activeReport)
+      this.$store.dispatch('deleteReport_object', object.id)
     },
     cloneReportObject(sub_type) {
       let report_object = {
