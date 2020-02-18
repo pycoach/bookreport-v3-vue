@@ -192,10 +192,6 @@ export default {
     formatDate (value){
       return moment(value).format('L')
     },
-    menuAction (action, item) {
-      console.log('action', action);
-      console.log('item', item);
-    },
     getIcon (extension) {
       let ext = extension.toLowerCase();
       if (ext === 'txt' || ext === 'rtf' || ext === 'text') {
@@ -229,11 +225,14 @@ export default {
         this.selected.splice(indexOfItem, 1)
       }
     },
+    showExcel (item) {
+      window.open(`/excel/viewer/${item.entity_id}/${item.name}`)
+    },
     handlePreviewFileDialog (item) {
       const extension = item.extension.toLowerCase();
       if (extension !== "zip") {
         if (extension === "csv" || extension.includes("xls")) {
-          EventBus.$emit('onPreviewExcel', item);
+          this.showExcel(item)
         } else {
           EventBus.$emit('onPreviewDocument', item)
         }

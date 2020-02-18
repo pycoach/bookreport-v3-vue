@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <Header />
-    <v-content>
+    <v-content :class="$route.meta.contentClassName">
       <router-view></router-view>
       <notifications group="loggedIn" position="top right" animation-type="velocity" />
     </v-content>
