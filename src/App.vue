@@ -2,6 +2,7 @@
   <v-app>
     <Header />
     <v-content>
+      <span class="version" v-if="showVersion">Version: {{version}}</span>
       <router-view></router-view>
       <notifications group="loggedIn" position="top right" animation-type="velocity" />
     </v-content>
@@ -28,5 +29,12 @@ export default {
          immediate: true
       }
     },
+     data () {
+  return {
+      showVersion: true,
+      version: '1.0.0',
+      transitionName: 'fade'
+    }
+  },
 };
 </script>
