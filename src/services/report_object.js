@@ -23,7 +23,7 @@ const getters = {
 }
 
 function get(context, URL, handler) {
-  api().get(URL).then(response => handler(context, response))
+  return api().get(URL).then(response => handler(context, response))
 }
 
 function post(context, URL, data, handler) {
@@ -74,6 +74,7 @@ function handleGetReport_object(context, response) {
   } else {
     context.commit('setActiveReport_object', report_object)
   }
+  return report_object
 }
 
 function addIfPresent(source, destination, propertyName) {
@@ -102,8 +103,8 @@ const actions = {
   deleteReport_object(context, id) {
     apiDelete(context, URL, id, handleReport_objectDelete)
   },
-  getReport_object(context, id) {
-    get(context, URL + '/' + id, handleGetReport_object)
+  getReport_object(context, id) {    
+    return get(context, URL + '/' + id, handleGetReport_object)
   }
 }
 

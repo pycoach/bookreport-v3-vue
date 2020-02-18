@@ -252,7 +252,7 @@
                       <template v-for="(report_object, index) in activeReport.report_objects">
                         <v-list-item
                           :key="report_object.entity_id"
-                          @click="editReportObject(report_object)">
+                          @click="editReportObject(report_object.id)">
                           <v-list-item-content>
                             <v-row>
                             <v-col sm="10" md="10" lg="10">
@@ -333,54 +333,42 @@ export default {
     }
   },
   methods: {
-    addReportObject() {
-      this.reportObjectEditMode = 'Create';
-      this.activeReportobject = {
-        project_id: this.activeProject.entity_id,
-      }
-
-      this.sub_type = 'Chapter'
-      this.header_template = ''
-      this.footer_template = ''
-      this.body = ''
-      this.css = ''
-      this.file_path = ''
-      this.page_number_start_page = 0
-      this.page_number_start_number = 0
-      this.selectedTopic = null
+    async editReportObject(id) {
       
-      this.reportObjectdialog = true
-    },
-    editReportObject(report_object) {      
-      this.reportObjectEditMode = 'Edit';
-      this.reportObjectdialog = true
+      let report_object = await this.$store.dispatch('getReport_object', id).then((obj)=> {
+        if(!obj['error'])return obj
+        else return null
+      })      
 
-      console.log(report_object)
+      if(report_object) {
+        this.reportObjectEditMode = 'Edit';
+        this.reportObjectdialog = true
 
-      this.activeReportobject = Object.assign({}, report_object)
+        this.activeReportobject = Object.assign({}, report_object)
 
-      this.sub_type = report_object.sub_type
-      if(report_object.sub_type == 'Chapter'){        
-        this.header_template = report_object.header_template
-        this.footer_template = report_object.footer_template
-        this.page_number_start_page = report_object.page_number_start_page
-        this.page_number_start_number = report_object.page_number_start_number
-      }
-      else if(report_object.sub_type == 'Title'){
-        this.body = report_object.body
-        this.css = report_object.css
-      }
-      else if(report_object.sub_type == 'Graphic'){
-        this.file_path = report_object.file_path
-        this.css = report_object.css
-      }
-      else if(report_object.sub_type == 'Report Section'){
-        for(let i = 0; i < this.topics.length; i++){
-          if(report_object.topic_id == this.topics[i].entity_id){
-            this.selectedTopic = this.topics[i]
-          }
+        this.sub_type = report_object.sub_type
+        if(report_object.sub_type == 'Chapter'){        
+          this.header_template = report_object.header_template
+          this.footer_template = report_object.footer_template
+          this.page_number_start_page = report_object.page_number_start_page
+          this.page_number_start_number = report_object.page_number_start_number
         }
-      }
+        else if(report_object.sub_type == 'Title'){
+          this.body = report_object.body
+          this.css = report_object.css
+        }
+        else if(report_object.sub_type == 'Graphic'){
+          this.file_path = report_object.file_path
+          this.css = report_object.css
+        }
+        else if(report_object.sub_type == 'Report Section'){
+          for(let i = 0; i < this.topics.length; i++){
+            if(report_object.topic_id == this.topics[i].entity_id){
+              this.selectedTopic = this.topics[i]
+            }
+          }
+        }        
+      }     
     },
     saveReportObject() {
       this.reportObjectdialog = false
@@ -474,7 +462,7 @@ export default {
     closeReport(){
       this.$store.commit('setActiveReport', {})
     },
-    addObjectToReport(i, object){
+    async addObjectToReport(i, object){
       let new_report = this.activeReport
       Object.assign(new_report.report_objects[i], object)
 
@@ -506,8 +494,12 @@ export default {
           new_report.report_objects[i+1].previous_id = new_report.report_objects[i].id 
         }
       }
-      this.$store.dispatch('saveReport', new_report)
-      this.editReportObject(object)
+      let ret = await this.$store.dispatch('saveReport', new_report).then((obj)=>{
+        if(!obj['error'])return true
+        else return false
+      })
+      if(ret)this.editReportObject(object.entity_id)
+
     },
     moveObjectInReport(old_index, new_index){
       let new_report = this.activeReport
