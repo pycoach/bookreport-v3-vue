@@ -24,19 +24,19 @@ const getters = {
 }
 
 function get(context, URL, handler) {
-  api().get(URL).then(response => handler(context, response))
+  return api().get(URL).then(response => handler(context, response))
 }
 
 function post(context, URL, data, handler) {
-  api().post(URL, data).then(response => handler(context, response))
+  return api().post(URL, data).then(response => handler(context, response))
 }
 
 function put(context, data, handler) {
-  api().put(URL, data).then(response => handler(context, response))
+  return api().put(URL, data).then(response => handler(context, response))
 }
 
 function apiDelete(context, URL, id, handler) {
-  api().delete(URL + '/' + id).then(response => handler(context, id, response))
+  return api().delete(URL + '/' + id).then(response => handler(context, id, response))
 }
 
 function handleReportLoad(context, response) {
@@ -56,6 +56,7 @@ function handleReportSave(context, response) {
   } else {
     context.commit('reportSuccess', report)
   }
+  return report
 }
 
 function handleReportDelete(context, id, response) {
@@ -94,9 +95,9 @@ const actions = {
   },
   saveReport(context, payload) {
     if (payload['entity_id']) {
-      put(context, payload, handleReportSave)
+      return put(context, payload, handleReportSave)
     } else {
-      post(context, URL, payload, handleReportSave)
+      return post(context, URL, payload, handleReportSave)
     }
   },
   deleteReport(context, id) {
