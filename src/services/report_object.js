@@ -27,11 +27,11 @@ function get(context, URL, handler) {
 }
 
 function post(context, URL, data, handler) {
-  api().post(URL, data).then(response => handler(context, response))
+  return api().post(URL, data).then(response => handler(context, response))
 }
 
 function put(context, data, handler) {
-  api().put(URL, data).then(response => handler(context, response))
+  return api().put(URL, data).then(response => handler(context, response))
 }
 
 function apiDelete(context, URL, id, handler) {
@@ -55,6 +55,7 @@ function handleReport_objectSave(context, response) {
   } else {
     context.commit('report_objectSuccess', report_object)
   }
+  return report_object
 }
 
 function handleReport_objectDelete(context, id, response) {
@@ -93,9 +94,9 @@ const actions = {
   },
   saveReport_object(context, payload) {
     if (payload['entity_id']) {
-      put(context, payload, handleReport_objectSave)
+      return put(context, payload, handleReport_objectSave)
     } else {
-      post(context, URL, payload, handleReport_objectSave)
+      return post(context, URL, payload, handleReport_objectSave)
     }
   },
   deleteReport_object(context, id) {
