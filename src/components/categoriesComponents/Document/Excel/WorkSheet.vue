@@ -43,9 +43,10 @@ export default {
     onCellClick (id) {
       if (this.selectedCell) {
         this.selectedCell = null
+        console.log('End to', id)
       } else {
         this.selectedCell = id
-        console.log('Clicked on', id)
+        console.log('Started from', id)
       }
     },
     onCellEnter(id) {
