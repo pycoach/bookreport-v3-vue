@@ -1,7 +1,7 @@
 <template>
   <div class="v-data-table disable-hover theme--light">
     <div class="v-data-table__wrapper">
-      <table>
+      <table @mouseleave="onWorkSheetLeave()">
         <thead>
           <td class="disabled-td" />
           <th v-for="heading in headings">
@@ -99,6 +99,9 @@ export default {
     handleKeyDown (event) {
       if (event.keyCode !== 27 || !this.selectedCell) return;
       this.resetSelection()
+    },
+    onWorkSheetLeave () {
+      this.$emit('onCellEnter', null);
     }
   },
   destroyed () {
