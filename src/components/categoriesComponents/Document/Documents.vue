@@ -248,6 +248,7 @@ export default {
       }
       Promise.all(promises).then(() => {
         console.log(promises)
+        this.selected = [];
         this.deleteDialog = false;
         this.isDeleting = false;
         this.$store.dispatch('ProjectDocuments/loadDocuments', {
