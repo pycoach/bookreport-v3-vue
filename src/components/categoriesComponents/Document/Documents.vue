@@ -7,13 +7,10 @@
             <v-card-title class="headline d-flex justify-space-between">
               Documents
               <div class="d-flex align-center">
-                <v-btn fab small text :disabled="!filesSelected">
+                <v-btn fab small text disabled>
                   <v-icon>file_download</v-icon>
                 </v-btn>
-                <v-btn fab small text :disabled="!filesSelected">
-                  <v-icon>open_with</v-icon>
-                </v-btn>
-                <v-btn fab small text :disabled="!filesSelected">
+                <v-btn fab small text :disabled="!filesSelected" @click="deleteDocuments">
                   <v-icon>delete</v-icon>
                 </v-btn>
                 <v-btn class="btn-primary btn-primary--small ml-3" @click="handleUploadDialog">
@@ -36,9 +33,13 @@
           >
             <template v-slot:body="{ items }">
               <tbody>
-                <tr v-for="item in items" :key="item.name">
+                <tr 
+                  v-for="item in items" 
+                  :key="item.entity_id"
+                  @click.stop="handlePreviewFileDialog(item)"
+                >
                   <td>
-                    <div class="d-flex align-center">
+                    <div class="d-flex align-center" @click.stop>
                       <v-checkbox
                         class="ma-0"
                         color="dark"
@@ -56,36 +57,6 @@
                   <td>{{item.trades | commaList}}</td>
                   <td>{{item.transactions | commaList}}</td>
                   <td>{{formatDate(item.changed_on)}}</td>
-                  <!-- // Actions Menu must be activated as soon as actions are ready-->
-                  <td>
-<!--                    <v-menu offset-y>-->
-<!--                      <template v-slot:activator="{ on, attrs }">-->
-<!--                        <v-btn-->
-<!--                          icon-->
-<!--                          v-bind="attrs"-->
-<!--                          v-on="on"-->
-<!--                        >-->
-<!--                          <i class="material-icons">menu</i>-->
-<!--                        </v-btn>-->
-<!--                      </template>-->
-<!--    -->
-<!--                      <v-list>-->
-<!--                        <v-list-item v-for="(listItem, index) in menu" :key="index" @click="menuAction(item.action, item)">-->
-<!--                          <v-list-item-title>-->
-<!--                            {{listItem.title}}-->
-<!--                          </v-list-item-title>-->
-<!--                        </v-list-item>-->
-<!--                      </v-list>-->
-<!--                    </v-menu>-->
-                    <v-btn 
-                      fab 
-                      small 
-                      text 
-                      @click="handlePreviewFileDialog(item)"
-                    >
-                      <v-icon>remove_red_eye</v-icon>
-                    </v-btn>
-                  </td>
                 </tr>
               </tbody>
             </template>
@@ -98,6 +69,34 @@
         </v-card>
       </v-col>
     </v-row>
+    <v-dialog
+      v-model="deleteDialog"
+      max-width="500"
+    >
+      <v-card>
+        <v-card-title class="headline">Confirm that you want to archive the selected files.</v-card-title>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn
+            color="primary"
+            text
+            @click="deleteDialog = false"
+          >
+            Cancel
+          </v-btn>
+
+          <v-btn
+            class="ml-5 btn-primary btn-primary--small text-uppercase"
+            text
+            :disabled="isDeleting"
+            :loading="isDeleting"
+            @click="confirmDelete"
+          >
+            Confirm
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-layout>
 </template>
 
@@ -107,6 +106,7 @@ import {mapGetters} from 'vuex';
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
 import * as far from '@fortawesome/fontawesome-free-regular/index';
 import { EventBus } from '../../../components/categoriesComponents/Document/eventBus.js';
+import Vue from "vue";
 export default {
   name: 'Documents',
   props: {
@@ -123,7 +123,7 @@ export default {
     ...mapGetters('ProjectDocuments', ['searchOptions', 'searchLastPayload', 'getDocuments', 'getDocumentsCount', 'documentsLoading']),
     getSelected () {
       let selected;
-      return selected = this.selected.map(item => item.Name);
+      return selected = this.selected.map(item => item.file_id);
     },
     filesSelected () {
       let selected = this.selected.map(item => item.Name);
@@ -158,10 +158,6 @@ export default {
         {
           text: "Date modified",
           value: "date"
-        },
-        {
-          text: "Actions",
-          value: "actions"
         }
       ],
       options: {
@@ -169,13 +165,8 @@ export default {
         sortBy: ['date'],
         itemsPerPage: 15
       },
-      menu: [
-        { title: 'Archive', action: 'archive' },
-        { title: 'Details', action: 'details' },
-        { title: 'Download', action: 'download' },
-        { title: 'Move', action: 'move' },
-        { title: 'Re-process', action: 'reprocess' }
-      ]
+      deleteDialog: false,
+      isDeleting: false
     }
   },
   filters: {
@@ -191,10 +182,6 @@ export default {
     },
     formatDate (value){
       return moment(value).format('L')
-    },
-    menuAction (action, item) {
-      console.log('action', action);
-      console.log('item', item);
     },
     getIcon (extension) {
       let ext = extension.toLowerCase();
@@ -238,6 +225,42 @@ export default {
           EventBus.$emit('onPreviewDocument', item)
         }
       }
+    },
+    deleteDocuments () {
+      const selectedFileIds = this.getSelected;
+      if (!selectedFileIds) return;
+      this.deleteDialog = true;
+    },
+    async confirmDelete () {
+      let promises = [];
+      const selectedDocumentIds = this.getSelected;
+      this.isDeleting = true
+      let self = this;
+      function deleteRequest(id) {
+        return new Promise(function(resolve) {
+          self.$store.dispatch('ProjectDocuments/deleteDocument', id).then(() => {
+            resolve()
+          })
+        })
+      }
+      for (let i = 0; i < selectedDocumentIds.length; i++) {
+        promises.push(await deleteRequest(selectedDocumentIds[i]));
+      }
+      Promise.all(promises).then(() => {
+        console.log(promises)
+        this.selected = [];
+        this.deleteDialog = false;
+        this.isDeleting = false;
+        this.$store.dispatch('ProjectDocuments/loadDocuments', {
+          ...this.searchLastPayload,
+          project_id: this.activeProject.entity_id
+        });
+        Vue.notify({
+          group: 'loggedIn',
+          type: 'success',
+          text: 'Files are deleted'
+        })
+      })
     }
   },
   watch: {
