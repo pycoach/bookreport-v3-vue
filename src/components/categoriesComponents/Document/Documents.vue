@@ -106,6 +106,7 @@ import {mapGetters} from 'vuex';
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
 import * as far from '@fortawesome/fontawesome-free-regular/index';
 import { EventBus } from '../../../components/categoriesComponents/Document/eventBus.js';
+import Vue from "vue";
 export default {
   name: 'Documents',
   props: {
@@ -122,7 +123,7 @@ export default {
     ...mapGetters('ProjectDocuments', ['searchOptions', 'searchLastPayload', 'getDocuments', 'getDocumentsCount', 'documentsLoading']),
     getSelected () {
       let selected;
-      return selected = this.selected.map(item => item.entity_id);
+      return selected = this.selected.map(item => item.file_id);
     },
     filesSelected () {
       let selected = this.selected.map(item => item.Name);
@@ -226,30 +227,38 @@ export default {
       }
     },
     deleteDocuments () {
-      const selectedDocumentIds = this.getSelected;
-      if (!selectedDocumentIds) return;
+      const selectedFileIds = this.getSelected;
+      if (!selectedFileIds) return;
       this.deleteDialog = true;
     },
     async confirmDelete () {
       let promises = [];
       const selectedDocumentIds = this.getSelected;
       this.isDeleting = true
-      const deleteRequest = (id) => {
-        for (let i = 0; i < selectedDocumentIds.length; i++) {
-          return new Promise((resolve) => {
-            this.$store.dispatch('ProjectDocuments/deleteDocument', selectedDocumentIds[i]).then(() => {
-              resolve(id)
-            })
+      let self = this;
+      function deleteRequest(id) {
+        return new Promise(function(resolve) {
+          self.$store.dispatch('ProjectDocuments/deleteDocument', id).then(() => {
+            resolve()
           })
-        }
-      };
+        })
+      }
       for (let i = 0; i < selectedDocumentIds.length; i++) {
         promises.push(await deleteRequest(selectedDocumentIds[i]));
       }
       Promise.all(promises).then(() => {
         console.log(promises)
-        this.deleteDialog = false
-        this.isDeleting = false
+        this.deleteDialog = false;
+        this.isDeleting = false;
+        this.$store.dispatch('ProjectDocuments/loadDocuments', {
+          ...this.searchLastPayload,
+          project_id: this.activeProject.entity_id
+        });
+        Vue.notify({
+          group: 'loggedIn',
+          type: 'success',
+          text: 'Files are deleted'
+        })
       })
     }
   },
