@@ -86,7 +86,7 @@ const actions = {
   async deleteDocument(context, entity_id) {
     let response;
     try {
-      response = await api().delete('/request_documents/' + entity_id);
+      response = await api().delete('/document/' + entity_id);
     } catch (e) {
       return
     }

@@ -234,15 +234,15 @@ export default {
       let promises = [];
       const selectedDocumentIds = this.getSelected;
       this.isDeleting = true
-      function deleteRequest(id) {
-        return new Promise(function(resolve) {
-          setTimeout(function () {
-            // this.$store.dispatch('ProjectDocuments/deleteDocument', selectedDocumentIds[i])
-            console.log('Delete file with ID - ', id);
-            resolve(id)
-          }, 500);
-        })
-      }
+      const deleteRequest = (id) => {
+        for (let i = 0; i < selectedDocumentIds.length; i++) {
+          return new Promise((resolve) => {
+            this.$store.dispatch('ProjectDocuments/deleteDocument', selectedDocumentIds[i]).then(() => {
+              resolve(id)
+            })
+          })
+        }
+      };
       for (let i = 0; i < selectedDocumentIds.length; i++) {
         promises.push(await deleteRequest(selectedDocumentIds[i]));
       }
