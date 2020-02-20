@@ -23,15 +23,15 @@ const getters = {
 }
 
 function get(context, URL, handler) {
-  api().get(URL).then(response => handler(context, response))
+  return api().get(URL).then(response => handler(context, response))
 }
 
 function post(context, URL, data, handler) {
-  api().post(URL, data).then(response => handler(context, response))
+  return api().post(URL, data).then(response => handler(context, response))
 }
 
 function put(context, data, handler) {
-  api().put(URL, data).then(response => handler(context, response))
+  return api().put(URL, data).then(response => handler(context, response))
 }
 
 function apiDelete(context, URL, id, handler) {
@@ -55,6 +55,7 @@ function handleReport_objectSave(context, response) {
   } else {
     context.commit('report_objectSuccess', report_object)
   }
+  return report_object
 }
 
 function handleReport_objectDelete(context, id, response) {
@@ -73,6 +74,7 @@ function handleGetReport_object(context, response) {
   } else {
     context.commit('setActiveReport_object', report_object)
   }
+  return report_object
 }
 
 function addIfPresent(source, destination, propertyName) {
@@ -93,16 +95,16 @@ const actions = {
   },
   saveReport_object(context, payload) {
     if (payload['entity_id']) {
-      put(context, payload, handleReport_objectSave)
+      return put(context, payload, handleReport_objectSave)
     } else {
-      post(context, URL, payload, handleReport_objectSave)
+      return post(context, URL, payload, handleReport_objectSave)
     }
   },
   deleteReport_object(context, id) {
     apiDelete(context, URL, id, handleReport_objectDelete)
   },
-  getReport_object(context, id) {
-    get(context, URL + '/' + id, handleGetReport_object)
+  getReport_object(context, id) {    
+    return get(context, URL + '/' + id, handleGetReport_object)
   }
 }
 
