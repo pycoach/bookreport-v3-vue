@@ -1,5 +1,8 @@
 <template>
   <div>
+    <v-overlay :value="isLoading">
+      <v-progress-circular indeterminate size="64" />
+    </v-overlay>
     <v-card>
       <v-toolbar dark color="primary" class="no-radius">
         <v-toolbar-title>View - {{file_name}}</v-toolbar-title>
@@ -7,7 +10,7 @@
           <span class="ml-5" v-if="currentEnteredCell">
             Snippet = 
             <strong v-if="isSelecting">
-              {{currentEnteredCell.coordinates[0] + currentEnteredCell.coordinates[1] + ': '}}
+              {{currentEnteredCell.coordinates[0] + String(Number(currentEnteredCell.coordinates[1]) + 1) + ': '}}
             </strong>
             {{currentEnteredCell.formula}}
           </span>
@@ -30,16 +33,16 @@
         v-model="tabs"
         :key="tabs"
         fixed-tabs
-        centered
         background-color="rgba(69, 90, 247, 0.08)"
         show-arrows
         class="rounded-tabs"
+        @change="requestSheetData"
       >
         <v-tabs-slider />
         <v-tab v-for="(sheet, n) in workbookSummary.sheets" :key="n" class="primary--text">
-          <span>Rows: {{sheet.rows}}</span>
-          <span>Columns: {{sheet.columns}}</span>
           <span><strong>{{sheet.title}}</strong></span>
+          <span class="font-weight-regular">Rows: {{sheet.rows}}</span>
+          <span class="font-weight-regular">Columns: {{sheet.columns}}</span>
         </v-tab>
         <v-tab-item v-for="(sheet, n) in workbookSummary.sheets" :key="n" class="tabItem">
           <WorkSheet
@@ -50,9 +53,6 @@
             @onSelect="handleCellSelect"
             @onCellEnter="handleCellEnter"
           />
-          {{n}}
-          {{sheet.columns}}
-          {{sheet.rows}}
         </v-tab-item>
       </v-tabs>
     </v-container>
@@ -64,25 +64,33 @@ import {mapState} from "vuex";
 import WorkSheet from '../components/WorkSheet'
 export default {
   name: 'ExcelViewer',
-  props: ['entity_id', 'file_name'],
+  props: ['file_id', 'file_name'],
   components: {
     WorkSheet
   },
   computed: {
-    ...mapState('ExcelServices', ['workbookSummary'])
+    ...mapState('ExcelServices', ['workbookSummary', 'isLoading'])
   },
   data: () => ({
-    tabs: null,
+    tabs: 0,
     isSelecting: false,
     currentEnteredCell: null,
     timer: null
   }),
   async mounted () {
-    await this.requestWorkbookSummary()
+    await this.requestWorkbookSummary();
+    await this.requestSheetData()
   },
   methods: {
     requestWorkbookSummary () {
-      this.$store.dispatch('ExcelServices/loadWorkbookSummary', this.entity_id)
+      this.$store.dispatch('ExcelServices/loadWorkbookSummary', this.file_id)
+    },
+    requestSheetData () {
+      const payload = {
+        file_id: this.file_id,
+        sheet: this.tabs
+      };
+      this.$store.dispatch('ExcelServices/loadSheetData', payload)
     },
     handleCellSelect (id) {
       id ? this.isSelecting = true : this.isSelecting = false;
@@ -102,12 +110,25 @@ export default {
 }
 </script>
 
-<style class="scss">
+<style lang="scss">
   .pt-0 .v-content__wrap {
     padding-top: 0;
   }
   .rounded-tabs .v-tabs-bar{
+    height: auto;
     border-top-left-radius: 5px;  
-    border-top-right-radius: 5px;  
+    border-top-right-radius: 5px;
+    .v-tab {
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 15px;
+      border-right: 1px dashed #455af7;
+      &:last-child {
+        border-right: none;
+      }
+      span {
+        margin: 3px 0;
+      }
+    }
   }
 </style>

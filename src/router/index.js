@@ -137,7 +137,7 @@ const router =  new Router({
       props: true
     },
     {
-      path: '/excel/viewer/:entity_id/:file_name',
+      path: '/excel/viewer/:file_id/:file_name',
       name: 'excelviewer',
       component: ExcelViewer,
       meta: {

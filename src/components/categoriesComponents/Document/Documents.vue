@@ -226,7 +226,7 @@ export default {
       }
     },
     showExcel (item) {
-      window.open(`/excel/viewer/${item.entity_id}/${item.name}`)
+      window.open(`/excel/viewer/${item.file_id}/${item.name}`)
     },
     handlePreviewFileDialog (item) {
       const extension = item.extension.toLowerCase();

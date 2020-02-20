@@ -1,7 +1,16 @@
 <template>
   <div class="v-data-table disable-hover theme--light">
+    {{sheetData}}
     <div class="v-data-table__wrapper">
       <table @mouseleave="onWorkSheetLeave()">
+        <v-overlay 
+          :value="isLoadingSheetData" 
+          absolute
+          opacity="1"
+          color="#fff"
+        >
+          <v-progress-circular color="primary" indeterminate size="64" />
+        </v-overlay>
         <thead>
           <td class="disabled-td" />
           <th v-for="heading in headings">
@@ -28,6 +37,7 @@
 </template>
 
 <script>
+import {mapState} from 'vuex';
 export default {
   name: 'WorkSheet',
   props: ['columns', 'rows', 'activeTab'],
@@ -35,6 +45,9 @@ export default {
     headings: [],
     selectedCell: null
   }),
+  computed: {
+    ...mapState('ExcelServices', ['sheetData', 'isLoadingSheetData'])
+  },
   created () {
     window.addEventListener('keydown', this.handleKeyDown)
   },
