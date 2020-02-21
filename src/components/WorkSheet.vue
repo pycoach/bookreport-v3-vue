@@ -1,15 +1,15 @@
 <template>
   <div class="v-data-table disable-hover theme--light">
     <div class="v-data-table__wrapper">
-      <table @mouseleave="onWorkSheetLeave()">
-        <v-overlay 
-          :value="isLoadingSheetData" 
-          absolute
-          opacity="1"
-          color="#fff"
-        >
-          <v-progress-circular color="primary" indeterminate size="64" />
-        </v-overlay>
+      <v-overlay
+        :value="isLoadingSheetData"
+        absolute
+        opacity="1"
+        color="#fff"
+      >
+        <v-progress-circular color="primary" indeterminate size="64" />
+      </v-overlay>
+      <table v-show="!isLoadingSheetData" @mouseleave="onWorkSheetLeave()">
         <thead>
           <td class="disabled-td" />
           <th v-for="heading in headings">
@@ -17,23 +17,70 @@
           </th>
         </thead>
         <tbody>
-        <tr v-for="(row, yAxis) in rows">
-          <td class="disabled-td">
-            {{ yAxis + 1 }}
-          </td>
-          <td 
-            v-for="(column, xAxis) in columns" :id="activeTab + 'cell_' + String(xAxis) + '-' + String(yAxis)"
-            @click="onCellClick(String(xAxis) + '-' + String(yAxis))"
-            @mouseenter="onCellEnter(String(xAxis) + '-' + String(yAxis))"
-          >
-            <!-- Getting actual coordinated-->
-            <!-- xAxix - headings[xAxis]-->
-            <!-- yAxis - Number(yAxis + 1)][2]-->
-            <template v-if="availableCells[headings[xAxis] + Number(yAxis + 1)]">
-              {{availableCells[headings[xAxis] + Number(yAxis + 1)][2]}}
-            </template>
-          </td>
-        </tr>
+        <!-- Showing all Rows -->
+        <template v-if="showAllRows">
+          <tr v-for="(row, yAxis) in rows">
+            <td class="disabled-td">
+              {{ yAxis + 1 }}
+            </td>
+            <td 
+              v-for="(column, xAxis) in columns" :id="activeTab + 'cell_' + String(xAxis) + '-' + String(yAxis)"
+              @click="onCellClick(String(xAxis) + '-' + String(yAxis))"
+              @mouseenter="onCellEnter(String(xAxis) + '-' + String(yAxis))"
+            >
+              <!-- Getting actual coordinates-->
+              <!-- xAxis - headings[xAxis]-->
+              <!-- yAxis - Number(yAxis + 1)-->
+              <template v-if="filledCells[headings[xAxis] + Number(yAxis + 1)]">
+                {{filledCells[headings[xAxis] + Number(yAxis + 1)][2]}}
+              </template>
+            </td>
+          </tr>
+        </template>
+        <!-- Showing first and last Rows -->
+        <template v-else-if="!showAllRows">
+          <tr v-for="(row, yAxis) in firstRows">
+            <td class="disabled-td">
+              {{ yAxis + 1 }}
+            </td>
+            <td
+              v-for="(column, xAxis) in columns" :id="activeTab + 'cell_' + String(xAxis) + '-' + String(yAxis)"
+              @click="onCellClick(String(xAxis) + '-' + String(yAxis))"
+              @mouseenter="onCellEnter(String(xAxis) + '-' + String(yAxis))"
+            >
+              <!-- Getting actual coordinates-->
+              <!-- xAxis - headings[xAxis]-->
+              <!-- yAxis - Number(yAxis + 1)-->
+              <template v-if="filledCells[headings[xAxis] + Number(yAxis + 1)]">
+                {{filledCells[headings[xAxis] + Number(yAxis + 1)][2]}}
+              </template>
+            </td>
+          </tr>
+          <!-- Expand button row-->
+          <tr @mouseenter="onWorkSheetLeave()" class="expand-tr">
+            <td></td>
+            <td class="expand-table-td">
+              ↑ First {{firstRows}} rows ↑ ... ↓ Last {{lastRows}} rows ↓
+            </td>
+          </tr>
+          <tr v-for="(row, yAxis) in lastRows + 1">
+            <td class="disabled-td">
+              {{ rows - lastRows + yAxis }}
+            </td>
+            <td
+              v-for="(column, xAxis) in columns" :id="activeTab + 'cell_' + String(xAxis) + '-' + String(rows - lastRows + yAxis - 1)"
+              @click="onCellClick(String(xAxis) + '-' + String(rows - lastRows + yAxis - 1))"
+              @mouseenter="onCellEnter(String(xAxis) + '-' + String(rows - lastRows + yAxis - 1))"
+            >
+              <!-- Getting actual coordinates-->
+              <!-- xAxis - headings[xAxis]-->
+              <!-- yAxis - Number(rows - lastRows + yAxis)-->
+              <template v-if="filledCells[headings[xAxis] + Number(rows - lastRows + yAxis)]">
+                {{filledCells[headings[xAxis] + Number(rows - lastRows + yAxis)][2]}}
+              </template>
+            </td>
+          </tr>
+        </template>
         </tbody>
       </table>
     </div>
@@ -48,7 +95,10 @@ export default {
   data: () => ({
     headings: [],
     selectedCell: null,
-    availableCells: {}
+    filledCells: {},
+    showAllRows: false,
+    firstRows: 10,
+    lastRows: 10
   }),
   computed: {
     ...mapState('ExcelServices', ['sheetData', 'isLoadingSheetData'])
@@ -57,6 +107,9 @@ export default {
     window.addEventListener('keydown', this.handleKeyDown)
   },
   async mounted () {
+    if (this.rows <= 21) {
+      this.showAllRows = true;
+    }
     await this.requestSheetData();
     this.initHeadings();
     this.scrappingCells();
@@ -69,7 +122,7 @@ export default {
     },
     scrappingCells () {
       for (let i = 0; i < this.sheetData.length; i++) {
-        this.availableCells[this.sheetData[i][0]] = this.sheetData[i]
+        this.filledCells[this.sheetData[i][0]] = this.sheetData[i]
       }
     },
     selectCells (from, to) {
@@ -144,6 +197,9 @@ export default {
 
 <style lang="scss" scoped>
   .v-data-table__wrapper {
+    table {
+      position: relative;
+    }
     td {
       border-left: 1px solid #F1F4F8;
       transition: 0.3s;
@@ -169,5 +225,22 @@ export default {
         background: rgb(0, 0, 0, 0) !important;
       }
     }
+  }
+  .expand-tr {
+    height: 60px;
+  }
+  .expand-table-td {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: inherit;
+    left: 0;
+    background: #fff;
+    border: none !important;
+    -webkit-box-shadow: 0 0 80px 0 #a2a2a2;
+    -moz-box-shadow:    0 0 80px 0 #a2a2a2;
+    box-shadow:         0 0 80px 0 #a2a2a2;
   }
 </style>

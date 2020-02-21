@@ -7,10 +7,9 @@
       <v-toolbar dark color="primary" class="no-radius">
         <v-toolbar-title>View - {{file_name}}</v-toolbar-title>
         <v-scroll-y-transition>
-          <span class="ml-5" v-if="currentEnteredCell">
-            Snippet = 
+          <span class="ml-5" v-if="(currentEnteredCell && currentEnteredCell.formula) || (currentEnteredCell && isSelecting)">
             <strong v-if="isSelecting">
-              {{currentEnteredCell.coordinates[0] + String(Number(currentEnteredCell.coordinates[1]) + 1) + ': '}}
+              Snippet = {{currentEnteredCell.coordinates[0] + String(Number(currentEnteredCell.coordinates[1]) + 1) + ': '}}
             </strong>
             {{currentEnteredCell.formula}}
           </span>
