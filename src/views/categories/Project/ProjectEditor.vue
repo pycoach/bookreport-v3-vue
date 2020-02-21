@@ -54,7 +54,7 @@
       <v-tab-item key="3">
         <Search/>
         <FiltersList />
-        <Documents />
+        <Documents onPreviewExcel="previewExcel" />
         <UploadDialog />
         <PreviewDialog />
       </v-tab-item>

@@ -9,6 +9,7 @@ const About = () => import('Views/About')
 const Dashboard = () => import('Views/Dashboard')
 const ProfileEditor = () => import('Views/ProfileEditor')
 const FileViewer = () => import('Views/FileViewer')
+const ExcelViewer = () => import('Views/ExcelViewer')
 
 Vue.use(Router)
 
@@ -132,6 +133,18 @@ const router =  new Router({
         hideNavigation: true,
         requiresAuth: true,
         title: 'File Viewer',
+      },
+      props: true
+    },
+    {
+      path: '/excel/viewer/:file_id/:file_name',
+      name: 'excelviewer',
+      component: ExcelViewer,
+      meta: {
+        hideNavigation: true,
+        requiresAuth: true,
+        title: 'Excel Viewer',
+        contentClassName: 'pt-0'
       },
       props: true
     }

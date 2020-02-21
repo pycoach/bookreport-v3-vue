@@ -216,11 +216,14 @@ export default {
         this.selected.splice(indexOfItem, 1)
       }
     },
+    showExcel (item) {
+      window.open(`/excel/viewer/${item.file_id}/${item.name}`)
+    },
     handlePreviewFileDialog (item) {
       const extension = item.extension.toLowerCase();
       if (extension !== "zip") {
         if (extension === "csv" || extension.includes("xls")) {
-          EventBus.$emit('onPreviewExcel', item);
+          this.showExcel(item)
         } else {
           EventBus.$emit('onPreviewDocument', item)
         }
