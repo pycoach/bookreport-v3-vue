@@ -82,6 +82,15 @@ const actions = {
     context.commit('setLastPayload', newPayload);
     context.commit('setLoading', true);
     post(context, URL, newPayload, handleDocumentLoad)
+  },
+  async deleteDocument(context, file_id) {
+    let response;
+    try {
+      response = await api().delete('/document/' + file_id);
+    } catch (e) {
+      return
+    }
+    return response['data']
   }
 };
 
