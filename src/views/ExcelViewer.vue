@@ -36,7 +36,6 @@
         background-color="rgba(69, 90, 247, 0.08)"
         show-arrows
         class="rounded-tabs"
-        @change="requestSheetData"
       >
         <v-tabs-slider />
         <v-tab v-for="(sheet, n) in workbookSummary.sheets" :key="n" class="primary--text">
@@ -50,6 +49,7 @@
             :columns=sheet.columns
             :rows=sheet.rows
             :activeTab="tabs"
+            :file_id="file_id"
             @onSelect="handleCellSelect"
             @onCellEnter="handleCellEnter"
           />
@@ -79,18 +79,10 @@ export default {
   }),
   async mounted () {
     await this.requestWorkbookSummary();
-    await this.requestSheetData()
   },
   methods: {
     requestWorkbookSummary () {
       this.$store.dispatch('ExcelServices/loadWorkbookSummary', this.file_id)
-    },
-    requestSheetData () {
-      const payload = {
-        file_id: this.file_id,
-        sheet: this.tabs
-      };
-      this.$store.dispatch('ExcelServices/loadSheetData', payload)
     },
     handleCellSelect (id) {
       id ? this.isSelecting = true : this.isSelecting = false;

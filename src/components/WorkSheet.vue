@@ -1,6 +1,5 @@
 <template>
   <div class="v-data-table disable-hover theme--light">
-    {{sheetData}}
     <div class="v-data-table__wrapper">
       <table @mouseleave="onWorkSheetLeave()">
         <v-overlay 
@@ -18,16 +17,21 @@
           </th>
         </thead>
         <tbody>
-        <tr v-for="(_, rowIndex) in rows">
+        <tr v-for="(row, yAxis) in rows">
           <td class="disabled-td">
-            {{ rowIndex + 1 }}
+            {{ yAxis + 1 }}
           </td>
           <td 
-            v-for="(_, index) in columns" :id="activeTab + 'cell_' + String(index) + '-' + String(rowIndex)"
-            @click="onCellClick(String(index) + '-' + String(rowIndex))"
-            @mouseenter="onCellEnter(String(index) + '-' + String(rowIndex))"
+            v-for="(column, xAxis) in columns" :id="activeTab + 'cell_' + String(xAxis) + '-' + String(yAxis)"
+            @click="onCellClick(String(xAxis) + '-' + String(yAxis))"
+            @mouseenter="onCellEnter(String(xAxis) + '-' + String(yAxis))"
           >
-            Test {{Math.floor(Math.random(0, 99999) * 1000)}}
+            <!-- Getting actual coordinated-->
+            <!-- xAxix - headings[xAxis]-->
+            <!-- yAxis - Number(yAxis + 1)][2]-->
+            <template v-if="availableCells[headings[xAxis] + Number(yAxis + 1)]">
+              {{availableCells[headings[xAxis] + Number(yAxis + 1)][2]}}
+            </template>
           </td>
         </tr>
         </tbody>
@@ -40,10 +44,11 @@
 import {mapState} from 'vuex';
 export default {
   name: 'WorkSheet',
-  props: ['columns', 'rows', 'activeTab'],
+  props: ['file_id', 'columns', 'rows', 'activeTab'],
   data: () => ({
     headings: [],
-    selectedCell: null
+    selectedCell: null,
+    availableCells: {}
   }),
   computed: {
     ...mapState('ExcelServices', ['sheetData', 'isLoadingSheetData'])
@@ -51,13 +56,20 @@ export default {
   created () {
     window.addEventListener('keydown', this.handleKeyDown)
   },
-  mounted () {
-    this.initHeadings()
+  async mounted () {
+    await this.requestSheetData();
+    this.initHeadings();
+    this.scrappingCells();
   },
   methods: {
     initHeadings () {
       for (let i = 0; i < this.columns; i++) {
         this.headings.push(String.fromCharCode(97 + i).toUpperCase())
+      }
+    },
+    scrappingCells () {
+      for (let i = 0; i < this.sheetData.length; i++) {
+        this.availableCells[this.sheetData[i][0]] = this.sheetData[i]
       }
     },
     selectCells (from, to) {
@@ -115,7 +127,14 @@ export default {
     },
     onWorkSheetLeave () {
       this.$emit('onCellEnter', null);
-    }
+    },
+    requestSheetData () {
+      const payload = {
+        file_id: this.file_id,
+        sheet: this.activeTab
+      };
+      return this.$store.dispatch('ExcelServices/loadSheetData', payload)
+    },
   },
   destroyed () {
     window.removeEventListener('keydown', this.handleKeyDown)
