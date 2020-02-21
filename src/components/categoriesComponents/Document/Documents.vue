@@ -123,7 +123,7 @@ export default {
     ...mapGetters('ProjectDocuments', ['searchOptions', 'searchLastPayload', 'getDocuments', 'getDocumentsCount', 'documentsLoading']),
     getSelected () {
       let selected;
-      return selected = this.selected.map(item => item.file_id);
+      return selected = this.selected.map(item => item.entity_id);
     },
     filesSelected () {
       let selected = this.selected.map(item => item.Name);
