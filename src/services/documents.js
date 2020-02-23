@@ -3,8 +3,10 @@ import api from 'Api'
 import moment from "moment";
 
 const URL = '/search';
+
 const state = {
-  searchType: 'basic',
+  searchType: 'hidden',
+  filterType: 'hidden',
   projectId: '',
   searchOptions: {},
   searchLastPayload: {},
@@ -22,6 +24,10 @@ const state = {
 const getters = {
   searchType: state => {
     return state.searchType
+  },
+
+  filterType: state => {
+    return state.filterType
   },
   searchOptions: state => {
     return state.searchOptions
@@ -101,6 +107,9 @@ const mutations = {
   setSearchType(state, type) {
     state.searchType = type
   },
+  setFilterType(state, type) {
+    state.filterType = type
+  },
   setOptions(state, newOptions) {
     state.searchOptions = newOptions
   },
@@ -144,6 +153,7 @@ const mutations = {
         text: `${key} (${response[key]})`
       })
     }
+
     transactions.splice(0, 0, {value: null, text: "All transactions"});
     transactions.splice(1, 0, {value: "No trade", text: "No transaction"});
     state.filterByTransaction = transactions;

@@ -54,7 +54,6 @@ const actions = {
       } else {
         userData['redirect'] =   user.redirect
         context.dispatch('getUserLogin', userData)
-        
       }
     })
   },

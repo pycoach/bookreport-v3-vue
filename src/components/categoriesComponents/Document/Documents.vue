@@ -1,11 +1,20 @@
 <template>
-  <v-layout wrap>
+  <v-layout wrap class="mt-4">
     <v-row>
       <v-col md="12" xs="12">
         <v-card>
           <v-toolbar>
             <v-card-title class="headline d-flex justify-space-between">
               Documents
+               <div class="vertical-divider vertical-divider--small" />
+                <img class="mr-3" src="../../../assets/search.svg" height="17px" alt="" />
+                <v-text-field
+                  class="card-search"
+                  @input="onSearch"
+                  v-model="searchQuery" 
+                  placeholder="Find Documents"
+                >
+                </v-text-field>
               <div class="d-flex align-center">
                 <v-btn fab small text disabled>
                   <v-icon>file_download</v-icon>
@@ -132,6 +141,8 @@ export default {
   },
   data () {
     return {
+      searchQuery: null,
+      timer: null,
       singleSelect: false,
       selected: [],
       headers: [
@@ -177,6 +188,18 @@ export default {
     }
   },
   methods: {
+    onSearch(value) {
+      if (this.timer) clearTimeout(this.timer);
+      this.timer = setTimeout(() => {
+        this.$store.dispatch('ProjectDocuments/loadDocuments', { 
+          project_id: this.activeProject.entity_id, 
+          basic: value 
+        })
+      }, 500);
+    },
+    resetForm () {
+      this.$refs.form.reset()
+    },
     handleUploadDialog () {
       EventBus.$emit('onUploadClick')
     },

@@ -98,7 +98,6 @@ button {
  }
 
  .btn-primary {
-   
         background: $primary !important;
         border-radius: 11px !important;
         height: 40px !important;
@@ -123,6 +122,41 @@ button {
            
       }
  }
+
+
+.btn-white {
+  background: #fff !important;
+  border-radius: 11px !important;
+  height: 40px !important;
+ 
+  vertical-align: center;
+  padding: 0px 30px !important;
+  font-size: 17px;
+  font-weight: 500;
+  color:  $dark-grey;
+  text-transform: none !important;
+  box-shadow: 3px 4px 41px rgba(0, 0, 0, 0.06);
+
+  &:hover {
+    background: rgb(250, 250, 250) !important;
+    opacity: 1;
+   
+    
+  }
+
+  &:before {
+    display: none;
+  }
+&--small {
+  padding: 8px 30px !important;
+  height: 33px !important;
+  box-shadow: none !important;
+}
+
+&.v-btn--disabled {
+     background: lighten($primary, 40% )  !important;
+  }
+}
 
 
  .btn-grey {
