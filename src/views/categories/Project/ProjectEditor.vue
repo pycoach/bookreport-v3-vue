@@ -52,8 +52,18 @@
       </v-tab-item>
   
       <v-tab-item key="3">
-        <Search/>
-        <FiltersList />
+
+        <template v-if="(filterType == 'show' && searchType == 'advanced') || (filterType == 'show' && searchType == 'hidden') || (filterType == 'hidden' && searchType == 'hidden')">  
+           <Search/>
+           <FiltersList />
+        </template>
+         <template v-if="(filterType == 'hidden' && searchType == 'advanced')">  
+           <FiltersList />
+           <Search/>
+        </template>
+      
+        
+        
         <Documents onPreviewExcel="previewExcel" />
         <UploadDialog />
         <PreviewDialog />
@@ -137,11 +147,15 @@ export default {
       this.$store.commit('setActiveProject', {user_id: this.user_id})
     }    
   },
+
   computed: {
+    ...mapGetters('ProjectDocuments', ['searchType']),
+    ...mapGetters('ProjectDocuments', ['filterType']),
     ...mapGetters(['activeProject', 'user', 'activeProjectIsLoading']),
     ...mapGetters('ProjectDocuments', ['searchLastPayload']),
     ...mapState('ProjectEditor', ['editMode', 'name', 'users', 'user_id', 'user_ids', 'description', 'clients'])
   },
+  
   methods: {
     async saveProject(e) {
       this.$store.commit('ProjectEditor/setName', e.name);

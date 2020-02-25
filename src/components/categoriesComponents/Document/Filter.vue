@@ -1,12 +1,41 @@
 <template>
-  <v-form ref="form" @submit.prevent="true">
+  <v-btn  v-if="filterType == 'hidden'"  class="mb- 2 btn-white "
+          @click="onTypeChange('show')">
+            <img class="mr-3" src="../../../assets/search.svg" height="17px" alt="" />
+            Filter
+  </v-btn>
+  <v-form v-else-if="filterType == 'show'" ref="form" @submit.prevent="true">
     <v-layout wrap>
       <v-row>
         <v-col md="12" xs="12">
           <v-card>
             <v-toolbar>
-              <v-card-title class="headline">
+              <v-card-title class="headline d-flex justify-space-between">
                 Filter
+                <div class="ml-3">
+                  <v-btn
+                    depressed 
+                    text 
+                    color="primary" 
+                    class="font-weight-bold"
+                    @click="resetForm"
+                    :disabled="documentsLoading"
+                  >
+                   <i class="material-icons">refresh</i>
+                    CLEAR FILTER
+                  </v-btn>
+
+                  <v-btn
+                  depressed 
+                  text 
+                  color="primary" 
+                  class="font-weight-bold"
+                  v-if="searchType !== 'hidden'"
+                  @click="onTypeChange('hidden')"
+                >
+                  —
+                </v-btn>
+              </div>
               </v-card-title>
             </v-toolbar>
             <v-expansion-panels>
@@ -17,18 +46,7 @@
                 <v-expansion-panel-content>
                   <v-container fluid class="pt-0">
                     <v-layout row>
-                      <v-flex xs4 class="d-flex align-center justify-center px-4">
-                        <v-btn 
-                          color="primary"
-                          text
-                          @click="resetForm"
-                          :disabled="documentsLoading"
-                        >
-                          <i class="material-icons">refresh</i>
-                          Clear Filter
-                        </v-btn>
-                      </v-flex>
-                      <v-flex xs4 class="px-4">
+                      <v-flex xs3 class="px-4">
                         <v-select
                           v-model="uploadSet"
                           @change="getDocuments"
@@ -42,7 +60,7 @@
                           class="wideSelect"
                         />
                       </v-flex>
-                      <v-flex xs4 class="px-4">
+                      <v-flex xs3 class="px-4">
                         <v-select
                           v-model="duplicate"
                           @change="getDocuments"
@@ -53,9 +71,7 @@
                           class="wideSelect"
                         />
                       </v-flex>
-                    </v-layout>
-                    <v-layout row>
-                      <v-flex xs4 class="px-4">
+                      <v-flex xs3 class="px-4">
                         <v-select
                           v-model="trade"
                           @change="getDocuments"
@@ -67,7 +83,8 @@
                           single-line
                         />
                       </v-flex>
-                      <v-flex xs4 class="px-4">
+                      
+                      <v-flex xs3 class="px-4">
                         <v-select
                           v-model="transaction"
                           @change="getDocuments"
@@ -79,7 +96,9 @@
                           single-line
                         />
                       </v-flex>
-                      <v-flex xs4 class="px-4">
+                    </v-layout>
+                    <v-layout row>
+                      <v-flex xs3 class="px-4">
                         <v-select
                           v-model="documentType"
                           @change="getDocuments"
@@ -92,9 +111,7 @@
                           class="wideSelect"
                         />
                       </v-flex>
-                    </v-layout>
-                    <v-layout row>
-                      <v-flex xs4 class="px-4">
+                      <v-flex xs3 class="px-4">
                         <v-select
                           v-model="size"
                           @change="getDocuments"
@@ -106,7 +123,7 @@
                           single-line
                         />
                       </v-flex>
-                      <v-flex xs4 class="px-4">
+                      <v-flex xs3 class="px-4">
                         <v-select
                           v-model="type"
                           @change="getDocuments"
@@ -118,7 +135,7 @@
                           single-line
                         />
                       </v-flex>
-                      <v-flex xs4 class="px-4">
+                      <v-flex xs3 class="px-4">
                         <v-select
                           v-model="supported"
                           @change="getDocuments"
@@ -159,6 +176,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters('ProjectDocuments', ['filterType']),
     ...mapGetters(['activeProject']),
     ...mapGetters('ProjectDocuments', ['documentsLoading']),
     ...mapState('ProjectDocuments', ['filterByUploadSet', 'filterByTrade', 'filterByTransaction', 'filterByDocumentTypes', 'filterByFileSizes', 'filterByFileTypes', 'searchLastPayload'])
@@ -176,6 +194,9 @@ export default {
         supported: this.supported,
         duplicate: this.duplicate
       });
+    },
+    onTypeChange (newType) {
+      this.$store.commit('ProjectDocuments/setFilterType', newType)
     },
     resetForm () {
       this.$refs.form.reset();
