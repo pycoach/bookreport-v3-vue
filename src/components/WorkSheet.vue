@@ -1,15 +1,15 @@
 <template>
   <div class="v-data-table disable-hover theme--light">
     <div class="v-data-table__wrapper">
-      <table @mouseleave="onWorkSheetLeave()">
-        <v-overlay 
-          :value="isLoadingSheetData" 
-          absolute
-          opacity="1"
-          color="#fff"
-        >
-          <v-progress-circular color="primary" indeterminate size="64" />
-        </v-overlay>
+      <v-overlay
+        :value="isLoadingSheetData"
+        absolute
+        opacity="1"
+        color="#fff"
+      >
+        <v-progress-circular color="primary" indeterminate size="64" />
+      </v-overlay>
+      <table v-show="!isLoadingSheetData" @mouseleave="onWorkSheetLeave()">
         <thead>
           <td class="disabled-td" />
           <th v-for="heading in headings">
@@ -17,23 +17,93 @@
           </th>
         </thead>
         <tbody>
-        <tr v-for="(row, yAxis) in rows">
-          <td class="disabled-td">
-            {{ yAxis + 1 }}
-          </td>
-          <td 
-            v-for="(column, xAxis) in columns" :id="activeTab + 'cell_' + String(xAxis) + '-' + String(yAxis)"
-            @click="onCellClick(String(xAxis) + '-' + String(yAxis))"
-            @mouseenter="onCellEnter(String(xAxis) + '-' + String(yAxis))"
-          >
-            <!-- Getting actual coordinated-->
-            <!-- xAxix - headings[xAxis]-->
-            <!-- yAxis - Number(yAxis + 1)][2]-->
-            <template v-if="availableCells[headings[xAxis] + Number(yAxis + 1)]">
-              {{availableCells[headings[xAxis] + Number(yAxis + 1)][2]}}
-            </template>
-          </td>
-        </tr>
+        <!-- Showing all Rows -->
+        <template v-if="showAllRows">
+          <tr v-for="(row, yAxis) in rows">
+            <td class="disabled-td">
+              {{ yAxis + 1 }}
+            </td>
+            <td 
+              v-for="(column, xAxis) in columns" :id="activeTab + 'cell_' + String(xAxis) + '-' + String(yAxis)"
+              @click="onCellClick(String(xAxis) + '-' + String(yAxis))"
+              @mouseenter="onCellEnter(String(xAxis) + '-' + String(yAxis))"
+            >
+              <!-- Getting actual coordinates-->
+              <!-- xAxis - headings[xAxis]-->
+              <!-- yAxis - Number(yAxis + 1)-->
+              <template v-if="filledCells[headings[xAxis] + Number(yAxis + 1)] && !isGettingSnippets">
+                {{filledCells[headings[xAxis] + Number(yAxis + 1)][2]}}
+              </template>
+              <template v-else-if="isGettingSnippets">
+                <v-skeleton-loader
+                  loading
+                  type="chip"
+                  class="mx-0"
+                />
+              </template>
+            </td>
+          </tr>
+        </template>
+        <!-- Showing first and last Rows -->
+        <template v-else-if="!showAllRows">
+          <!-- First Rows -->
+          <tr v-for="(row, yAxis) in Number(firstRows)" :key="yAxis + 1">
+            <td class="disabled-td">
+              {{ yAxis + 1 }}
+            </td>
+            <td
+              v-for="(column, xAxis) in columns" :id="activeTab + 'cell_' + String(xAxis) + '-' + String(yAxis)"
+              @click="onCellClick(String(xAxis) + '-' + String(yAxis))"
+              @mouseenter="onCellEnter(String(xAxis) + '-' + String(yAxis))"
+            >
+              <!-- Getting actual coordinates-->
+              <!-- xAxis - headings[xAxis]-->
+              <!-- yAxis - Number(yAxis + 1)-->
+              <template v-if="filledCells[headings[xAxis] + Number(yAxis + 1)] && !isGettingSnippets">
+                {{filledCells[headings[xAxis] + Number(yAxis + 1)][2]}}
+              </template>
+              <template v-else-if="isGettingSnippets">
+                <v-skeleton-loader
+                  loading
+                  type="chip"
+                  class="mx-0"
+                />
+              </template>
+            </td>
+          </tr>
+          <!-- Paginator -->
+          <WorkSheetPaginator
+            :rowsCount="rows"
+            :isFetching="isFetching"
+            @mouseenter="onWorkSheetLeave()"
+            @onLoad="requestSheetDataDetailed($event)"
+          />
+          <!-- Last Rows -->
+          <tr v-for="(row, yAxis) in Number(lastRows)" :key="'last' + (rows - lastRows + yAxis)">
+            <td class="disabled-td">
+              {{ rows - lastRows + yAxis + 1 }}
+            </td>
+            <td
+              v-for="(column, xAxis) in columns" :id="activeTab + 'cell_' + String(xAxis) + '-' + String(rows - lastRows + yAxis)"
+              @click="onCellClick(String(xAxis) + '-' + String(rows - lastRows + yAxis))"
+              @mouseenter="onCellEnter(String(xAxis) + '-' + String(rows - lastRows + yAxis))"
+            >
+              <!-- Getting actual coordinates-->
+              <!-- xAxis - headings[xAxis]-->
+              <!-- yAxis - rows - lastRows + yAxis + 1-->
+              <template v-if="filledCells[headings[xAxis] + Number(rows - lastRows + yAxis + 1)] && !isGettingSnippets">
+                {{filledCells[headings[xAxis] + Number(rows - lastRows + yAxis + 1)][2]}}
+              </template>
+              <template v-else-if="isGettingSnippets">
+                <v-skeleton-loader
+                  loading
+                  type="chip"
+                  class="mx-0"
+                />
+              </template>
+            </td>
+          </tr>
+        </template>
         </tbody>
       </table>
     </div>
@@ -42,24 +112,39 @@
 
 <script>
 import {mapState} from 'vuex';
+import WorkSheetPaginator from './WorkSheetPaginator';
 export default {
   name: 'WorkSheet',
-  props: ['file_id', 'columns', 'rows', 'activeTab'],
+  components: {
+    WorkSheetPaginator
+  },
+  props: ['sheetName', 'fileId', 'columns', 'rows', 'activeTab'],
   data: () => ({
     headings: [],
     selectedCell: null,
-    availableCells: {}
+    selectedCells: {},
+    filledCells: {},
+    showAllRows: false,
+    sheetSnippets: [],
+    firstRows: 10,
+    lastRows: 10,
+    isFetching: false,
+    isGettingSnippets: false
   }),
   computed: {
-    ...mapState('ExcelServices', ['sheetData', 'isLoadingSheetData'])
+    ...mapState('ExcelServices', ['sheetData', 'isLoadingSheetData', 'allSnippets'])
   },
   created () {
     window.addEventListener('keydown', this.handleKeyDown)
   },
   async mounted () {
+    if (this.rows <= 21) {
+      this.showAllRows = true;
+    }
     await this.requestSheetData();
     this.initHeadings();
     this.scrappingCells();
+    this.requestSnippets()
   },
   methods: {
     initHeadings () {
@@ -69,7 +154,7 @@ export default {
     },
     scrappingCells () {
       for (let i = 0; i < this.sheetData.length; i++) {
-        this.availableCells[this.sheetData[i][0]] = this.sheetData[i]
+        this.filledCells[this.sheetData[i][0]] = this.sheetData[i]
       }
     },
     selectCells (from, to) {
@@ -82,10 +167,32 @@ export default {
         }
       }
       this.removeTemporaryHighlights()
-      // Adding temporary highlight classes to cells
+      let filledCells = [];
       for (let i = 0; i < activeCoordinates.length; i++) {
-        document.getElementById(this.activeTab + 'cell_' + activeCoordinates[i]).classList.add('highlight-temp')
+        let cell = document.getElementById(this.activeTab + 'cell_' + activeCoordinates[i]);
+        // Adding temporary highlight classes to cells
+        if (cell) {
+          cell.classList.add('highlight-temp');
+        }
+        // Getting filled cells from selected
+        if (this.filledCells[this.headings[activeCoordinates[i].split('-')[0]] + (Number(activeCoordinates[i].split('-')[1]) + 1)]) {
+          filledCells.push(this.headings[activeCoordinates[i].split('-')[0]] + (Number(activeCoordinates[i].split('-')[1]) + 1))
+        }
       }
+      let self = this;
+      this.selectedCells = {
+        from: this.headings[Math.min(...cordsX)] + (Number(Math.min(...cordsY)) + 1),
+        to: this.headings[Math.max(...cordsX)] + (Number(Math.max(...cordsY)) + 1),
+        colRange: [(Math.min(...cordsX)) + 1, Math.max(...cordsX) + 1],
+        rowRange: [(Math.min(...cordsY)) + 1, Math.max(...cordsY) + 1],
+        get values () {
+          let values = [];
+          for (let key of filledCells) {
+            values.push(self.filledCells[key])
+          }
+          return values
+        }
+      };
     },
     resetSelection () {
       this.$emit('onSelect', false)
@@ -94,19 +201,18 @@ export default {
     },
     removeTemporaryHighlights () {
       let temporaryCells = document.querySelectorAll('.highlight-temp')
+      if (!temporaryCells.length) return;
       for (let i = 0; i < temporaryCells.length; i++) {
         temporaryCells[i].classList.remove('highlight-temp')
       }
     },
     onCellClick (id) {
       if (this.selectedCell) {
-        let temporaryCells = document.querySelectorAll('.highlight-temp')
-        for (let i = 0; i < temporaryCells.length; i++) {
-          temporaryCells[i].classList.add('highlight')
-        }
+        this.highlightSnippets();
+        this.setSnippets();
         this.resetSelection();
       } else {
-        this.selectedCell = id
+        this.selectedCell = id;
         this.$emit('onSelect', true)
       }
     },
@@ -130,11 +236,69 @@ export default {
     },
     requestSheetData () {
       const payload = {
-        file_id: this.file_id,
+        file_id: this.fileId,
         sheet: this.activeTab
       };
       return this.$store.dispatch('ExcelServices/loadSheetData', payload)
     },
+    requestSheetDataDetailed (e) {
+      this.isFetching = true;
+      const payload = {
+        file_id: this.fileId,
+        sheet: this.activeTab,
+        first_rows: e.firstRows,
+        last_rows: e.lastRows
+      };
+      this.$store.dispatch('ExcelServices/loadSheetDataDetailed', payload).then(() => {
+        this.firstRows = e.firstRows;
+        this.lastRows = e.lastRows;
+        this.scrappingCells();
+        setTimeout(() => {
+          this.renderSnippets();
+        });
+        this.isFetching = false
+      }).finally(() => {
+        this.isFetching = false
+      })
+    },
+    setSnippets () {
+      const payload = {
+        document_id: this.fileId,
+        project_id: 1111,
+        sheet: this.activeTab,
+        sheetName: this.sheetName,
+        ...this.selectedCells
+      };
+      this.$store.dispatch('ExcelServices/addSnippet', payload)
+    },
+    requestSnippets () {
+      if (this.allSnippets.length) {
+        this.renderSnippets();
+        return
+      }
+      this.isGettingSnippets = true;
+      this.$store.dispatch('ExcelServices/loadSnippets', { file_id: this.fileId }).then(() => {
+        this.renderSnippets()
+      }).finally(() => {
+        this.isGettingSnippets = false
+      })
+    },
+    coordinateToNumber (coordinate) {
+      return this.headings.indexOf(coordinate.match(/[a-zA-Z]+/g)[0]) + '-' + (Number(coordinate.match(/\d+/g)[0]) - 1)
+    },
+    renderSnippets () {
+      this.sheetSnippets = this.allSnippets.filter((snippets) => Number(snippets.sheet) === Number(this.activeTab))
+      for (let i = 0; i < this.sheetSnippets.length; i++) {
+        this.selectCells(this.coordinateToNumber(this.sheetSnippets[i].cell1), this.coordinateToNumber(this.sheetSnippets[i].cell2));
+        this.highlightSnippets();
+      }
+    },
+    highlightSnippets () {
+      let temporaryCells = document.querySelectorAll('.highlight-temp')
+      for (let i = 0; i < temporaryCells.length; i++) {
+        temporaryCells[i].classList.add('highlight')
+      }
+    }
   },
   destroyed () {
     window.removeEventListener('keydown', this.handleKeyDown)
@@ -144,6 +308,9 @@ export default {
 
 <style lang="scss" scoped>
   .v-data-table__wrapper {
+    table {
+      position: relative;
+    }
     td {
       border-left: 1px solid #F1F4F8;
       transition: 0.3s;

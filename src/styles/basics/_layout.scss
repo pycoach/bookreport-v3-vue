@@ -37,3 +37,11 @@
       padding: 0;
    }
 }
+
+.v-data-table__wrapper {
+   td {
+      .v-skeleton-loader {
+         margin: 5px 0;
+      }
+   }
+}

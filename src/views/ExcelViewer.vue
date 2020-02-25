@@ -7,10 +7,9 @@
       <v-toolbar dark color="primary" class="no-radius">
         <v-toolbar-title>View - {{file_name}}</v-toolbar-title>
         <v-scroll-y-transition>
-          <span class="ml-5" v-if="currentEnteredCell">
-            Snippet = 
+          <span class="ml-5" v-if="(currentEnteredCell && currentEnteredCell.formula) || (currentEnteredCell && isSelecting)">
             <strong v-if="isSelecting">
-              {{currentEnteredCell.coordinates[0] + String(Number(currentEnteredCell.coordinates[1]) + 1) + ': '}}
+              Snippet = {{currentEnteredCell.coordinates[0] + String(Number(currentEnteredCell.coordinates[1]) + 1) + ': '}}
             </strong>
             {{currentEnteredCell.formula}}
           </span>
@@ -38,7 +37,7 @@
         class="rounded-tabs"
       >
         <v-tabs-slider />
-        <v-tab v-for="(sheet, n) in workbookSummary.sheets" :key="n" class="primary--text">
+        <v-tab v-for="(sheet, n) in workbookSummary.sheets" :key="n" class="primary--text" :disabled="!sheet.rows && !sheet.columns">
           <span><strong>{{sheet.title}}</strong></span>
           <span class="font-weight-regular">Rows: {{sheet.rows}}</span>
           <span class="font-weight-regular">Columns: {{sheet.columns}}</span>
@@ -48,8 +47,9 @@
             ref="workSheet"
             :columns=sheet.columns
             :rows=sheet.rows
-            :activeTab="tabs"
-            :file_id="file_id"
+            :active-tab="tabs"
+            :file-id="file_id"
+            :sheet-name="sheet.title"
             @onSelect="handleCellSelect"
             @onCellEnter="handleCellEnter"
           />
