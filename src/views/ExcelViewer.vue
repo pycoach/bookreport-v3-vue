@@ -37,7 +37,7 @@
         class="rounded-tabs"
       >
         <v-tabs-slider />
-        <v-tab v-for="(sheet, n) in workbookSummary.sheets" :key="n" class="primary--text">
+        <v-tab v-for="(sheet, n) in workbookSummary.sheets" :key="n" class="primary--text" :disabled="!sheet.rows && !sheet.columns">
           <span><strong>{{sheet.title}}</strong></span>
           <span class="font-weight-regular">Rows: {{sheet.rows}}</span>
           <span class="font-weight-regular">Columns: {{sheet.columns}}</span>
@@ -47,8 +47,9 @@
             ref="workSheet"
             :columns=sheet.columns
             :rows=sheet.rows
-            :activeTab="tabs"
-            :file_id="file_id"
+            :active-tab="tabs"
+            :file-id="file_id"
+            :sheet-name="sheet.title"
             @onSelect="handleCellSelect"
             @onCellEnter="handleCellEnter"
           />
