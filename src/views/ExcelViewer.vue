@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="work-sheet" :class="{'show-snippets': showSnippetsList}">
     <v-overlay :value="isLoading">
       <v-progress-circular indeterminate size="64" />
     </v-overlay>
@@ -25,10 +25,18 @@
             Cancel Snippet (ESC)
           </v-btn>
         </v-scroll-x-transition>
+        <v-scroll-x-transition>
+          <v-btn
+            v-if="!showSnippetsList"
+            text
+            @click="toggleSnippetsList()"
+          >
+            Snippets
+          </v-btn>
+        </v-scroll-x-transition>
       </v-toolbar>
     </v-card>
     <v-container fluid>
-      {{workbookSummary}}
       <v-tabs
         v-model="tabs"
         :key="tabs"
@@ -71,7 +79,7 @@ export default {
     WorkSheet
   },
   computed: {
-    ...mapState('ExcelServices', ['workbookSummary', 'isLoading'])
+    ...mapState('ExcelServices', ['workbookSummary', 'isLoading', 'showSnippetsList'])
   },
   data: () => ({
     tabs: 0,
@@ -99,6 +107,9 @@ export default {
     },
     resetSelection () {
       this.$refs.workSheet[0].resetSelection()
+    },
+    toggleSnippetsList () {
+      this.$store.commit('ExcelServices/TOGGLE_SNIPPETS_LIST')
     }
   }
 }
@@ -107,6 +118,9 @@ export default {
 <style lang="scss">
   .pt-0 .v-content__wrap {
     padding-top: 0;
+    .version {
+      display: none;
+    }
   }
   .rounded-tabs .v-tabs-bar{
     height: auto;
@@ -124,5 +138,16 @@ export default {
         margin: 3px 0;
       }
     }
+  }
+  .work-sheet {
+    transition: 0.3s;
+    .v-sheet {
+      &:after {
+        display: none;
+      }
+    }
+  }
+  .show-snippets {
+    padding-right: 290px;
   }
 </style>

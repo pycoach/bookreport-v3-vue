@@ -144,7 +144,7 @@ const router =  new Router({
         hideNavigation: true,
         requiresAuth: true,
         title: 'Excel Viewer',
-        contentClassName: 'pt-0'
+        contentClassName: 'has-toolbar'
       },
       props: true
     }

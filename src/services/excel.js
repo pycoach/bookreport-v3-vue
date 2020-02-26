@@ -4,6 +4,7 @@ import api from 'Api'
 const URL = '/excel/';
 const URL_SNIPPET = '/excel-snippet/';
 const state = {
+  showSnippetsList: false,
   workbookSummary: {},
   sheetData: {},
   allSnippets: [],
@@ -85,6 +86,17 @@ const actions = {
     context.commit('SET_SHEET_SNIPPETS', response['data']);
     return response['data']
   },
+  async deleteSnippets(context, payload) {
+    let response;
+    try {
+      response = await api().delete(`${URL_SNIPPET}${payload.entity_id}`);
+    } catch (e) {
+      context.commit('SET_MESSAGE', { message: e, type: 'error' });
+      return
+    }
+    context.commit('SET_MESSAGE', { message: 'Snippets are deleted', type: 'success' });
+    return response['data']
+  },
 };
 
 const mutations = {
@@ -102,6 +114,9 @@ const mutations = {
   },
   SET_LOADING_SHEETS (state, isLoading) {
     state.isLoadingSheetData = isLoading;
+  },
+  TOGGLE_SNIPPETS_LIST (state) {
+    state.showSnippetsList = !state.showSnippetsList
   },
   SET_MESSAGE(state, details) {
     Vue.notify({
