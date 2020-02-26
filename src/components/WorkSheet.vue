@@ -118,7 +118,7 @@ export default {
   components: {
     WorkSheetPaginator
   },
-  props: ['sheetName', 'fileId', 'columns', 'rows', 'activeTab'],
+  props: ['sheetName', 'projectId', 'fileId', 'columns', 'rows', 'activeTab'],
   data: () => ({
     headings: [],
     selectedCell: null,
@@ -264,7 +264,7 @@ export default {
     setSnippets () {
       const payload = {
         document_id: this.fileId,
-        project_id: 1111,
+        project_id: this.projectId,
         sheet: this.activeTab,
         sheetName: this.sheetName,
         ...this.selectedCells

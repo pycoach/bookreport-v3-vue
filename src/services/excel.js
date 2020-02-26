@@ -58,7 +58,7 @@ const actions = {
     try {
       response = await api().post(`${URL_SNIPPET}`, {
         document_id: payload.document_id,
-        project_id: payload.document_id,
+        project_id: payload.project_id,
         sheet: String(payload.sheet),
         sheet_name: payload.sheetName,
         cell1: payload.from,

@@ -45,7 +45,7 @@
                 <tr 
                   v-for="item in items" 
                   :key="item.entity_id"
-                  @click.stop="handlePreviewFileDialog(item)"
+                  @click.stop="handlePreviewFile(item)"
                 >
                   <td>
                     <div class="d-flex align-center" @click.stop>
@@ -240,9 +240,9 @@ export default {
       }
     },
     showExcel (item) {
-      window.open(`/excel/viewer/${item.file_id}/${item.name}`)
+      window.open(`/excel/viewer/${item.project_id}/${item.file_id}/${item.name}`)
     },
-    handlePreviewFileDialog (item) {
+    handlePreviewFile (item) {
       const extension = item.extension.toLowerCase();
       if (extension !== "zip") {
         if (extension === "csv" || extension.includes("xls")) {

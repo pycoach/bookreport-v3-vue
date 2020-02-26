@@ -28,6 +28,7 @@
       </v-toolbar>
     </v-card>
     <v-container fluid>
+      {{workbookSummary}}
       <v-tabs
         v-model="tabs"
         :key="tabs"
@@ -49,6 +50,7 @@
             :rows=sheet.rows
             :active-tab="tabs"
             :file-id="file_id"
+            :project-id="project_id"
             :sheet-name="sheet.title"
             @onSelect="handleCellSelect"
             @onCellEnter="handleCellEnter"
@@ -64,7 +66,7 @@ import {mapState} from "vuex";
 import WorkSheet from '../components/WorkSheet'
 export default {
   name: 'ExcelViewer',
-  props: ['file_id', 'file_name'],
+  props: ['project_id', 'file_id', 'file_name'],
   components: {
     WorkSheet
   },
