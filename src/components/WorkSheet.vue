@@ -1,5 +1,14 @@
 <template>
   <div class="v-data-table disable-hover theme--light">
+<!--    <div v-for="n in allSnippets">-->
+<!--      <div>{{n}}</div>-->
+<!--    </div>-->
+    <WorkSheetSnippetsList 
+      :snippets="sheetSnippets"
+      @handleDelete="handleSnippetDelete($event)"
+      @mouseenter="highlightCells($event.from, $event.to)"
+      @mouseleave="removeHighlights('remove')"
+    />
     <div class="v-data-table__wrapper">
       <v-overlay
         :value="isLoadingSheetData"
@@ -31,10 +40,10 @@
               <!-- Getting actual coordinates-->
               <!-- xAxis - headings[xAxis]-->
               <!-- yAxis - Number(yAxis + 1)-->
-              <template v-if="filledCells[headings[xAxis] + Number(yAxis + 1)] && !isGettingSnippets">
+              <template v-if="filledCells[headings[xAxis] + Number(yAxis + 1)] && !isComputingSnippets">
                 {{filledCells[headings[xAxis] + Number(yAxis + 1)][2]}}
               </template>
-              <template v-else-if="isGettingSnippets">
+              <template v-else-if="isComputingSnippets">
                 <v-skeleton-loader
                   loading
                   type="chip"
@@ -59,10 +68,10 @@
               <!-- Getting actual coordinates-->
               <!-- xAxis - headings[xAxis]-->
               <!-- yAxis - Number(yAxis + 1)-->
-              <template v-if="filledCells[headings[xAxis] + Number(yAxis + 1)] && !isGettingSnippets">
+              <template v-if="filledCells[headings[xAxis] + Number(yAxis + 1)] && !isComputingSnippets">
                 {{filledCells[headings[xAxis] + Number(yAxis + 1)][2]}}
               </template>
-              <template v-else-if="isGettingSnippets">
+              <template v-else-if="isComputingSnippets">
                 <v-skeleton-loader
                   loading
                   type="chip"
@@ -91,10 +100,10 @@
               <!-- Getting actual coordinates-->
               <!-- xAxis - headings[xAxis]-->
               <!-- yAxis - rows - lastRows + yAxis + 1-->
-              <template v-if="filledCells[headings[xAxis] + Number(rows - lastRows + yAxis + 1)] && !isGettingSnippets">
+              <template v-if="filledCells[headings[xAxis] + Number(rows - lastRows + yAxis + 1)] && !isComputingSnippets">
                 {{filledCells[headings[xAxis] + Number(rows - lastRows + yAxis + 1)][2]}}
               </template>
-              <template v-else-if="isGettingSnippets">
+              <template v-else-if="isComputingSnippets">
                 <v-skeleton-loader
                   loading
                   type="chip"
@@ -113,12 +122,14 @@
 <script>
 import {mapState} from 'vuex';
 import WorkSheetPaginator from './WorkSheetPaginator';
+import WorkSheetSnippetsList from '../components/WorkSheetSnippetsList'
 export default {
   name: 'WorkSheet',
   components: {
-    WorkSheetPaginator
+    WorkSheetPaginator,
+    WorkSheetSnippetsList
   },
-  props: ['sheetName', 'fileId', 'columns', 'rows', 'activeTab'],
+  props: ['sheetName', 'projectId', 'fileId', 'columns', 'rows', 'activeTab'],
   data: () => ({
     headings: [],
     selectedCell: null,
@@ -129,10 +140,10 @@ export default {
     firstRows: 10,
     lastRows: 10,
     isFetching: false,
-    isGettingSnippets: false
+    isComputingSnippets: false
   }),
   computed: {
-    ...mapState('ExcelServices', ['sheetData', 'isLoadingSheetData', 'allSnippets'])
+    ...mapState('ExcelServices', ['sheetData', 'isLoadingSheetData', 'allSnippets', 'showSnippetsList'])
   },
   created () {
     window.addEventListener('keydown', this.handleKeyDown)
@@ -166,7 +177,7 @@ export default {
           activeCoordinates.push(i + '-' + j)
         }
       }
-      this.removeTemporaryHighlights()
+      this.removeHighlights()
       let filledCells = [];
       for (let i = 0; i < activeCoordinates.length; i++) {
         let cell = document.getElementById(this.activeTab + 'cell_' + activeCoordinates[i]);
@@ -196,13 +207,26 @@ export default {
     },
     resetSelection () {
       this.$emit('onSelect', false)
-      this.removeTemporaryHighlights()
+      this.removeHighlights()
       this.selectedCell = null
     },
-    removeTemporaryHighlights () {
-      let temporaryCells = document.querySelectorAll('.highlight-temp')
+    removeHighlights (type = 'temporary') {
+      let className;
+      switch(type) {
+        case 'remove':
+          className = 'highlight-remove';
+          break;
+        case 'temporary':
+          className = 'highlight-temp';
+          break;
+        case 'highlight':
+          className = 'highlight';
+          break;
+      }
+      let temporaryCells = document.querySelectorAll(`.${className}`)
       if (!temporaryCells.length) return;
       for (let i = 0; i < temporaryCells.length; i++) {
+        temporaryCells[i].classList.remove(className)
         temporaryCells[i].classList.remove('highlight-temp')
       }
     },
@@ -264,23 +288,26 @@ export default {
     setSnippets () {
       const payload = {
         document_id: this.fileId,
-        project_id: 1111,
+        project_id: this.projectId,
         sheet: this.activeTab,
         sheetName: this.sheetName,
         ...this.selectedCells
       };
-      this.$store.dispatch('ExcelServices/addSnippet', payload)
+      this.$store.dispatch('ExcelServices/addSnippet', payload).then((res) => {
+        this.allSnippets.push(res);
+        this.renderSnippets()
+      })
     },
     requestSnippets () {
       if (this.allSnippets.length) {
         this.renderSnippets();
         return
       }
-      this.isGettingSnippets = true;
+      this.isComputingSnippets = true;
       this.$store.dispatch('ExcelServices/loadSnippets', { file_id: this.fileId }).then(() => {
         this.renderSnippets()
       }).finally(() => {
-        this.isGettingSnippets = false
+        this.isComputingSnippets = false
       })
     },
     coordinateToNumber (coordinate) {
@@ -293,15 +320,33 @@ export default {
         this.highlightSnippets();
       }
     },
-    highlightSnippets () {
+    highlightSnippets (type = 'add') {
+      let className;
+      switch(type) {
+        case 'remove':
+          className = 'highlight-remove';
+          break;
+        case 'add':
+          className = 'highlight';
+          break;
+      }
       let temporaryCells = document.querySelectorAll('.highlight-temp')
       for (let i = 0; i < temporaryCells.length; i++) {
-        temporaryCells[i].classList.add('highlight')
+        temporaryCells[i].classList.add(className)
       }
+    },
+    highlightCells (from, to) {
+      from = this.coordinateToNumber(from);
+      to = this.coordinateToNumber(to);
+      this.selectCells(from, to);
+      this.highlightSnippets('remove');
+    },
+    handleSnippetDelete (entityId) {
+      const index = this.allSnippets.findIndex(snippet => snippet.entity_id === entityId);
+      this.allSnippets.splice(index, 1);
+      this.removeHighlights('highlight');
+      this.renderSnippets()
     }
-  },
-  destroyed () {
-    window.removeEventListener('keydown', this.handleKeyDown)
   }
 }
 </script>
@@ -327,6 +372,9 @@ export default {
       }
       &.highlight {
         background: rgba(69, 90, 247, 0.2);
+      }
+      &.highlight-remove {
+        background: rgba(255, 43, 43, 0.3);
       }
     }
   }
