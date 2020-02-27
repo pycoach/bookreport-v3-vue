@@ -6,6 +6,7 @@
     <v-card>
       <v-toolbar dark color="primary" class="no-radius">
         <v-toolbar-title>View - {{file_name}}</v-toolbar-title>
+        <!-- Current cell -->
         <v-scroll-y-transition>
           <span class="ml-5" v-if="(currentEnteredCell && currentEnteredCell.formula) || (currentEnteredCell && isSelecting)">
             <strong v-if="isSelecting">
@@ -15,6 +16,7 @@
           </span>
         </v-scroll-y-transition>
         <v-spacer />
+        <!-- Cells selection reset button-->
         <v-scroll-x-transition>
           <v-btn
             v-if="isSelecting"
@@ -25,6 +27,7 @@
             Cancel Snippet (ESC)
           </v-btn>
         </v-scroll-x-transition>
+        <!-- Snippets list toggle button-->
         <v-scroll-x-transition>
           <v-btn
             v-if="!showSnippetsList"
@@ -34,6 +37,14 @@
             Snippets
           </v-btn>
         </v-scroll-x-transition>
+        <!-- Row range modal toggle button-->
+        <v-btn
+          text
+          key="delete"
+          @click="toggleRowRangeDialog"
+        >
+          Change Data
+        </v-btn>
       </v-toolbar>
     </v-card>
     <v-container fluid>
@@ -70,8 +81,9 @@
 </template>
 
 <script>
-import {mapState} from "vuex";
-import WorkSheet from '../components/WorkSheet'
+import { EventBus } from '../components/EventBus';
+import {mapState} from 'vuex';
+import WorkSheet from '../components/WorkSheet/index'
 export default {
   name: 'ExcelViewer',
   props: ['project_id', 'file_id', 'file_name'],
@@ -110,6 +122,9 @@ export default {
     },
     toggleSnippetsList () {
       this.$store.commit('ExcelServices/TOGGLE_SNIPPETS_LIST')
+    },
+    toggleRowRangeDialog () {
+      EventBus.$emit('toggleRowRangeDialog')
     }
   }
 }
@@ -147,7 +162,14 @@ export default {
       }
     }
   }
+  .primary .v-toolbar__content {
+    transition: 0.3s;
+  }
   .show-snippets {
-    padding-right: 290px;
+    $left: 290px;
+    padding-right: $left;
+    .primary .v-toolbar__content {
+      padding-right: calc(#{$left} + 15px);
+    }
   }
 </style>

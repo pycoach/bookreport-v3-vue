@@ -10,14 +10,20 @@
           color="default"
         >
           <v-app-bar-nav-icon @click="toggleList" />
-          <v-toolbar-title>Snippets</v-toolbar-title>
+          <v-toolbar-title>
+            Snippets 
+            <template v-if="processing">
+              <i>Adding</i>
+              <v-progress-circular width="2" color="white" indeterminate size="20" class="ml-3" />
+            </template>
+          </v-toolbar-title>
           <v-spacer />
         </v-app-bar>
           <div class="snippets-list__content">
             <template v-if="snippets.length && !isLoadingSheetData">
               <SnippetItem
-                v-for="snippet in snippets"
-                :key="snippet.cell1 + snippet.cell2"
+                v-for="(snippet, index) in snippets"
+                :key="snippet.cell1 + snippet.cell2 + index"
                 :snippet="snippet"
                 @handleDelete="deleteSnippet($event)"
                 @mouseenter="$emit('mouseenter', { from: snippet.cell1, to: snippet.cell2 })"
@@ -46,11 +52,11 @@
 </template>
 
 <script>
-import {mapState} from "vuex";
-import SnippetItem from './WorkSheet/SnippetListItem'
+import {mapState} from 'vuex';
+import SnippetItem from './SnippetListItem'
 export default {
   name: 'WorkSheetSnippetsList',
-  props: ['snippets'],
+  props: ['snippets', 'processing'],
   components: {
     SnippetItem
   },

@@ -1,14 +1,18 @@
 <template>
   <div class="v-data-table disable-hover theme--light">
-<!--    <div v-for="n in allSnippets">-->
-<!--      <div>{{n}}</div>-->
-<!--    </div>-->
-    <WorkSheetSnippetsList 
+    <SnippetsList 
       :snippets="sheetSnippets"
-      @handleDelete="handleSnippetDelete($event)"
+      :processing="isProcessingNewSnippet"
       @mouseenter="highlightCells($event.from, $event.to)"
       @mouseleave="removeHighlights('remove')"
+      @handleDelete="handleSnippetDelete($event)"
     />
+    <RowRange
+      :rowMode="rowMode"
+      @change="handleRowRangeChange($event)"
+    />
+    {{showAllRows}}
+    <h1>{{firstRows}} - {{lastRows}}</h1>
     <div class="v-data-table__wrapper">
       <v-overlay
         :value="isLoadingSheetData"
@@ -81,7 +85,7 @@
             </td>
           </tr>
           <!-- Paginator -->
-          <WorkSheetPaginator
+          <RowsPaginator
             :rowsCount="rows"
             :isFetching="isFetching"
             @mouseenter="onWorkSheetLeave()"
@@ -120,14 +124,16 @@
 </template>
 
 <script>
-import {mapState} from 'vuex';
-import WorkSheetPaginator from './WorkSheetPaginator';
-import WorkSheetSnippetsList from '../components/WorkSheetSnippetsList'
+import { mapState } from 'vuex';
+import RowsPaginator from './RowsPaginator';
+import RowRange from './RowRange';
+import SnippetsList from './SnippetsList'
 export default {
   name: 'WorkSheet',
   components: {
-    WorkSheetPaginator,
-    WorkSheetSnippetsList
+    RowsPaginator,
+    RowRange,
+    SnippetsList
   },
   props: ['sheetName', 'projectId', 'fileId', 'columns', 'rows', 'activeTab'],
   data: () => ({
@@ -136,26 +142,28 @@ export default {
     selectedCells: {},
     filledCells: {},
     showAllRows: false,
+    rowMode: 1,
     sheetSnippets: [],
     firstRows: 10,
     lastRows: 10,
     isFetching: false,
+    isProcessingNewSnippet: false,
     isComputingSnippets: false
   }),
   computed: {
-    ...mapState('ExcelServices', ['sheetData', 'isLoadingSheetData', 'allSnippets', 'showSnippetsList'])
+    ...mapState('ExcelServices', ['sheetData', 'isLoadingSheetData', 'allSnippets', 'showSnippetsList']),
   },
   created () {
     window.addEventListener('keydown', this.handleKeyDown)
   },
   async mounted () {
-    if (this.rows <= 21) {
+    if (this.rows <= 100) {
       this.showAllRows = true;
     }
     await this.requestSheetData();
     this.initHeadings();
     this.scrappingCells();
-    this.requestSnippets()
+    this.requestSnippets();
   },
   methods: {
     initHeadings () {
@@ -273,19 +281,27 @@ export default {
         first_rows: e.firstRows,
         last_rows: e.lastRows
       };
-      this.$store.dispatch('ExcelServices/loadSheetDataDetailed', payload).then(() => {
+      return this.$store.dispatch('ExcelServices/loadSheetDataDetailed', payload).then(() => {
         this.firstRows = e.firstRows;
         this.lastRows = e.lastRows;
         this.scrappingCells();
-        setTimeout(() => {
-          this.renderSnippets();
-        });
+        this.renderSnippets();
         this.isFetching = false
       }).finally(() => {
         this.isFetching = false
       })
     },
+    requestSheetDataAll () {
+      const filesCount = Math.ceil(this.rows / 1000);
+      const payload = {
+        filesCount: filesCount,
+        file_id: this.fileId,
+        sheet: this.activeTab,
+      };
+      this.$store.dispatch('ExcelServices/loadSheetDataAll', payload)
+    },
     setSnippets () {
+      this.isProcessingNewSnippet = true;
       const payload = {
         document_id: this.fileId,
         project_id: this.projectId,
@@ -296,6 +312,8 @@ export default {
       this.$store.dispatch('ExcelServices/addSnippet', payload).then((res) => {
         this.allSnippets.push(res);
         this.renderSnippets()
+      }).finally(() => {
+        this.isProcessingNewSnippet = false;
       })
     },
     requestSnippets () {
@@ -314,11 +332,13 @@ export default {
       return this.headings.indexOf(coordinate.match(/[a-zA-Z]+/g)[0]) + '-' + (Number(coordinate.match(/\d+/g)[0]) - 1)
     },
     renderSnippets () {
-      this.sheetSnippets = this.allSnippets.filter((snippets) => Number(snippets.sheet) === Number(this.activeTab))
-      for (let i = 0; i < this.sheetSnippets.length; i++) {
-        this.selectCells(this.coordinateToNumber(this.sheetSnippets[i].cell1), this.coordinateToNumber(this.sheetSnippets[i].cell2));
-        this.highlightSnippets();
-      }
+      setTimeout(() => {
+        this.sheetSnippets = this.allSnippets.filter((snippets) => Number(snippets.sheet) === Number(this.activeTab))
+        for (let i = 0; i < this.sheetSnippets.length; i++) {
+          this.selectCells(this.coordinateToNumber(this.sheetSnippets[i].cell1), this.coordinateToNumber(this.sheetSnippets[i].cell2));
+          this.highlightSnippets();
+        }
+      })
     },
     highlightSnippets (type = 'add') {
       let className;
@@ -340,12 +360,38 @@ export default {
       to = this.coordinateToNumber(to);
       this.selectCells(from, to);
       this.highlightSnippets('remove');
+      this.resetSelection()
     },
     handleSnippetDelete (entityId) {
       const index = this.allSnippets.findIndex(snippet => snippet.entity_id === entityId);
       this.allSnippets.splice(index, 1);
       this.removeHighlights('highlight');
       this.renderSnippets()
+    },
+    handleRowRangeChange (mode) {
+      this.rowMode = mode;
+      switch(mode) {
+        case 1: // First and Last rows
+          this.requestSheetDataDetailed({ firstRows: 10, lastRows: 10 }).then(() => {
+            this.showAllRows = false;
+          });
+          break;
+        case 2: // All rows
+          this.showAllRows = true;
+          // this.requestSheetDataAll();
+          break;
+        case 3:
+          break;
+      }
+    }
+  },
+  watch: {
+    showAllRows (showAllRows) {
+      if (showAllRows) {
+        this.rowMode = 2 // All rows
+      } else {
+        this.rowMode = 1 // First and Last rows
+      }
     }
   }
 }

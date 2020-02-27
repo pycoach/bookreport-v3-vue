@@ -43,6 +43,27 @@ const actions = {
     context.commit('SET_SHEET_DATA', response['data']);
     return response['data']
   },
+  async loadSheetDataAll(context, payload) {
+    context.commit('SET_LOADING_SHEETS', true);
+    let response = [];
+    let promises = [];
+    try {
+      for (let i = 1; i <= payload.filesCount; i++) {
+        promises.push(new Promise(resolve => {
+          api().get(`${URL}${payload.file_id}/sheet/${payload.sheet}/file/${i}`).then((res) => {
+            response = [...response, ...res['data']];
+            resolve()
+          });
+        }))
+      }
+      Promise.all(promises).then(() => {
+        context.commit('SET_LOADING_SHEETS', false);
+        context.commit('SET_SHEET_DATA', response);
+      })
+    } catch (e) {
+      context.commit('SET_MESSAGE', e, 'error');
+    }
+  },
   async loadSheetDataDetailed(context, payload) {
     let response;
     try {

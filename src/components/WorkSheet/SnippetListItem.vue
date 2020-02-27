@@ -12,13 +12,14 @@
       <v-list-item-subtitle v-text="`${snippet.cell1} - ${snippet.cell2}`"></v-list-item-subtitle>
     </v-list-item-content>
     <v-list-item-action>
-      <v-btn 
+      <v-btn
+        color="error"
         icon
         :disabled="isDeleting"
         :loading="isDeleting"
         @click="deleteSnippet(snippet.entity_id)"
       >
-        <v-icon color="dark lighten-1">delete</v-icon>
+        <v-icon color="lighten-1">delete</v-icon>
       </v-btn>
     </v-list-item-action>
   </v-list-item>
