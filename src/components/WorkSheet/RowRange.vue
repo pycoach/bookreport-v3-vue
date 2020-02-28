@@ -5,26 +5,67 @@
   >
     <v-card>
       <v-card-title class="headline">Choose Rows to Display</v-card-title>
-      <v-radio-group 
-        :value="rowMode"
-        @change="handleChange($event)"
-      >
-        <v-radio
-          label="First and Last"
-          :value="1"
-        />
-        <v-radio
-          label="All Rows"
-          :value="2"
-        />
-        <v-radio
-          label="Range"
-          :value="3"
-        />
-      </v-radio-group>
+        <v-container grid-list-xl fluid >
+        <v-radio-group 
+          :value="rowMode"
+          @change="handleChange"
+        >
+          <v-radio
+            label="First and Last"
+            color="primary"
+            :value="1"
+          />
+          <v-radio
+            label="All Rows"
+            color="primary"
+            :value="2"
+          />
+          <v-radio
+            label="Range"
+            color="primary"
+            :value="3"
+          />
+        </v-radio-group>
+        <v-scroll-y-transition>
+          <template v-if="newRowMode === 1">
+            <v-row>
+              <v-col cols="4">
+                <v-text-field
+                  v-model="first"
+                  label="Show first"
+                  type="number"
+                  hint="rows"
+                  persistent-hint
+                />
+              </v-col>
+              <v-col cols="4" offset="4">
+                <v-text-field
+                  v-model="last"
+                  label="Show last"
+                  type="number"
+                  hint="rows"
+                  persistent-hint
+                />
+              </v-col>
+            </v-row>
+          </template>
+          <template v-else-if="newRowMode === 3">
+            <v-row>
+              <v-col cols="4">
+                <v-text-field
+                  v-model="range"
+                  label="Range"
+                  hint="B4:D12"
+                  persistent-hint
+                />
+              </v-col>
+            </v-row>
+          </template>
+        </v-scroll-y-transition>
+      </v-container>
       <v-divider />
       <v-card-actions>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           color="primary"
           text
@@ -41,14 +82,20 @@
 import { EventBus } from '../EventBus'; 
 export default {
   name: 'RowRange',
-  props: ['rowMode'],
+  props: ['rowMode', 'firstRows', 'lastRows'],
   data: () => ({
     show: false,
-    newRowMode: null
+    newRowMode: null,
+    first: 10,
+    last: 10,
+    range: null
   }),
   mounted () {
     EventBus.$on('toggleRowRangeDialog', () => {
-      this.show = !this.show
+      this.show = !this.show;
+      this.newRowMode = this.rowMode;
+      this.first = this.firstRows;
+      this.last = this.lastRows
     })
   },
   methods: {
@@ -57,7 +104,12 @@ export default {
     },
     submitChange () {
       this.show = false;
-      this.$emit('change', this.newRowMode)
+      this.$emit('change', {
+        mode: this.newRowMode,
+        firstRows: this.first,
+        lastRows: this.last,
+        range: this.range && this.range.toUpperCase()
+      })
     }
   }
 }

@@ -5,14 +5,14 @@
       :processing="isProcessingNewSnippet"
       @mouseenter="highlightCells($event.from, $event.to)"
       @mouseleave="removeHighlights('remove')"
-      @handleDelete="handleSnippetDelete($event)"
+      @handleDelete="handleSnippetDelete"
     />
     <RowRange
       :rowMode="rowMode"
-      @change="handleRowRangeChange($event)"
+      :firstRows="firstRows"
+      :lastRows="lastRows"
+      @change="handleRowRangeChange"
     />
-    {{showAllRows}}
-    <h1>{{firstRows}} - {{lastRows}}</h1>
     <div class="v-data-table__wrapper">
       <v-overlay
         :value="isLoadingSheetData"
@@ -32,7 +32,7 @@
         <tbody>
         <!-- Showing all Rows -->
         <template v-if="showAllRows">
-          <tr v-for="(row, yAxis) in rows">
+          <tr v-for="(row, yAxis) in rows" :key="yAxis + 1">
             <td class="disabled-td">
               {{ yAxis + 1 }}
             </td>
@@ -88,8 +88,10 @@
           <RowsPaginator
             :rowsCount="rows"
             :isFetching="isFetching"
+            :firstRows="firstRows"
+            :lastRows="lastRows"
             @mouseenter="onWorkSheetLeave()"
-            @onLoad="requestSheetDataDetailed($event)"
+            @onLoad="requestSheetDataDetailed"
           />
           <!-- Last Rows -->
           <tr v-for="(row, yAxis) in Number(lastRows)" :key="'last' + (rows - lastRows + yAxis)">
@@ -142,6 +144,7 @@ export default {
     selectedCells: {},
     filledCells: {},
     showAllRows: false,
+    showColumns: [], // [] is All
     rowMode: 1,
     sheetSnippets: [],
     firstRows: 10,
@@ -274,31 +277,40 @@ export default {
       return this.$store.dispatch('ExcelServices/loadSheetData', payload)
     },
     requestSheetDataDetailed (e) {
+      const { firstRows, lastRows } = e;
       this.isFetching = true;
       const payload = {
         file_id: this.fileId,
         sheet: this.activeTab,
-        first_rows: e.firstRows,
-        last_rows: e.lastRows
+        first_rows: firstRows,
+        last_rows: lastRows
       };
       return this.$store.dispatch('ExcelServices/loadSheetDataDetailed', payload).then(() => {
-        this.firstRows = e.firstRows;
-        this.lastRows = e.lastRows;
+        this.firstRows = firstRows;
+        this.lastRows = lastRows;
         this.scrappingCells();
         this.renderSnippets();
+        this.showAllRows = false;
         this.isFetching = false
       }).finally(() => {
         this.isFetching = false
       })
     },
     requestSheetDataAll () {
+      this.isFetching = true;
       const filesCount = Math.ceil(this.rows / 1000);
       const payload = {
         filesCount: filesCount,
         file_id: this.fileId,
         sheet: this.activeTab,
       };
-      this.$store.dispatch('ExcelServices/loadSheetDataAll', payload)
+      this.$store.dispatch('ExcelServices/loadSheetDataAll', payload).then(() => {
+        this.scrappingCells();
+        this.renderSnippets();
+        this.showAllRows = true;
+      }).finally(() => {
+        this.isFetching = false
+      })
     },
     setSnippets () {
       this.isProcessingNewSnippet = true;
@@ -368,19 +380,23 @@ export default {
       this.removeHighlights('highlight');
       this.renderSnippets()
     },
-    handleRowRangeChange (mode) {
+    handleRowRangeChange (e) {
+      const { mode, firstRows, lastRows, range } = e;
       this.rowMode = mode;
       switch(mode) {
         case 1: // First and Last rows
-          this.requestSheetDataDetailed({ firstRows: 10, lastRows: 10 }).then(() => {
-            this.showAllRows = false;
-          });
+          this.requestSheetDataDetailed({ firstRows, lastRows });
           break;
         case 2: // All rows
-          this.showAllRows = true;
-          // this.requestSheetDataAll();
+          this.requestSheetDataAll();
           break;
         case 3:
+          this.requestSheetDataAll();
+          const [from, to] = [range.split(':')[0], range.split(':')[1]];
+          const [startRow, endRow] = [Number(this.coordinateToNumber(from).split('-')[1]) + 1, Number(this.coordinateToNumber(to).split('-')[1]) + 1];
+          const [startColumn, endColumn] = [Number(this.coordinateToNumber(from).split('-')[0]), Number(this.coordinateToNumber(to).split('-')[0])];
+          console.log(startRow, endRow);
+          console.log('Column', startColumn, endColumn);
           break;
       }
     }

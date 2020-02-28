@@ -8,7 +8,7 @@
       >
         ↑ First
         <v-text-field
-          v-model="firstRows"
+          :value="firstRows"
           class="mx-4"
           type="number"
           ref="refFirstRows"
@@ -18,7 +18,7 @@
         />
         rows ↑ ... ↓ Last
         <v-text-field
-          v-model="lastRows"
+          :value="lastRows"
           class="mx-4"
           type="number"
           ref="refLastRows"
@@ -34,7 +34,7 @@
           class="ml-5"
           :disabled="isFetching || !valid"
           :loading="isFetching"
-          @click="onLoad"
+          @click.prevent="onLoad"
         >
           Load
         </v-btn>
@@ -46,11 +46,9 @@
 <script>
 export default {
   name: 'WorkSheetPaginator',
-  props: ['isFetching', 'rowsCount'],
+  props: ['isFetching', 'rowsCount', 'firstRows', 'lastRows'],
   data: () => ({
-    valid: true,
-    firstRows: 10,
-    lastRows: 10,
+    valid: true
   }),
   computed: {
     firstRowsRules () {
@@ -81,9 +79,9 @@ export default {
       }
     },
     onLoad () {
-      this.$emit('onLoad', { 
+      this.$emit('onLoad', {
         firstRows: this.$refs.refFirstRows.internalValue,
-        lastRows: this.$refs.refLastRows.internalValue 
+        lastRows: this.$refs.refLastRows.internalValue
       })
     },
     onMouseenter () {

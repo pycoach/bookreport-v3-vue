@@ -44,7 +44,6 @@ const actions = {
     return response['data']
   },
   async loadSheetDataAll(context, payload) {
-    context.commit('SET_LOADING_SHEETS', true);
     let response = [];
     let promises = [];
     try {
@@ -56,8 +55,7 @@ const actions = {
           });
         }))
       }
-      Promise.all(promises).then(() => {
-        context.commit('SET_LOADING_SHEETS', false);
+      return Promise.all(promises).then(() => {
         context.commit('SET_SHEET_DATA', response);
       })
     } catch (e) {
