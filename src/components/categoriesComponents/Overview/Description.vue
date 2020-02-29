@@ -25,6 +25,7 @@
               clearable
               class="px-3 mt-4"
               :value="name"
+              :counter="100"
               @input="$store.commit('ProjectEditor/setName', $event)"
             >
             </v-text-field>

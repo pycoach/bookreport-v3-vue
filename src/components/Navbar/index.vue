@@ -23,7 +23,7 @@
             <v-list-item-avatar  v-on="on"
       :size="57"
       >
-        <img :src="user.picture">
+        <img v-if="user" :src="user.picture">
            </v-list-item-avatar>
          
         </template>
@@ -41,8 +41,8 @@
         </v-list>
       </v-menu>
       <v-list-item-content>
-        <v-list-item-title class="user-name">{{ user.name }}</v-list-item-title>
-        <v-list-item-subtitle class="user-email" >{{ user.email }}</v-list-item-subtitle>
+        <v-list-item-title v-if="user" class="user-name">{{ user.name }}</v-list-item-title>
+        <v-list-item-subtitle v-if="user" class="user-email" >{{ user.email }}</v-list-item-subtitle>
        
       </v-list-item-content>
       </div>
