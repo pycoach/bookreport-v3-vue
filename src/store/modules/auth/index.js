@@ -131,7 +131,7 @@ const mutations = {
         Vue.notify({
             group: 'loggedIn',
             type: 'success',
-            text: 'You should receive an email with password reset instructions.'
+            text: 'If your email is registered in our system, you’ll receive instructions on how to reset your password.'
         })
     }, 1500)
   },
