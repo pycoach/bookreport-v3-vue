@@ -33,7 +33,7 @@
           placeholder="••••••••••••••"
           v-model="password"
           :append-icon="showPassword ? 'visibility' : 'visibility_off'"
-          :rules="[passwordRules.required, passwordRules.min]"
+          :rules="[rules.required, rules.password]"
           :type="showPassword ? 'text' : 'password'"
           name="input-10-1"
           hint="At least 8 characters"
@@ -45,7 +45,7 @@
         </v-form>
          
           <v-btn
-            :disabled="signUpDisabled"
+            :disabled="signUpDisabled || !validPassword"
             depressed
             :class="{'no-shadow': signUpDisabled}"
             class="primary button-login"
@@ -87,6 +87,12 @@ export default {
     components: {
       Intro
   },
+  computed: {
+    validPassword: function(){
+      const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/;
+      return pattern.test(this.password)
+    }
+  },
   data() {
     return {
       valid: false,
@@ -101,10 +107,16 @@ export default {
         v => /.+@.+\..+/.test(v) || 'E-mail must be valid',
       ],
       password: '',
-      passwordRules: {
-          required: value => !!value || 'Password is required.',
-          min: v => v.length >= 8 || 'Min 8 characters',
-        },
+      rules: {
+        required: value => !!value || "Required.",
+        password: value => {
+          const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/;
+          return (
+            pattern.test(value) ||
+            "Min. 8 characters with at least one capital letter, a number and a special character."
+          );
+        }
+      },
       showPassword: false,
       signUpDisabled: false,
       checkError: false
