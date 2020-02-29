@@ -61,7 +61,7 @@ const actions = {
     context.commit('logoutUser')
   },
   resetPassword(context, email) {
-    api(false).post('/password-reset', {
+    return api(false).post('/password-reset', {
       'email': email
     }).then(function (response) {
       const userData = response['data']
@@ -70,6 +70,7 @@ const actions = {
       } else {
         context.commit('resetPasswordSuccess', userData)
       }
+      return userData
     })
   },
   updateProfile(context, profile) {
