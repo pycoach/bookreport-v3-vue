@@ -13,7 +13,7 @@
             </div>
         <v-form v-model="valid" class="mb-4">
         <v-text-field
-          label="Name"
+          label="Name*"
           v-model="name"
           required
           placeholder="John Smith"
@@ -21,7 +21,7 @@
           validate-on-blur>
         </v-text-field>
         <v-text-field
-          label="Email"
+          label="Email*"
           v-model="email"
           placeholder="mail@user.com"
           required
@@ -29,7 +29,7 @@
           validate-on-blur>
         </v-text-field>
         <v-text-field
-          label="Password"
+          label="Password*"
           placeholder="••••••••••••••"
           v-model="password"
           :append-icon="showPassword ? 'visibility' : 'visibility_off'"
