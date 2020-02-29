@@ -284,7 +284,7 @@ export default {
         Vue.notify({
           group: 'loggedIn',
           type: 'success',
-          text: 'Files are deleted'
+          text: 'Documents are archived'
         })
       })
     }
