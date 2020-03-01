@@ -23,7 +23,7 @@
         </v-form>
           <v-btn
             depressed
-            
+            :disabled="!canSubmit()"
             class="primary mt-10  button-login"
             style="width: 100%"
             @click="submit">
@@ -54,11 +54,14 @@ export default {
       username: '',
       emailRules: [
         v => !!v || 'E-mail is required',
-        v => /.+@.+\..+/.test(v) || 'E-mail must be valid',
+        v => /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(String(v).toLowerCase()) || 'E-mail must be valid',
       ]
     }
   },
   methods:{
+    canSubmit() {
+      return /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(String(this.username).toLowerCase())
+    },
     submit(){
       this.$store.dispatch('resetPassword', this.username)
     }

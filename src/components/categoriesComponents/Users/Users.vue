@@ -99,14 +99,14 @@
       userEditMode: 'Add',
       username: '',
       useremail: '',
-      emailRules: [ v => /.+@.+/.test(v) || 'Invalid Email address' ],
+      emailRules: [ v => /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(String(v).toLowerCase()) || 'Invalid Email address' ],
       userRoles: ['provider admin', 'provider analyst', 'client manager', 'client analyst', 'participant'],
       activeUser: null,
     }
   },
   methods: {
     canSave() {
-      return /^[^.\s]/.test(this.username) && /.+@.+/.test(this.useremail)
+      return /^[^.\s]/.test(this.username) && /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(String(this.useremail).toLowerCase())
     },
     async saveProject(e) {
       this.$store.commit('ProjectEditor/setName', e.name);
