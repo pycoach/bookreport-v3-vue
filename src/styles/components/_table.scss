@@ -1,0 +1,77 @@
+.topictype-table th, .topictype-table td {
+   border: 1px solid #C2C2C2;
+}
+
+.topictype-table th {
+   font-style: normal;
+   font-weight: 600;
+   font-size: 14px;
+   line-height: 17px;
+   padding: 10px 0 ;
+}
+
+
+.topictype-table {
+   input {
+      font-size: 14px;
+   }
+
+   .v-input__control {
+      font-size: 14px;
+   }
+
+   .v-select__selections {
+      font-size: 14px;
+   }
+
+
+   th, td {
+      border: 1px solid #C2C2C2;
+   }
+
+   border-collapse: separate;
+   border-left: 0;
+   border-radius: 4px;
+   border-spacing: 0px;
+
+
+   table {
+      border-spacing: 0;
+  }
+  td > div {
+     padding: 0 10px ;
+     font-size: 14px;
+  }
+
+  tr:first-child th:first-child,
+  tbody:first-child tr:first-child td:first-child {
+      border-top-left-radius: 0.6em;
+  }
+   tr:first-child th:last-child,
+  tbody:first-child tr:first-child td:last-child {
+      border-top-right-radius: 0.6em;
+  }
+  
+  tr:last-child td:first-child,
+  tr:last-child td:first-child {
+      border-bottom-left-radius: 0.6em;
+  }
+  tr:last-child td:last-child,
+  tr:last-child td:last-child {
+      border-bottom-right-radius: 0.6em;
+  }
+  
+  thead + tbody tr td,
+  tfoot + tbody tr td,
+  tfoot tr td,
+  tbody + tbody tr td,
+  tr + tr td {
+      border-top: 0;
+  }
+  
+  tr th + th,
+  tr td + td {
+      border-left: 0;
+  }
+}
+
