@@ -1,5 +1,5 @@
 <template>
-  <v-col sm="12" md="6" lg="6">
+  <v-col sm="12" md="6" lg="6" id="topic">
     <v-card>
       <v-toolbar style="border: none">
         <v-card-title>Topics
@@ -47,13 +47,14 @@
       </v-simple-table>
     </v-card>
     <!--Dialog-->
-    <v-dialog persistent v-model="topicDialog" max-width="80%">
+    <v-dialog persistent v-model="topicDialog" max-width="80%"   class="dialog-window" >
       <v-card>
         <v-card-title class="headline">{{topicEditMode}} Topic</v-card-title>
         <v-container grid-list-xl fluid >
           <v-layout row wrap>
-            <v-flex xs12 md12>
-              <v-select label="Topic Type"                        
+            <v-flex xs12 md6 py-0>
+              <v-select label="Topic Type"
+                        clearable
                         v-model="selectedTopicType"
                         item-text="name"
                         return-object
@@ -61,30 +62,34 @@
               >
               </v-select>
             </v-flex>
-            <v-flex xs12 md12>
-              <v-text-field label="Topic Name"                            
+            <v-flex xs12 md6 py-0>
+              <v-text-field label="Topic Name"
+                            clearable
                             v-model="topicName"
               >
               </v-text-field>
             </v-flex>
-            <v-flex xs12 md12>
-              <v-select label="Trade"                        
+            <v-flex xs12 md6 py-0>
+              <v-select label="Trade"
+                        clearable
                         v-model="topicTrade"
                         item-text="name"
                         :items="trades"
               >
               </v-select>
             </v-flex>
-            <v-flex xs12 md12>
-              <v-select label="Transaction"                        
+            <v-flex xs12 md6 py-0>
+              <v-select label="Transaction"
+                        clearable
                         v-model="topicTransaction"
                         item-text="name"
                         :items="transactions"
               >
               </v-select>
             </v-flex>
-            <v-flex xs12 md12>
-              <v-select label="Document"                        
+            <v-flex xs12 md6 py-0>
+              <v-select label="Document"
+                        clearable
                         v-model="topicDocumentType"
                         item-text="name"
                         :items="documentTypes"
@@ -92,7 +97,7 @@
               </v-select>
             </v-flex>
 
-            <v-flex xs12 md12>
+            <v-flex xs12 md6 py-0>
               <table class="topictype-table" style="width:100%;">
                 <tr>
                   <th>Name</th>
@@ -106,7 +111,6 @@
                     <v-text-field v-model="topicVariables[index].value" :label="item.place_holder" @change="changeTopicVariables"></v-text-field>
                   </td>
                 </tr>
-
               </table>
             </v-flex>
 

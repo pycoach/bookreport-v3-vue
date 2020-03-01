@@ -147,7 +147,7 @@ export default {
         'fileName': file.name,
         'fullPath': file.fullPath || file.name,
         'contentType': file.type,
-        'Transactions': this.selectedTransactionList,
+        'Transactions': this.selectedTransactionList ,
         'DocumentTypes': this.selectedDocumentTypeList,
         'Trades': this.selectedTradeList,
         'UserID': this.user.user_id,
@@ -171,9 +171,9 @@ export default {
     },
     cancelUpload () {
       this.fileDialog = false;
-      this.selectedDocumentTypes = '';
-      this.selectedDocumentTransactions = '';
-      this.selectedDocumentTrades = '';
+      this.selectedDocumentTypes = [];
+      this.selectedDocumentTransactions = [];
+      this.selectedDocumentTrades = [];
       this.$refs.dropzone.dropzone.removeAllFiles(true);
       this.uploading = false
     }
