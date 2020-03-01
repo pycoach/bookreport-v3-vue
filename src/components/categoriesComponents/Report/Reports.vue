@@ -117,8 +117,7 @@
               <v-layout row wrap>
                 <v-flex xs12 md12>
                     <v-text-field 
-                      label="Name"
-                      clearable
+                      label="Name*"
                       v-model="reportName"
                     />                  
                   </v-flex>                
@@ -133,6 +132,7 @@
               <v-btn 
                 class="ml-5 btn-primary btn-primary--small" 
                 text 
+                :disabled="!canSave()"
                 @click="saveReport"
               >
                 Save
@@ -335,6 +335,9 @@ export default {
     }
   },
   methods: {
+    canSave() {
+      return /^[^.\s]/.test(this.reportName)
+    },
     async editReportObject(id) {
       
       let report_object = await this.$store.dispatch('getReport_object', id).then((obj)=> {

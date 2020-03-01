@@ -53,8 +53,7 @@
         <v-container grid-list-xl fluid >
           <v-layout row wrap>
             <v-flex xs12 md12>
-              <v-select label="Topic Type"
-                        clearable
+              <v-select label="Topic Type"                        
                         v-model="selectedTopicType"
                         item-text="name"
                         return-object
@@ -63,15 +62,13 @@
               </v-select>
             </v-flex>
             <v-flex xs12 md12>
-              <v-text-field label="Topic Name"
-                            clearable
+              <v-text-field label="Topic Name"                            
                             v-model="topicName"
               >
               </v-text-field>
             </v-flex>
             <v-flex xs12 md12>
-              <v-select label="Trade"
-                        clearable
+              <v-select label="Trade"                        
                         v-model="topicTrade"
                         item-text="name"
                         :items="trades"
@@ -79,8 +76,7 @@
               </v-select>
             </v-flex>
             <v-flex xs12 md12>
-              <v-select label="Transaction"
-                        clearable
+              <v-select label="Transaction"                        
                         v-model="topicTransaction"
                         item-text="name"
                         :items="transactions"
@@ -88,8 +84,7 @@
               </v-select>
             </v-flex>
             <v-flex xs12 md12>
-              <v-select label="Document"
-                        clearable
+              <v-select label="Document"                        
                         v-model="topicDocumentType"
                         item-text="name"
                         :items="documentTypes"
@@ -138,7 +133,11 @@
           <v-btn  color="primary" text @click="topicDialog=false">
             Cancel
           </v-btn>
-          <v-btn  class="ml-5 btn-primary btn-primary--small"  text @click="saveTopic">
+          <v-btn  
+          class="ml-5 btn-primary btn-primary--small"  
+          text 
+          :disabled="!canSave()"
+          @click="saveTopic">
             Save
           </v-btn>
         </v-card-actions>
@@ -188,6 +187,9 @@ export default {
     }
   },
   methods: {
+    canSave() {
+      return /^[^.\s]/.test(this.topicName)
+    },
     addTopic() {
       this.topicEditMode = 'Create';
       this.topicDialog = true;

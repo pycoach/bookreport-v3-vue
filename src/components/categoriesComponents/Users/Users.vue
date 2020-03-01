@@ -38,12 +38,12 @@
                             v-model="username"
                             required
                             prepend-icon="person"
-                            label="Name"></v-text-field>
+                            label="Name*"></v-text-field>
               <v-text-field
                       v-else :disabled="true"
                       v-model="username"
                       prepend-icon="person"
-                      label="Name"></v-text-field>
+                      label="Name*"></v-text-field>
             </v-flex>
           </v-layout>
           <v-layout row wrap>
@@ -51,7 +51,7 @@
               <v-text-field
                       v-if="userEditMode === 'Add'"
                       v-model="useremail"
-                      label="Email"
+                      label="Email*"
                       required
                       prepend-icon="mail"
                       :rules="emailRules"></v-text-field>
@@ -72,7 +72,12 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="primary" text @click="userDialog = false">Cancel</v-btn>
-          <v-btn class="ml-5 btn-primary btn-primary--small"  @click="saveUser">Save</v-btn>
+          <v-btn 
+          class="ml-5 btn-primary btn-primary--small"  
+          :disabled="!canSave()"
+          @click="saveUser">
+          Save
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -100,6 +105,9 @@
     }
   },
   methods: {
+    canSave() {
+      return /^[^.\s]/.test(this.username) && /.+@.+/.test(this.useremail)
+    },
     async saveProject(e) {
       this.$store.commit('ProjectEditor/setName', e.name);
       var _this = this;
