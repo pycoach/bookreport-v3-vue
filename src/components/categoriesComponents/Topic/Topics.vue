@@ -137,7 +137,11 @@
           <v-btn  color="primary" text @click="topicDialog=false">
             Cancel
           </v-btn>
-          <v-btn  class="ml-5 btn-primary btn-primary--small"  text @click="saveTopic">
+          <v-btn  
+          class="ml-5 btn-primary btn-primary--small"  
+          text 
+          :disabled="!canSave()"
+          @click="saveTopic">
             Save
           </v-btn>
         </v-card-actions>
@@ -187,6 +191,9 @@ export default {
     }
   },
   methods: {
+    canSave() {
+      return /^[^.\s]/.test(this.topicName)
+    },
     addTopic() {
       this.topicEditMode = 'Create';
       this.topicDialog = true;

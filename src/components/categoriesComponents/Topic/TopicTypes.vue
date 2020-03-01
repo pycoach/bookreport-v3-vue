@@ -53,16 +53,14 @@
           <v-layout row wrap>
             <v-flex xs12 md4 py-0>
               <v-text-field 
-                label="Name"
-                clearable
+                label="Name*"                
                 v-model="topicTypeName"
               />
             </v-flex>
             <v-flex xs12 md8 py-0>
               <v-textarea 
                 label="Description"
-                v-model="topicTypeDescription"
-                clearable
+                v-model="topicTypeDescription"                
                 outlined
                 auto-grow
                 rows="2"
@@ -140,7 +138,7 @@
             Cancel
           </v-btn>
           <v-btn 
-            :disabled="topicTypeName === '' || topicTypeVariables.length === 1" 
+            :disabled="!canSave() || topicTypeVariables.length == 1" 
             class="ml-5 btn-primary btn-primary--small" 
             text 
             @click="saveTopicType"
@@ -202,6 +200,9 @@ export default {
     }
   },
   methods: {
+    canSave() {
+      return /^[^.\s]/.test(this.topicTypeName)
+    },
     addTopicType() {
       this.topicTypeEditMode = 'Create';
       this.topicTypeDialog = true;
@@ -222,6 +223,7 @@ export default {
         },
       ];
       this.activeTopicTypeVariable = {}
+      this.activeTopicType = {}
     },
   
     editTopicType(topicType) {

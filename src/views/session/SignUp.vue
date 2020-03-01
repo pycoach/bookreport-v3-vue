@@ -45,7 +45,7 @@
         </v-form>
          
           <v-btn
-            :disabled="signUpDisabled || !validPassword"
+            :disabled="signUpDisabled || !canSignUp()"
             depressed
             :class="{'no-shadow': signUpDisabled}"
             class="primary button-login"
@@ -87,12 +87,6 @@ export default {
     components: {
       Intro
   },
-  computed: {
-    validPassword: function(){
-      const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/;
-      return pattern.test(this.password)
-    }
-  },
   data() {
     return {
       valid: false,
@@ -104,7 +98,7 @@ export default {
       email: '',
       emailRules: [
         v => !!v || 'E-mail is required',
-        v => /.+@.+\..+/.test(v) || 'E-mail must be valid',
+        v => /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(String(v).toLowerCase()) || 'E-mail must be valid',
       ],
       password: '',
       rules: {
@@ -123,6 +117,9 @@ export default {
     }
   },
   methods: {
+    canSignUp() {
+      return /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(String(this.email).toLowerCase()) && /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/.test(this.password)
+    },
     async submit(){
       this.signUpDisabled = true
       const store = this.$store
