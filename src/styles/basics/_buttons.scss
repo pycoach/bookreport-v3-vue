@@ -101,6 +101,7 @@ button {
         background: $primary !important;
         border-radius: 11px !important;
         height: 40px !important;
+        text-transform: uppercase !important;
         font-weight: normal;
         vertical-align: center;
         padding: 0px 38px !important;
@@ -118,11 +119,9 @@ button {
       }
 
       &.v-btn--disabled {
-           background: lighten($primary, 40% )  !important;
-           
+           background: lighten($primary, 40) !important;
       }
  }
-
 
 .btn-white {
   background: #fff !important;
@@ -154,13 +153,12 @@ button {
 }
 
 &.v-btn--disabled {
-     background: lighten($primary, 40% )  !important;
+     background: lighten($primary, 40 )  !important;
   }
 }
 
 
- .btn-grey {
-   
+ .btn-grey {   
   background: #F4F4F4 !important;
   border-radius: 11px !important;
   height: 40px !important;
@@ -188,8 +186,8 @@ button {
 }
 
 &.v-btn--disabled {
-     background: lighten($primary, 40% )  !important;
-     
+     background: lighten($primary, 40 )  !important;
+   
 }
 }
 
@@ -205,4 +203,25 @@ button {
    }
  }
 
+
+
+.btn-table {
+  background: $primary ;
+  border-radius: 11px;
+  width: 35px !important;
+  height: 34px !important;
+  min-width: 35px !important;
+  
+ 
+
+  &--outline {
+    background: #F4F4F4 !important;
+  }
+
+  &:not(:last-child) {
+    margin-right: 0.6rem;
+  }
+
+
+}
 
