@@ -85,6 +85,7 @@
 </template>
 
 <script>
+  import Vue from 'vue'
   import {mapGetters, mapState} from "vuex";
   
   export default {
@@ -106,6 +107,7 @@
   },
   methods: {
     canSave() {
+      if(this.userEditMode == 'Edit') return true
       return /^[^.\s]/.test(this.username) && /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(String(this.useremail).toLowerCase())
     },
     async saveProject(e) {
@@ -126,10 +128,15 @@
   
       await this.$store.dispatch('saveProject', this.activeProject).then(function (project) {
         if (!project['error'] && window.location.pathname !== '/Projecteditor/' + project.entity_id) {
-          _this.$router.push('/Projecteditor/' + project.entity_id);
           _this.$store.commit('ProjectEditor/setEditMode', 'Edit');
+          Vue.notify({
+            group: 'loggedIn',
+            type: 'success',
+            text: 'User deleted'
+          })
         }
       })
+
     },
     setValues(source, destination) {
       destination['version'] = source['version']
@@ -173,7 +180,11 @@
     
       await this.$store.dispatch('saveProject', this.activeProject).then(function (project) {
         if (!project['error']) {
-          window.location = '/Projecteditor/' + project.entity_id
+          Vue.notify({
+            group: 'loggedIn',
+            type: 'success',
+            text: 'User deleted'
+          })
         }
       })
     },
@@ -202,7 +213,11 @@
       this.userDialog = false
       await this.$store.dispatch('saveProject', this.activeProject).then(function (project) {
         if (!project['error']) {
-          window.location = '/Projecteditor/' + project.entity_id
+          Vue.notify({
+            group: 'loggedIn',
+            type: 'success',
+            text: 'User saved'
+          })
         }
       })
     }

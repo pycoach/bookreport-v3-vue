@@ -85,7 +85,7 @@ name: 'Description',
   },
   methods: {
     canSave() {
-      return /^[^.\s]/.test(this.name)
+      return this.name && /^[^.\s]/.test(this.name)
     },
     emitSave (name, description) {
       this.$emit('onSave', { name, description })
