@@ -25,100 +25,72 @@
       <table v-show="!isLoadingSheetData" @mouseleave="onWorkSheetLeave()">
         <thead>
           <td class="disabled-td" />
-          <th v-for="heading in headings">
-            {{ heading }}
+          <th v-for="(_, colIndex) in columnsComputed">
+            {{ headings[xAxisComputed + colIndex] }}
           </th>
         </thead>
         <tbody>
-        <!-- Showing all Rows -->
-        <template v-if="showAllRows">
-          <tr v-for="(row, yAxis) in rows" :key="yAxis + 1">
-            <td class="disabled-td">
-              {{ yAxis + 1 }}
-            </td>
-            <td 
-              v-for="(column, xAxis) in columns" :id="activeTab + 'cell_' + String(xAxis) + '-' + String(yAxis)"
-              @click="onCellClick(String(xAxis) + '-' + String(yAxis))"
-              @mouseenter="onCellEnter(String(xAxis) + '-' + String(yAxis))"
-            >
-              <!-- Getting actual coordinates-->
-              <!-- xAxis - headings[xAxis]-->
-              <!-- yAxis - Number(yAxis + 1)-->
-              <template v-if="filledCells[headings[xAxis] + Number(yAxis + 1)] && !isComputingSnippets">
-                {{filledCells[headings[xAxis] + Number(yAxis + 1)][2]}}
-              </template>
-              <template v-else-if="isComputingSnippets">
-                <v-skeleton-loader
-                  loading
-                  type="chip"
-                  class="mx-0"
-                />
-              </template>
-            </td>
-          </tr>
-        </template>
-        <!-- Showing first and last Rows -->
-        <template v-else-if="!showAllRows">
-          <!-- First Rows -->
-          <tr v-for="(row, yAxis) in Number(firstRows)" :key="yAxis + 1">
-            <td class="disabled-td">
-              {{ yAxis + 1 }}
-            </td>
-            <td
-              v-for="(column, xAxis) in columns" :id="activeTab + 'cell_' + String(xAxis) + '-' + String(yAxis)"
-              @click="onCellClick(String(xAxis) + '-' + String(yAxis))"
-              @mouseenter="onCellEnter(String(xAxis) + '-' + String(yAxis))"
-            >
-              <!-- Getting actual coordinates-->
-              <!-- xAxis - headings[xAxis]-->
-              <!-- yAxis - Number(yAxis + 1)-->
-              <template v-if="filledCells[headings[xAxis] + Number(yAxis + 1)] && !isComputingSnippets">
-                {{filledCells[headings[xAxis] + Number(yAxis + 1)][2]}}
-              </template>
-              <template v-else-if="isComputingSnippets">
-                <v-skeleton-loader
-                  loading
-                  type="chip"
-                  class="mx-0"
-                />
-              </template>
-            </td>
-          </tr>
-          <!-- Paginator -->
-          <RowsPaginator
-            :rowsCount="rows"
-            :isFetching="isFetching"
-            :firstRows="firstRows"
-            :lastRows="lastRows"
-            @mouseenter="onWorkSheetLeave()"
-            @onLoad="requestSheetDataDetailed"
-          />
-          <!-- Last Rows -->
-          <tr v-for="(row, yAxis) in Number(lastRows)" :key="'last' + (rows - lastRows + yAxis)">
-            <td class="disabled-td">
-              {{ rows - lastRows + yAxis + 1 }}
-            </td>
-            <td
-              v-for="(column, xAxis) in columns" :id="activeTab + 'cell_' + String(xAxis) + '-' + String(rows - lastRows + yAxis)"
-              @click="onCellClick(String(xAxis) + '-' + String(rows - lastRows + yAxis))"
-              @mouseenter="onCellEnter(String(xAxis) + '-' + String(rows - lastRows + yAxis))"
-            >
-              <!-- Getting actual coordinates-->
-              <!-- xAxis - headings[xAxis]-->
-              <!-- yAxis - rows - lastRows + yAxis + 1-->
-              <template v-if="filledCells[headings[xAxis] + Number(rows - lastRows + yAxis + 1)] && !isComputingSnippets">
-                {{filledCells[headings[xAxis] + Number(rows - lastRows + yAxis + 1)][2]}}
-              </template>
-              <template v-else-if="isComputingSnippets">
-                <v-skeleton-loader
-                  loading
-                  type="chip"
-                  class="mx-0"
-                />
-              </template>
-            </td>
-          </tr>
-        </template>
+          <!-- Showing Rows -->
+          <template>
+            <tr v-for="(row, rowIndex) in Number(rowsComputed)" :key="createRowKey(rowIndex)">
+              <td class="disabled-td">
+                {{createRowKey(rowIndex)}}
+              </td>
+              <td
+                v-for="(column, colIndex) in columnsComputed" :id="createCellId(colIndex, rowIndex)"
+                :key="xAxisComputed + colIndex"
+                @click="onCellClick(createCellCoordinates(colIndex, rowIndex))"
+                @mouseenter="onCellEnter(createCellCoordinates(colIndex, rowIndex))"
+              >
+                <template v-if="getFilledCell(colIndex, rowIndex) && !isComputingSnippets">
+                  {{ getFilledCell(colIndex, rowIndex)[2] }}
+                </template>
+                <!-- Loader -->
+                <template v-else-if="isComputingSnippets">
+                  <v-skeleton-loader
+                    loading
+                    type="chip"
+                    class="mx-0"
+                  />
+                </template>
+              </td>
+            </tr>
+            <template v-if="!showAllRows">
+              <!-- Paginator -->
+              <RowsPaginator
+                :rowsCount="rows"
+                :isFetching="isFetching"
+                :firstRows="firstRows"
+                :lastRows="lastRows"
+                @mouseenter="onWorkSheetLeave()"
+                @onLoad="requestSheetDataDetailed"
+              />
+              <!-- Last Rows -->
+              <tr v-for="(_, rowIndex) in Number(lastRows)" :key="createRowKeyLast(rowIndex)">
+                <td class="disabled-td">
+                  {{createRowKeyLast(rowIndex)}}
+                </td>
+                <td
+                  v-for="(column, colIndex) in columnsComputed" :id="createCellIdLast(colIndex, rowIndex)"
+                  :key="xAxisComputed + colIndex"
+                  @click="onCellClick(createCellCoordinatesLast(colIndex, rowIndex))"
+                  @mouseenter="onCellEnter(createCellCoordinatesLast(colIndex, rowIndex))"
+                >
+                  <template v-if="getFilledCellLast(colIndex, rowIndex) && !isComputingSnippets">
+                    {{getFilledCellLast(colIndex, rowIndex)[2]}}
+                  </template>
+                  <template v-else-if="isComputingSnippets">
+                    <!-- Loader -->
+                    <v-skeleton-loader
+                      loading
+                      type="chip"
+                      class="mx-0"
+                    />
+                  </template>
+                </td>
+              </tr>
+            </template>
+          </template>
         </tbody>
       </table>
     </div>
@@ -144,7 +116,8 @@ export default {
     selectedCells: {},
     filledCells: {},
     showAllRows: false,
-    showColumns: [], // [] is All
+    shownRows: [],
+    shownColumns: [],
     rowMode: 1,
     sheetSnippets: [],
     firstRows: 10,
@@ -155,6 +128,23 @@ export default {
   }),
   computed: {
     ...mapState('ExcelServices', ['sheetData', 'isLoadingSheetData', 'allSnippets', 'showSnippetsList']),
+    columnsComputed () {
+      return this.shownColumns.length ? Math.max(...this.shownColumns) - Math.min(...this.shownColumns) + 1 : this.columns
+    },
+    xAxisComputed () {
+      return this.shownColumns.length ? Math.min(...this.shownColumns) : 0
+    },
+    rowsComputed () {
+      if (!this.showAllRows) {
+        return this.firstRows;
+      } else if (this.shownRows.length) {
+        return Math.max(...this.shownRows) - Math.min(...this.shownRows) + 1
+      }
+      return this.rows
+    },
+    yAxisComputed () {
+      return this.shownRows.length ? Math.min(...this.shownRows) - 1 : 0
+    }
   },
   created () {
     window.addEventListener('keydown', this.handleKeyDown)
@@ -291,9 +281,10 @@ export default {
         this.scrappingCells();
         this.renderSnippets();
         this.showAllRows = false;
-        this.isFetching = false
       }).finally(() => {
-        this.isFetching = false
+        this.isFetching = false;
+        this.shownRows = [];
+        this.shownColumns = [];
       })
     },
     requestSheetDataAll () {
@@ -309,7 +300,9 @@ export default {
         this.renderSnippets();
         this.showAllRows = true;
       }).finally(() => {
-        this.isFetching = false
+        this.isFetching = false;
+        this.shownRows = [];
+        this.shownColumns = [];
       })
     },
     setSnippets () {
@@ -395,10 +388,34 @@ export default {
           const [from, to] = [range.split(':')[0], range.split(':')[1]];
           const [startRow, endRow] = [Number(this.coordinateToNumber(from).split('-')[1]) + 1, Number(this.coordinateToNumber(to).split('-')[1]) + 1];
           const [startColumn, endColumn] = [Number(this.coordinateToNumber(from).split('-')[0]), Number(this.coordinateToNumber(to).split('-')[0])];
-          console.log(startRow, endRow);
-          console.log('Column', startColumn, endColumn);
+          this.shownRows = [startRow, endRow];
+          this.shownColumns = [startColumn, endColumn];
           break;
       }
+    },
+    createRowKey (rowIndex) {
+      return this.yAxisComputed + rowIndex + 1
+    },
+    createRowKeyLast (rowIndex) {
+      return this.rows - this.lastRows - this.yAxisComputed + rowIndex + 1
+    },
+    createCellId (colIndex, rowIndex) {
+      return this.activeTab + 'cell_' + String(this.xAxisComputed + colIndex) + '-' + String(this.yAxisComputed + rowIndex)
+    },
+    createCellIdLast (colIndex, rowIndex) {
+      return this.activeTab + 'cell_' + String(this.xAxisComputed + colIndex) + '-' + String(this.rows - this.lastRows - this.yAxisComputed + rowIndex)
+    },
+    createCellCoordinates (colIndex, rowIndex) {
+      return String(this.xAxisComputed + colIndex) + '-' + String(this.yAxisComputed + rowIndex)
+    },
+    createCellCoordinatesLast (colIndex, rowIndex) {
+      return String(this.xAxisComputed + colIndex) + '-' + String(this.rows - this.lastRows - this.yAxisComputed + rowIndex)
+    },
+    getFilledCell (colIndex, rowIndex) {
+      return this.filledCells[this.headings[this.xAxisComputed + colIndex] + Number(this.yAxisComputed + rowIndex + 1)]
+    },
+    getFilledCellLast (colIndex, rowIndex) {
+      return this.filledCells[this.headings[this.xAxisComputed + colIndex] + Number(this.rows - this.lastRows - this.yAxisComputed + rowIndex + 1)]
     }
   },
   watch: {
