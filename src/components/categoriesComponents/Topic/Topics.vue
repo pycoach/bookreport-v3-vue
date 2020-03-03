@@ -13,8 +13,11 @@
           >
           </v-text-field>
         </v-card-title>
-        <v-btn v-show="userRole === 'provider admin'" class="ml-5 btn-primary btn-primary--small  "
-               @click="addTopic">
+        <v-btn 
+          v-show="userRole == 'provider admin'" 
+          :disabled="topic_types.length == 0"
+          class="ml-5 btn-primary btn-primary--small"
+          @click="addTopic">
           + Add
         </v-btn>
       </v-toolbar>
@@ -54,7 +57,6 @@
           <v-layout row wrap>
             <v-flex xs12 md6 py-0>
               <v-select label="Topic Type"
-                        clearable
                         v-model="selectedTopicType"
                         item-text="name"
                         return-object
@@ -64,14 +66,12 @@
             </v-flex>
             <v-flex xs12 md6 py-0>
               <v-text-field label="Topic Name"
-                            clearable
                             v-model="topicName"
               >
               </v-text-field>
             </v-flex>
             <v-flex xs12 md6 py-0>
               <v-select label="Trade"
-                        clearable
                         v-model="topicTrade"
                         item-text="name"
                         :items="trades"
@@ -80,7 +80,6 @@
             </v-flex>
             <v-flex xs12 md6 py-0>
               <v-select label="Transaction"
-                        clearable
                         v-model="topicTransaction"
                         item-text="name"
                         :items="transactions"
@@ -89,7 +88,6 @@
             </v-flex>
             <v-flex xs12 md6 py-0>
               <v-select label="Document"
-                        clearable
                         v-model="topicDocumentType"
                         item-text="name"
                         :items="documentTypes"
@@ -134,13 +132,14 @@
         </v-container>
         <v-card-actions >
           <v-spacer></v-spacer>
-          <v-btn  color="primary" text @click="topicDialog=false">
+          <v-btn  color="primary" text @click="cancelTopic">
             Cancel
           </v-btn>
           <v-btn  
           class="ml-5 btn-primary btn-primary--small"  
           text 
-          :disabled="!canSave()"
+          :disabled="!canSave() || saving"
+          :loading="saving"
           @click="saveTopic">
             Save
           </v-btn>
@@ -181,6 +180,7 @@ export default {
       topicSearch:'',
       activeTopic: {},
       topicTab: null,
+      saving: false,
       documentTypes: ["Fund - Financial","Fund - Memo", "Investment - Financial", "Investment - Legal",
         "Investment - Memo", "Investment - Value Model"],
       editor: ClassicEditor,
@@ -198,13 +198,23 @@ export default {
       this.topicEditMode = 'Create';
       this.topicDialog = true;
     
-      this.activeTopic = {
+      let newTopic = {
         'project_id': this.activeProject.entity_id,
         'snippet_ids': []
-      };
+      };      
+      
+      Object.assign(this.activeTopic, newTopic);      
+      
       this.topicName = '';
-      this.topicDescription = '';
-      this.topicVariables = {}
+      this.topicTrade = '';
+      this.topicTransaction = '';
+      this.topicDocumentType = '';
+      this.topicTemplate = '';
+      this.topicTemplatePreview = '';
+      this.topicVariables = []
+
+      Object.assign(this.selectedTopicType, this.topic_types[0])
+      this.topicTypeChanged()
     },
   
     editTopic(topic) {
@@ -218,23 +228,22 @@ export default {
       this.topicDocumentType = topic['document'];
       this.topicTemplate = topic['template'];
       this.topicSnippetsIds = topic['snippet_ids'];
-    
-    
+
       for(let i = 0; i < this.topic_types.length; i++){
-        if (topic['topic_type_id'] === this.topic_types[i].entity_id){
-          Object.assign(this.selectedTopicType, this.topic_types[i])
-        
+        if (topic['topic_type_id'] == this.topic_types[i].entity_id){
+          Object.assign(this.selectedTopicType, this.topic_types[i])        
         }
-      }
-    
+      }    
       this.topicVariables = topic['variables']
     },
   
     deleteTopic(id) {
       this.$store.dispatch('deleteTopic', id)
     },
-  
-    saveTopic() {
+    cancelTopic() {
+      this.topicDialog=false
+    },
+    async saveTopic() {
       let topic = Object.assign({}, this.activeTopic);
       topic['topic_type_id'] = this.selectedTopicType.entity_id;
       topic['name'] = this.topicName;
@@ -253,44 +262,57 @@ export default {
         variables.push(variable)
       }
       topic['variables'] = variables;
-    
-      this.$store.dispatch('saveTopic', topic).then(() => {
-        this.topicDialog = false;
+
+      this.saving = true
+      let ret = await this.$store.dispatch('saveTopic', topic).then((data) => {
+        if(!data['error'])return true
+        return false
       })
+
+      if (ret){
+        this.topicDialog = false;
+      }
+      this.saving = false
     },
     updateTemplatePreview() {
-      let topicTemplate = this.topicTemplate
-      for(let i = 0; i < this.topicVariables.length; i++){
-       let topicVariable = this.topicVariables[i]        
-        topicTemplate = topicTemplate.replace('%%' + topicVariable.name + '%%', topicVariable.value)
-      }
-      this.topicTemplatePreview = topicTemplate
+      if(this.topicTemplate){
+        let topicTemplate = this.topicTemplate
+        for(let i = 0; i < this.topicVariables.length; i++){
+        let topicVariable = this.topicVariables[i] 
+          topicTemplate = topicTemplate.replace('%%' + topicVariable.name + '%%', topicVariable.value)
+        }
+        this.topicTemplatePreview = topicTemplate
+      }      
     },
     changeTopicVariables(){
       this.updateTemplatePreview()
-    }
+    },
+    topicTypeChanged() {
+      this.topicName = this.selectedTopicType.name + ' for ' + this.topicTransaction;
+      this.topicTemplate = this.selectedTopicType.template;
+    
+      this.topicVariables = [];
+      for(let i = 0; i < this.selectedTopicType.variables.length; i++){
+        let variable_type = this.selectedTopicType.variables[i];
+        let variable = {
+          'name': variable_type.name,
+          'data_type':variable_type.data_type,
+          'place_holder': 'ex: ' + variable_type.example_value,
+          'value': ''
+        };
+        this.topicVariables.push(variable)
+      }
+    },
   },
   watch: {
     selectedTopicType() {
-      if(this.selectedTopicType){
-        this.topicName = this.selectedTopicType.name + ' for ' + this.topicTransaction;
-        this.topicTemplate = this.selectedTopicType.template;
-      
-        this.topicVariables = [];
-        for(let i = 0; i < this.selectedTopicType.variables.length; i++){
-          let variable_type = this.selectedTopicType.variables[i];
-          let variable = {
-            'name': variable_type.name,
-            'data_type':variable_type.data_type,
-            'place_holder': 'ex: ' + variable_type.example_value,
-            'value': ''
-          };
-          this.topicVariables.push(variable)
-        }
-      }
+      this.topicTypeChanged()
     },
     topicTransaction() {
-      this.topicName = this.selectedTopicType.name + ' for ' + this.topicTransaction
+      if(this.selectedTopicType){
+        this.topicName = this.selectedTopicType.name + ' for ' + this.topicTransaction
+      }
+      
     },
     topicTemplate() {
       this.updateTemplatePreview()
