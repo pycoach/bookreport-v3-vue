@@ -10,14 +10,19 @@
         </v-btn>
       </v-toolbar>
       <v-list two-line style="min-height: 450px;">
-        <template v-for="(user, index) in users">
+        <template v-for="(item, index) in users">
           <v-list-item
-                  :key="user.user_id"
-                  @click="editUser(user)">
+          :key="item.user_id"
+          :disabled="item.user_id==user.user_id"
+          @click="editUser(item)">
             <v-list-item-content>
-              <v-list-item-title v-html="user.name"></v-list-item-title>
+              <v-list-item-title v-html="item.name"></v-list-item-title>
             </v-list-item-content>
-            <v-btn icon @click.stop="deleteUser(user.user_id)">
+            <v-btn 
+            icon 
+            :disabled="item.user_id==user.user_id"
+            @click.stop="deleteUser(item.user_id)"
+            >
               <img class="close-icon" src="../../../assets/icons/trash.svg" alt="">
             </v-btn>
           </v-list-item>
