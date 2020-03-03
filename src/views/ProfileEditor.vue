@@ -1,7 +1,7 @@
 <template>
   <v-container fluid>
     <v-row justify="space-around">
-      <v-sheet width="400" height="300" elevation="5" :tile="false">
+      <v-sheet width="500" height="300" elevation="5" :tile="false">
         <v-row justify="space-around">
           <v-hover>
             <template v-slot:default="{ hover }">
@@ -57,8 +57,8 @@
           field="picture"
           @crop-success="cropSuccess"
           v-model="show"
-          :width="500"
-          :height="200"
+          :width="300"
+          :height="300"
           langType="en"
           img-format="png">
         </image-upload>

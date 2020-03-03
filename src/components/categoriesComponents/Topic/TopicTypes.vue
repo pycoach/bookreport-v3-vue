@@ -138,8 +138,9 @@
             Cancel
           </v-btn>
           <v-btn 
-            :disabled="!canSave() || topicTypeVariables.length == 1" 
+            :disabled="!canSave() || topicTypeVariables.length == 1 || saving"
             class="ml-5 btn-primary btn-primary--small" 
+            :loading="saving"
             text 
             @click="saveTopicType"
           >
@@ -192,6 +193,7 @@ export default {
           edit: true
         },
       ],
+      saving: false,
       editor: ClassicEditor,
       editorData: '<p>Content of the editor.</p>',
       editorConfig: {
@@ -207,9 +209,11 @@ export default {
       this.topicTypeEditMode = 'Create';
       this.topicTypeDialog = true;
     
-      this.activeTopicType = {
+      let newTopicType = {
         'project_id': this.activeProject.entity_id
       };
+      Object.assign(this.activeTopicType, newTopicType);
+
       this.topicTypeName = '';
       this.topicTypeDescription = '';
       this.topicTypeTemplate = '';
@@ -222,8 +226,8 @@ export default {
           edit: true
         },
       ];
-      this.activeTopicTypeVariable = {}
-      this.activeTopicType = {}
+
+      Object.assign(this.activeTopicTypeVariable, {});
     },
   
     editTopicType(topicType) {
@@ -249,7 +253,7 @@ export default {
     deleteTopicType(id) {
       this.$store.dispatch('deleteTopicType', id)
     },
-    saveTopicType() {
+    async saveTopicType() {
       this.activeTopicType['name'] = this.topicTypeName;
       this.activeTopicType['description'] = this.topicTypeDescription;
       for(let i = 0; i < this.topicTypeVariables.length; i ++){
@@ -259,11 +263,19 @@ export default {
         }
       }
       this.activeTopicType['variables'] = this.topicTypeVariables;
-      this.activeTopicType['template'] = this.topicTypeTemplate;
-    
-      this.$store.dispatch('saveTopicType', this.activeTopicType).then(() => {
-        this.topicTypeDialog = false;
+      this.activeTopicType['template'] = this.topicTypeTemplate;      
+      
+      this.saving = true
+      let ret = await this.$store.dispatch('saveTopicType', this.activeTopicType).then((data) => {
+        if(!data['error'])return true
+        else return false
       })
+
+      if(ret){
+        this.topicTypeDialog = false
+        Object.assign(this.activeTopicType, {})
+      }
+      this.saving = false  
     },
     cancelTopicType() {
       this.topicTypeDialog = false;
