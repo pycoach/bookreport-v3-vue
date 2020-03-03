@@ -21,7 +21,6 @@
           <v-btn
             v-if="isSelecting"
             text
-            key="delete"
             @click="resetSelection"
           >
             Cancel Snippet (ESC)
@@ -38,12 +37,12 @@
           </v-btn>
         </v-scroll-x-transition>
         <!-- Row range modal toggle button-->
-        <v-btn
-          text
-          key="delete"
-          @click="toggleRowRangeDialog"
-        >
+        <v-btn text @click="toggleRowRangeDialog">
           Change Data
+        </v-btn>
+        <!-- Column selection modal toggle button-->
+        <v-btn text @click="toggleColumnSelectionDialog">
+          Select Columns
         </v-btn>
       </v-toolbar>
     </v-card>
@@ -125,6 +124,9 @@ export default {
     },
     toggleRowRangeDialog () {
       EventBus.$emit('toggleRowRangeDialog')
+    },
+    toggleColumnSelectionDialog () {
+      EventBus.$emit('toggleColumnsDialog')
     }
   }
 }
