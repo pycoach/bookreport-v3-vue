@@ -7,7 +7,8 @@
       <v-card-title class="headline">Choose Columns to Display</v-card-title>
       <v-container grid-list-xl fluid>
         <v-checkbox 
-          v-for="heading in headings"
+          v-for="(heading, i) in headings"
+          :key="i"
           v-model="selected" 
           :label="heading"
           :value="heading"

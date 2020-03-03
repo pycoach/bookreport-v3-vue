@@ -1,34 +1,53 @@
 <template>
-  <v-list-item 
-    :disabled="isDeleting" 
+  <v-list-group
+    class="snippets-group"
+    :ripple="false"
+    append-icon=""
+    no-action
+    :disabled="isDeleting"
     @mouseenter="$emit('mouseenter')"
     @mouseleave="$emit('mouseleave')"
   >
-    <v-list-item-avatar>
-      <v-icon class="grey lighten-1 white--text">bookmark</v-icon>
-    </v-list-item-avatar>
-    <v-list-item-content>
-      <v-list-item-title v-text="snippet.sheet_name"></v-list-item-title>
-      <v-list-item-subtitle v-text="`${snippet.cell1} - ${snippet.cell2}`"></v-list-item-subtitle>
-    </v-list-item-content>
-    <v-list-item-action>
-      <v-btn
-        color="error"
-        icon
-        :disabled="isDeleting"
-        :loading="isDeleting"
-        @click="deleteSnippet(snippet.entity_id)"
-      >
-        <v-icon color="lighten-1">delete</v-icon>
-      </v-btn>
-    </v-list-item-action>
-  </v-list-item>
+    <template v-slot:activator>
+      <v-list-item-avatar>
+        <v-icon class="grey lighten-1 white--text">bookmark</v-icon>
+      </v-list-item-avatar>
+      <v-list-item-content>
+        <v-list-item-title v-text="snippet.sheet_name"></v-list-item-title>
+        <v-list-item-subtitle v-text="`${snippet.cell1} - ${snippet.cell2}`"></v-list-item-subtitle>
+      </v-list-item-content>
+      <v-list-item-action>
+        <v-btn
+          icon
+          :disabled="isDeleting"
+        >
+          <v-icon color="lighten-1">bookmark</v-icon>
+        </v-btn>
+      </v-list-item-action>
+      <v-list-item-action class="ma-0">
+        <v-btn
+          color="error"
+          icon
+          :disabled="isDeleting"
+          :loading="isDeleting"
+          @click="deleteSnippet(snippet.entity_id)"
+        >
+          <v-icon color="lighten-1">delete</v-icon>
+        </v-btn>
+      </v-list-item-action>
+    </template>
+    <Topics />
+  </v-list-group>
 </template>
 
 <script>
+
 export default {
   name: 'SnippetListItem',
   props: ['snippet'],
+  components: {
+    'Topics': () => import('./SnippetListItemTopic')
+  },
   data: () => ({
     isDeleting: false
   }),
@@ -48,6 +67,11 @@ export default {
 }
 </script>
 
-<style scoped>
-
+<style lang="scss">
+  .snippets-group {
+    .v-list-item--active::before {
+      background: currentColor;
+      opacity: 0.16;
+    }
+  }
 </style>
