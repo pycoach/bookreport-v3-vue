@@ -14,6 +14,10 @@
       :lastRows="lastRows"
       @change="handleRowRangeChange"
     />
+    <ColumnSelector
+      :headings="headings"
+      @onChange="changeColumns"
+    />
     <div class="v-data-table__wrapper">
       <v-overlay
         :value="isLoadingSheetData"
@@ -26,7 +30,7 @@
       <table v-show="!isLoadingSheetData" @mouseleave="onWorkSheetLeave()">
         <thead>
           <td class="disabled-td" />
-          <th v-for="(_, colIndex) in columnsComputed">
+          <th v-for="(_, colIndex) in columnsComputed" v-show="!hiddenColumns.includes(headings[colIndex])">
             {{ headings[xAxisComputed + colIndex] }}
           </th>
         </thead>
@@ -39,6 +43,7 @@
               </td>
               <td
                 v-for="(___, colIndex) in columnsComputed" :id="createCellId(colIndex, rowIndex)"
+                v-show="!hiddenColumns.includes(headings[colIndex])"
                 :key="`${rowIndex}-${xAxisComputed}-${colIndex}`"
                 @click="onCellClick(createCellCoordinates(colIndex, rowIndex))"
                 @mouseenter="onCellEnter(createCellCoordinates(colIndex, rowIndex))"
@@ -72,8 +77,10 @@
                   {{rows - lastRows - yAxisComputed + rowIndex + 1}}
                 </td>
                 <td
-                  v-for="(column, colIndex) in columnsComputed" :id="createCellIdLast(colIndex, rowIndex)"
+                  v-for="(column, colIndex) in columnsComputed"
+                  v-show="!hiddenColumns.includes(headings[colIndex])"
                   :key="`${rowIndex}-${xAxisComputed}-${colIndex}`"
+                  :id="createCellIdLast(colIndex, rowIndex)"
                   @click="onCellClick(createCellCoordinatesLast(colIndex, rowIndex))"
                   @mouseenter="onCellEnter(createCellCoordinatesLast(colIndex, rowIndex))"
                 >
@@ -108,7 +115,8 @@ export default {
   components: {
     RowsPaginator,
     RowRange,
-    SnippetsList
+    SnippetsList,
+    'ColumnSelector': () => import('./ColumnSelector')
   },
   props: ['sheetName', 'projectId', 'fileId', 'columns', 'rows', 'activeTab'],
   data: () => ({
@@ -119,6 +127,7 @@ export default {
     showAllRows: false,
     shownRows: [],
     shownColumns: [],
+    hiddenColumns: [],
     rowMode: 1,
     sheetSnippets: [],
     firstRows: 10,
@@ -399,6 +408,9 @@ export default {
           });
           break;
       }
+    },
+    changeColumns (e) {
+      this.hiddenColumns = e
     },
     createRowKey (rowIndex) {
       return `${this.yAxisComputed}-${rowIndex}`
