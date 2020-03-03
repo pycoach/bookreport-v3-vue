@@ -28,26 +28,35 @@
         </v-radio-group>
         <v-scroll-y-transition>
           <template v-if="newRowMode === 1">
-            <v-row>
-              <v-col cols="4">
-                <v-text-field
-                  v-model="first"
-                  label="Show first"
-                  type="number"
-                  hint="rows"
-                  persistent-hint
-                />
-              </v-col>
-              <v-col cols="4" offset="4">
-                <v-text-field
-                  v-model="last"
-                  label="Show last"
-                  type="number"
-                  hint="rows"
-                  persistent-hint
-                />
-              </v-col>
-            </v-row>
+            <v-form
+              ref="form"
+              v-model="valid"
+            >
+              <v-row>
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="first"
+                    label="Show first"
+                    type="number"
+                    hint="rows"
+                    :rules="firstRowsRules"
+                    persistent-hint
+                    @input="validate"
+                  />
+                </v-col>
+                <v-col cols="4" offset="4">
+                  <v-text-field
+                    v-model="last"
+                    label="Show last"
+                    type="number"
+                    hint="rows"
+                    :rules="lastRowsRules"
+                    persistent-hint
+                    @input="validate"
+                  />
+                </v-col>
+              </v-row>
+            </v-form>
           </template>
           <template v-else-if="newRowMode === 3">
             <v-row>
@@ -82,14 +91,37 @@
 import { EventBus } from '../EventBus'; 
 export default {
   name: 'RowRange',
-  props: ['rowMode', 'firstRows', 'lastRows'],
+  props: ['rowMode', 'firstRows', 'lastRows', 'rowsCount'],
   data: () => ({
+    valid: true,
     show: false,
     newRowMode: null,
     first: 10,
     last: 10,
     range: null
   }),
+  computed: {
+    firstRowsRules () {
+      const rules = [];
+      const availableCount =
+        v => (Number(v) || '') < this.rowsCount - this.lastRows + 1 ||
+          `${this.rowsCount - this.lastRows} Row(s) is available for first`;
+      rules.push(availableCount);
+      return rules
+    },
+    lastRowsRules () {
+      const rules = [];
+      const maxCount =
+        v => (Number(v) || '') < this.rowsCount + 1 ||
+          `Maximum rows available ${this.rowsCount}`;
+      rules.push(maxCount);
+      const availableCount =
+        v => (Number(v) || '') < this.rowsCount - this.firstRows + 1 ||
+          `${this.rowsCount - this.firstRows} Row(s) is available for last`;
+      rules.push(availableCount);
+      return rules
+    }
+  },
   mounted () {
     EventBus.$on('toggleRowRangeDialog', () => {
       this.show = !this.show;
@@ -99,6 +131,11 @@ export default {
     })
   },
   methods: {
+    validate () {
+      if (this.$refs.form.validate()) {
+        this.snackbar = true
+      }
+    },
     handleChange (e) {
       this.newRowMode = e
     },

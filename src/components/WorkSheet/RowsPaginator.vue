@@ -13,6 +13,7 @@
           type="number"
           ref="refFirstRows"
           :rules="firstRowsRules"
+          :disabled="isFetching"
           style="max-width: 50px"
           @input="validate"
         />
@@ -23,6 +24,7 @@
           type="number"
           ref="refLastRows"
           :rules="lastRowsRules"
+          :disabled="isFetching"
           style="max-width: 50px"
           @input="validate"
         />
@@ -48,7 +50,7 @@ export default {
   name: 'WorkSheetPaginator',
   props: ['isFetching', 'rowsCount', 'firstRows', 'lastRows'],
   data: () => ({
-    valid: true
+    valid: false
   }),
   computed: {
     firstRowsRules () {

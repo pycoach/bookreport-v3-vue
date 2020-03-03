@@ -9,6 +9,7 @@
     />
     <RowRange
       :rowMode="rowMode"
+      :rowsCount="rows"
       :firstRows="firstRows"
       :lastRows="lastRows"
       @change="handleRowRangeChange"
@@ -34,11 +35,11 @@
           <template>
             <tr v-for="(row, rowIndex) in Number(rowsComputed)" :key="createRowKey(rowIndex)">
               <td class="disabled-td">
-                {{createRowKey(rowIndex)}}
+                {{yAxisComputed + rowIndex + 1}}
               </td>
               <td
                 v-for="(column, colIndex) in columnsComputed" :id="createCellId(colIndex, rowIndex)"
-                :key="xAxisComputed + colIndex"
+                :key="`${rowIndex}-${xAxisComputed}-${colIndex}`"
                 @click="onCellClick(createCellCoordinates(colIndex, rowIndex))"
                 @mouseenter="onCellEnter(createCellCoordinates(colIndex, rowIndex))"
               >
@@ -68,11 +69,11 @@
               <!-- Last Rows -->
               <tr v-for="(_, rowIndex) in Number(lastRows)" :key="createRowKeyLast(rowIndex)">
                 <td class="disabled-td">
-                  {{createRowKeyLast(rowIndex)}}
+                  {{rows - lastRows - yAxisComputed + rowIndex + 1}}
                 </td>
                 <td
                   v-for="(column, colIndex) in columnsComputed" :id="createCellIdLast(colIndex, rowIndex)"
-                  :key="xAxisComputed + colIndex"
+                  :key="`${rowIndex}-${xAxisComputed}-${colIndex}`"
                   @click="onCellClick(createCellCoordinatesLast(colIndex, rowIndex))"
                   @mouseenter="onCellEnter(createCellCoordinatesLast(colIndex, rowIndex))"
                 >
@@ -280,7 +281,7 @@ export default {
         this.lastRows = lastRows;
         this.scrappingCells();
         this.renderSnippets();
-        this.showAllRows = false;
+        this.showAllRows = firstRows + lastRows >= this.rows;
       }).finally(() => {
         this.isFetching = false;
         this.shownRows = [];
@@ -394,7 +395,7 @@ export default {
       }
     },
     createRowKey (rowIndex) {
-      return this.yAxisComputed + rowIndex + 1
+      return `${this.yAxisComputed}-${rowIndex}`
     },
     createRowKeyLast (rowIndex) {
       return this.rows - this.lastRows - this.yAxisComputed + rowIndex + 1
