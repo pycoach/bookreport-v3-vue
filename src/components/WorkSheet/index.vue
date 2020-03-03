@@ -33,12 +33,12 @@
         <tbody>
           <!-- Showing Rows -->
           <template>
-            <tr v-for="(row, rowIndex) in Number(rowsComputed)" :key="createRowKey(rowIndex)">
+            <tr v-for="(__, rowIndex) in Number(rowsComputed)" :key="createRowKey(rowIndex)">
               <td class="disabled-td">
                 {{yAxisComputed + rowIndex + 1}}
               </td>
               <td
-                v-for="(column, colIndex) in columnsComputed" :id="createCellId(colIndex, rowIndex)"
+                v-for="(___, colIndex) in columnsComputed" :id="createCellId(colIndex, rowIndex)"
                 :key="`${rowIndex}-${xAxisComputed}-${colIndex}`"
                 @click="onCellClick(createCellCoordinates(colIndex, rowIndex))"
                 @mouseenter="onCellEnter(createCellCoordinates(colIndex, rowIndex))"
@@ -269,6 +269,11 @@ export default {
     },
     requestSheetDataDetailed (e) {
       const { firstRows, lastRows } = e;
+      // If the selected rows count is equal to all rows count  
+      if (Number(firstRows) + Number(lastRows) >= this.rows) {
+        this.requestSheetDataAll();
+        return 
+      }
       this.isFetching = true;
       const payload = {
         file_id: this.fileId,
@@ -281,7 +286,7 @@ export default {
         this.lastRows = lastRows;
         this.scrappingCells();
         this.renderSnippets();
-        this.showAllRows = firstRows + lastRows >= this.rows;
+        this.showAllRows = false;
       }).finally(() => {
         this.isFetching = false;
         this.shownRows = [];
@@ -296,7 +301,7 @@ export default {
         file_id: this.fileId,
         sheet: this.activeTab,
       };
-      this.$store.dispatch('ExcelServices/loadSheetDataAll', payload).then(() => {
+      return this.$store.dispatch('ExcelServices/loadSheetDataAll', payload).then(() => {
         this.scrappingCells();
         this.renderSnippets();
         this.showAllRows = true;
@@ -379,18 +384,19 @@ export default {
       this.rowMode = mode;
       switch(mode) {
         case 1: // First and Last rows
-          this.requestSheetDataDetailed({ firstRows, lastRows });
+          this.requestSheetDataDetailed({ firstRows, lastRows })
           break;
         case 2: // All rows
           this.requestSheetDataAll();
           break;
         case 3:
-          this.requestSheetDataAll();
-          const [from, to] = [range.split(':')[0], range.split(':')[1]];
-          const [startRow, endRow] = [Number(this.coordinateToNumber(from).split('-')[1]) + 1, Number(this.coordinateToNumber(to).split('-')[1]) + 1];
-          const [startColumn, endColumn] = [Number(this.coordinateToNumber(from).split('-')[0]), Number(this.coordinateToNumber(to).split('-')[0])];
-          this.shownRows = [startRow, endRow];
-          this.shownColumns = [startColumn, endColumn];
+          this.requestSheetDataAll().then(() => {
+            const [from, to] = [range.split(':')[0], range.split(':')[1]];
+            const [startRow, endRow] = [Number(this.coordinateToNumber(from).split('-')[1]) + 1, Number(this.coordinateToNumber(to).split('-')[1]) + 1];
+            const [startColumn, endColumn] = [Number(this.coordinateToNumber(from).split('-')[0]), Number(this.coordinateToNumber(to).split('-')[0])];
+            this.shownRows = [startRow, endRow];
+            this.shownColumns = [startColumn, endColumn];
+          });
           break;
       }
     },

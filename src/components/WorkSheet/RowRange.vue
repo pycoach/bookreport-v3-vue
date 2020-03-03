@@ -41,6 +41,7 @@
                     hint="rows"
                     :rules="firstRowsRules"
                     persistent-hint
+                    @focus="focusOn('first')"
                     @input="validate"
                   />
                 </v-col>
@@ -52,6 +53,7 @@
                     hint="rows"
                     :rules="lastRowsRules"
                     persistent-hint
+                    @focus="focusOn('last')"
                     @input="validate"
                   />
                 </v-col>
@@ -78,6 +80,7 @@
         <v-btn
           color="primary"
           text
+          :disabled="!valid && newRowMode === 1"
           @click="submitChange"
         >
           I accept
@@ -91,34 +94,59 @@
 import { EventBus } from '../EventBus'; 
 export default {
   name: 'RowRange',
-  props: ['rowMode', 'firstRows', 'lastRows', 'rowsCount'],
+  props: ['rowMode', 'rowsCount', 'firstRows', 'lastRows'],
   data: () => ({
     valid: true,
     show: false,
     newRowMode: null,
     first: 10,
     last: 10,
-    range: null
+    range: null,
+    focusedOn: null
   }),
   computed: {
     firstRowsRules () {
-      const rules = [];
+      let rules = [];
+      const maxCount =
+        v => (Number(v) || '') <= this.rowsCount ||
+          `You have reached the maximal rows count`;
+      rules.push(maxCount);
+      const isPositive =
+        v => (Number(v) || '') > -1 ||
+          `Rows count must be positive number`;
+      rules.push(isPositive);
+    
+      if (this.focusedOn !== 'first') return rules;
       const availableCount =
-        v => (Number(v) || '') < this.rowsCount - this.lastRows + 1 ||
-          `${this.rowsCount - this.lastRows} Row(s) is available for first`;
+        v => (Number(v) || '') < this.rowsCount - this.last + 1 ||
+          `${this.rowsCount - this.last} Row are available for first`;
       rules.push(availableCount);
+    
+      if (this.rowsCount - this.last <= 0) {
+        rules = []
+      }
       return rules
     },
     lastRowsRules () {
-      const rules = [];
+      let rules = [];
       const maxCount =
-        v => (Number(v) || '') < this.rowsCount + 1 ||
-          `Maximum rows available ${this.rowsCount}`;
+        v => (Number(v) || '') <= this.rowsCount ||
+          `You have reached the maximal rows count`;
       rules.push(maxCount);
+      const isPositive =
+        v => (Number(v) || '') > -1 ||
+          `Rows count must be positive number`;
+      rules.push(isPositive);
+    
+      if (this.focusedOn !== 'last') return rules;
       const availableCount =
-        v => (Number(v) || '') < this.rowsCount - this.firstRows + 1 ||
-          `${this.rowsCount - this.firstRows} Row(s) is available for last`;
+        v => (Number(v) || '') < this.rowsCount - this.first + 1 ||
+          `${this.rowsCount - this.first} Row are available for last`;
       rules.push(availableCount);
+    
+      if (this.rowsCount - this.first <= 0) {
+        rules = []
+      }
       return rules
     }
   },
@@ -131,6 +159,9 @@ export default {
     })
   },
   methods: {
+    focusOn (e) {
+      this.focusedOn = e;
+    },
     validate () {
       if (this.$refs.form.validate()) {
         this.snackbar = true

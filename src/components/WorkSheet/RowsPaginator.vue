@@ -8,25 +8,27 @@
       >
         ↑ First
         <v-text-field
-          :value="firstRows"
+          v-model="first"
           class="mx-4"
           type="number"
           ref="refFirstRows"
           :rules="firstRowsRules"
           :disabled="isFetching"
-          style="max-width: 50px"
-          @input="validate"
+          style="max-width: 55px"
+          @focus="focusOn('first')"
+          @input="validate()"
         />
         rows ↑ ... ↓ Last
         <v-text-field
-          :value="lastRows"
+          v-model="last"
           class="mx-4"
           type="number"
           ref="refLastRows"
           :rules="lastRowsRules"
           :disabled="isFetching"
-          style="max-width: 50px"
-          @input="validate"
+          style="max-width: 55px"
+          @focus="focusOn('last')"
+          @input="validate()"
         />
         rows ↓
         <v-btn
@@ -50,31 +52,65 @@ export default {
   name: 'WorkSheetPaginator',
   props: ['isFetching', 'rowsCount', 'firstRows', 'lastRows'],
   data: () => ({
-    valid: false
+    valid: false,
+    first: 10,
+    last: 10,
+    focusedOn: null
   }),
   computed: {
     firstRowsRules () {
-      const rules = [];
+      let rules = [];
+      const maxCount =
+        v => (Number(v) || '') <= this.rowsCount ||
+          `You have reached the maximal rows count`;
+      rules.push(maxCount);
+      const isPositive =
+        v => (Number(v) || '') > -1 ||
+          `Rows count must be positive number`;
+      rules.push(isPositive);
+      
+      if (this.focusedOn !== 'first') return rules;
       const availableCount =
-        v => (Number(v) || '') < this.rowsCount - this.lastRows + 1 ||
-          `${this.rowsCount - this.lastRows} Row(s) is available for first`;
+        v => (Number(v) || '') < this.rowsCount - this.last + 1 ||
+          `${this.rowsCount - this.last} Row are available for first`;
       rules.push(availableCount);
+  
+      if (this.rowsCount - this.last <= 0) {
+        rules = []
+      }
       return rules
     },
     lastRowsRules () {
-      const rules = [];
+      let rules = [];
       const maxCount =
-        v => (Number(v) || '') < this.rowsCount + 1 ||
-          `Maximum rows available ${this.rowsCount}`;
+        v => (Number(v) || '') <= this.rowsCount ||
+          `You have reached the maximal rows count`;
       rules.push(maxCount);
+      const isPositive =
+        v => (Number(v) || '') > -1 ||
+          `Rows count must be positive number`;
+      rules.push(isPositive);
+      
+      if (this.focusedOn !== 'last') return rules;
       const availableCount =
-        v => (Number(v) || '') < this.rowsCount - this.firstRows + 1 ||
-          `${this.rowsCount - this.firstRows} Row(s) is available for last`;
+        v => (Number(v) || '') < this.rowsCount - this.first + 1 ||
+          `${this.rowsCount - this.first} Row are available for last`;
       rules.push(availableCount);
+      
+      if (this.rowsCount - this.first <= 0) {
+        rules = []
+      }
       return rules
     }
   },
+  created () {
+    this.first = this.firstRows;
+    this.last = this.lastRows
+  },
   methods: {
+    focusOn (e) {
+      this.focusedOn = e;
+    },
     validate () {
       if (this.$refs.form.validate()) {
         this.snackbar = true
@@ -82,12 +118,20 @@ export default {
     },
     onLoad () {
       this.$emit('onLoad', {
-        firstRows: this.$refs.refFirstRows.internalValue,
-        lastRows: this.$refs.refLastRows.internalValue
+        firstRows: this.first,
+        lastRows: this.last
       })
     },
     onMouseenter () {
       this.$emit('mouseenter')
+    }
+  },
+  watch: {
+    firstRows (newValue) {
+      this.first = newValue
+    },
+    lastRows (newValue) {
+      this.last = newValue
     }
   }
 }
