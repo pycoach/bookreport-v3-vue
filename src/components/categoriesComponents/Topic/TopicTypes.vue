@@ -1,5 +1,5 @@
 <template>
-  <v-col sm="12" md="6" lg="6">
+  <v-col sm="12" md="6" lg="6" id="topicType">
     <v-card >
       <v-toolbar style="border: none">
         <v-card-title>Topic Types
@@ -46,30 +46,28 @@
       </v-simple-table>
     </v-card>
     <!--Dialog-->
-    <v-dialog persistent v-model="topicTypeDialog" max-width="80%">
+    <v-dialog persistent v-model="topicTypeDialog" max-width="80%" class="dialog-window" >
       <v-card>
         <v-card-title class="headline">{{topicTypeEditMode}} Topic Type</v-card-title>
         <v-container grid-list-xl fluid >
           <v-layout row wrap>
-            <v-flex xs12 md12>
+            <v-flex xs12 md4 py-0>
               <v-text-field 
-                label="Name"
-                clearable
+                label="Name*"                
                 v-model="topicTypeName"
               />
             </v-flex>
-            <v-flex xs12 md12>
+            <v-flex xs12 md8 py-0>
               <v-textarea 
                 label="Description"
-                v-model="topicTypeDescription"
-                clearable
+                v-model="topicTypeDescription"                
                 outlined
                 auto-grow
                 rows="2"
                 row-height="10" 
               />
             </v-flex>
-            <v-flex xs12 md12>
+            <v-flex xs12 md12 py-0>
               <table class="topictype-table" style="width:100%;">
                 <tr>
                   <th>Name</th>
@@ -96,17 +94,17 @@
                     <v-text-field v-else v-model="activeTopicTypeVariable.example_value"></v-text-field>
                   </td>
                   <td>
-                    <div v-if="item.name === ''">
-                      <v-btn :disabled="!item.edit || !activeTopicTypeVariable.name || !activeTopicTypeVariable.data_type" @click="addTopicTypeVariable()">add</v-btn>
-                      <v-btn :disabled="!item.edit" @click="clearTopicTypeVariable()">clear</v-btn>
+                    <div v-if="item.name === ''" class="my-3 text-center d-flex">
+                      <v-btn text class="btn-table  btn-table--outline" :disabled="!item.edit" @click="clearTopicTypeVariable()"><img class="close-icon" src="../../../assets/icons/close.svg" alt="" /></v-btn>
+                      <v-btn text class="btn-table" :disabled="!item.edit || !activeTopicTypeVariable.name || !activeTopicTypeVariable.data_type" @click="addTopicTypeVariable()"> <img class="check-icon" src="../../../assets/icons/check.svg" alt="" /></v-btn>
                     </div>
-                    <div v-else-if="!item.edit">
-                      <v-btn @click="editTopicTypeVariable(item)">edit</v-btn>
-                      <v-btn @click="deleteTopicTypeVariable(item)">delete</v-btn>
+                    <div v-else-if="!item.edit" class="my-3 text-center d-flex">
+                      <v-btn text class="btn-table  btn-table--outline" @click="editTopicTypeVariable(item)"><img class="close-icon" src="../../../assets/icons/edit-pencil.svg" alt="" /></v-btn>
+                      <v-btn text class="btn-table  btn-table--outline" @click="deleteTopicTypeVariable(item)"><img class="close-icon" src="../../../assets/icons/trash-red.svg" alt="" /></v-btn>
                     </div>
-                    <div v-else>
-                      <v-btn @click="saveTopicTypeVariable(item)">Save</v-btn>
-                      <v-btn @click="cancelTopicTypeVariable(item)">Cancel</v-btn>
+                    <div v-else  class="my-3 text-center d-flex">
+                      <v-btn text class="btn-table  btn-table--outline" @click="cancelTopicTypeVariable(item)"> <img class="close-icon" src="../../../assets/icons/close.svg" alt="" /></v-btn>
+                      <v-btn text class="btn-table " @click="saveTopicTypeVariable(item)">  <img class="check-icon" src="../../../assets/icons/check.svg" alt="" /></v-btn>
                     </div>
                   </td>
                 </tr>
@@ -135,16 +133,17 @@
             color="primary" 
             text 
             @click="cancelTopicType"
+             class="ml-5 btn-primary-outline btn-primary-outline--small" 
           >
             Cancel
           </v-btn>
           <v-btn 
-            :disabled="topicTypeName === '' || topicTypeVariables.length === 1" 
+            :disabled="!canSave() || topicTypeVariables.length == 1" 
             class="ml-5 btn-primary btn-primary--small" 
             text 
             @click="saveTopicType"
           >
-            Save
+            SAVE
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -201,6 +200,9 @@ export default {
     }
   },
   methods: {
+    canSave() {
+      return /^[^.\s]/.test(this.topicTypeName)
+    },
     addTopicType() {
       this.topicTypeEditMode = 'Create';
       this.topicTypeDialog = true;
@@ -221,6 +223,7 @@ export default {
         },
       ];
       this.activeTopicTypeVariable = {}
+      this.activeTopicType = {}
     },
   
     editTopicType(topicType) {

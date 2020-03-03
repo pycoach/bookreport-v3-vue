@@ -9,8 +9,9 @@
             <v-container grid-list-xl fluid>
               <v-layout row wrap>
                 <v-flex xs12 md12>
-                  <v-select label="Sub Type"                        
+                  <v-select label="Sub Type"
                     v-model="sub_type"
+                    :disabled="true"
                     :items="['Chapter', 'Title', 'Page Break', 'Graphic', 'Table of Contents', 'Report Section']"
                   >
                   </v-select>                  
@@ -84,6 +85,7 @@
                         v-model="selectedTopic"
                         item-text="name"
                         return-object
+                        :disabled="true"
                         :items="topics"
                       >
                       </v-select>
@@ -115,8 +117,7 @@
               <v-layout row wrap>
                 <v-flex xs12 md12>
                     <v-text-field 
-                      label="Name"
-                      clearable
+                      label="Name*"
                       v-model="reportName"
                     />                  
                   </v-flex>                
@@ -131,6 +132,7 @@
               <v-btn 
                 class="ml-5 btn-primary btn-primary--small" 
                 text 
+                :disabled="!canSave()"
                 @click="saveReport"
               >
                 Save
@@ -333,6 +335,9 @@ export default {
     }
   },
   methods: {
+    canSave() {
+      return /^[^.\s]/.test(this.reportName)
+    },
     async editReportObject(id) {
       
       let report_object = await this.$store.dispatch('getReport_object', id).then((obj)=> {
@@ -341,9 +346,6 @@ export default {
       })      
 
       if(report_object) {
-        this.reportObjectEditMode = 'Edit';
-        this.reportObjectdialog = true
-
         this.activeReportobject = Object.assign({}, report_object)
 
         this.sub_type = report_object.sub_type
@@ -367,7 +369,10 @@ export default {
               this.selectedTopic = this.topics[i]
             }
           }
-        }        
+        }
+          
+        this.reportObjectEditMode = 'Edit';
+        this.reportObjectdialog = true     
       }     
     },
     saveReportObject() {

@@ -35,8 +35,9 @@
         <v-row justify="space-around">
           <v-btn
             color="green darken-1"
+            :disabled="!enablePasswordReset"
             text
-            @click="$store.dispatch('resetPassword', user.email)">
+            @click="resetPassword">
             Reset Password
           </v-btn>
           <v-btn
@@ -91,6 +92,7 @@ export default {
         v => !!v || 'Name is required',
       ],
       profilePicture: '',
+      enablePasswordReset: true,
     }
   },
   methods: {
@@ -112,6 +114,12 @@ export default {
       this.profilePicture = imgDataUrl
       this.save()
     },
+    async resetPassword() {
+      this.enablePasswordReset = false
+      await this.$store.dispatch('resetPassword', this.user.email)
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      this.enablePasswordReset = true
+    }
   }
 
 }

@@ -61,7 +61,7 @@ const actions = {
     context.commit('logoutUser')
   },
   resetPassword(context, email) {
-    api(false).post('/password-reset', {
+    return api(false).post('/password-reset', {
       'email': email
     }).then(function (response) {
       const userData = response['data']
@@ -70,6 +70,7 @@ const actions = {
       } else {
         context.commit('resetPasswordSuccess', userData)
       }
+      return userData
     })
   },
   updateProfile(context, profile) {
@@ -131,7 +132,7 @@ const mutations = {
         Vue.notify({
             group: 'loggedIn',
             type: 'success',
-            text: 'You should receive an email with password reset instructions.'
+            text: 'If your email is registered in our system, you’ll receive instructions on how to reset your password.'
         })
     }, 1500)
   },

@@ -69,8 +69,7 @@
           <v-layout row wrap>
             <v-flex xs12 md12>
               <v-text-field 
-                label="Name"
-                clearable
+                label="Name*"
                 v-model="transactionName" 
               />
             </v-flex>
@@ -98,7 +97,7 @@
         </v-container>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="dialog = false">
+          <v-btn color="primary" text @click="closeTransaction">
             CANCEL
           </v-btn>
           <v-btn 
@@ -106,7 +105,7 @@
             text 
             @click="saveTransaction"
             :loading="isLoading"
-            :disabled="isLoading"
+            :disabled="isLoading || !canSave()"
           >
             SAVE
           </v-btn>
@@ -142,6 +141,9 @@ export default {
     }
   },
   methods: {
+    canSave() {
+      return /^[^.\s]/.test(this.transactionName)
+    },
     addTransaction() {
       this.activeTransaction = {
         'project_id': this.activeProject.entity_id
@@ -153,7 +155,7 @@ export default {
       this.dialog = true
     },
     editTransaction(transaction) {
-      this.activeTransaction = transaction;
+      this.activeTransaction = Object.assign({}, transaction)
       this.transactionName = transaction['name'];
       this.transactionDescription = transaction['description'];
       this.transactionTrade = null;
@@ -176,6 +178,12 @@ export default {
     },
     deleteTransaction(id) {
       this.$store.dispatch('deleteTransaction', id)
+    },
+    closeTransaction() {
+      this.transactionName = ''
+      this.transactionDescription = ''
+      this.activeTransaction = {}
+      this.dialog = false
     },
     transactionTradeChanged(trade) {
       this.activeTransaction['trade_id'] = trade['entity_id']

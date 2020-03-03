@@ -21,10 +21,11 @@
         <v-layout row wrap>
           <v-flex xs12 md12 v-if="editMode === 'Create' || editDescriptionMode">
             <v-text-field 
-              label="Name"
+              label="Name*"
               clearable
               class="px-3 mt-4"
               :value="name"
+              :counter="100"
               @input="$store.commit('ProjectEditor/setName', $event)"
             >
             </v-text-field>
@@ -56,7 +57,7 @@
         <v-btn 
           class="ml-5 btn-primary btn-primary--small"
           text
-          :disabled="activeProjectIsLoading"
+          :disabled="activeProjectIsLoading || !canSave()"
           :loading="activeProjectIsLoading"
           @click="emitSave(name, description)"
         >
@@ -73,7 +74,7 @@ export default {
 name: 'Description',
   computed: {
     ...mapGetters(['activeProjectIsLoading']),
-    ...mapState('ProjectEditor', ['editMode', 'name', 'description'])
+    ...mapState('ProjectEditor', ['editMode', 'name', 'description']),   
   },
   data() {
     return {
@@ -83,6 +84,9 @@ name: 'Description',
     }
   },
   methods: {
+    canSave() {
+      return this.name && /^[^.\s]/.test(this.name)
+    },
     emitSave (name, description) {
       this.$emit('onSave', { name, description })
     },
@@ -105,6 +109,8 @@ name: 'Description',
       }
       this.editDescriptionMode = false;
     }
+  },
+  watch: {
   }
 }
 </script>
