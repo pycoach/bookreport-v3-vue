@@ -142,6 +142,8 @@ export default {
       this.$store.dispatch('loadTransactions', this.id)
       this.$store.dispatch('loadTopicTypes', this.id)
       this.$store.dispatch('loadTopics', this.id)      
+      this.$store.dispatch('loadReports', this.id)
+      this.$store.dispatch('loadReport_objects', this.id)
     } else {
       this.$store.commit('ProjectEditor/setEditMode', 'Create');
       this.$store.commit('setActiveProject', {user_id: this.user_id})
@@ -159,7 +161,6 @@ export default {
   methods: {
     async saveProject(e) {
       this.$store.commit('ProjectEditor/setName', e.name);
-      var _this = this;
       if (this.users.length === 0){
         this.$store.commit('ProjectEditor/setUsers', [{
           'user_id': this.user_id,
@@ -173,12 +174,11 @@ export default {
       }
       this.setValues(this, this.activeProject);
 
-      await this.$store.dispatch('saveProject', this.activeProject).then(function (project) {
-        if (!project['error'] && window.location.pathname !== '/Projecteditor/' + project.entity_id ) {
-          _this.$router.push('/Projecteditor/' + project.entity_id);
-          _this.$store.commit('ProjectEditor/setEditMode', 'Edit');
-        }
-      });
+      let ret = await this.$store.dispatch('saveProject', this.activeProject).then(function (project) {
+        if (!project['error'])return true
+        else return false
+      })
+      if(ret)this.$router.push('/project');
     },
     setValues(source, destination) {      
       destination['version'] = source['version']
