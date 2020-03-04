@@ -13,15 +13,15 @@
         <template v-for="(item, index) in users">
           <v-list-item
           :key="item.user_id"
-          :disabled="item.user_id==user.user_id"
+          :disabled="item.user_id === user.user_id"
           @click="editUser(item)">
             <v-list-item-content>
               <v-list-item-title v-html="item.name"></v-list-item-title>
             </v-list-item-content>
-            <v-btn 
-            icon 
-            :disabled="item.user_id==user.user_id"
-            @click.stop="deleteUser(item.user_id)"
+            <v-btn
+            icon
+            v-if="item.user_id !== user.user_id"
+            @click.stop="openDeleteUserConfirmationDialog(item)"
             >
               <img class="close-icon" src="../../../assets/icons/trash.svg" alt="">
             </v-btn>
@@ -77,12 +77,24 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="primary" text @click="userDialog = false">Cancel</v-btn>
-          <v-btn 
-          class="ml-5 btn-primary btn-primary--small"  
+          <v-btn
+          class="ml-5 btn-primary btn-primary--small"
           :disabled="!canSave()"
           @click="saveUser">
           Save
           </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!--    Confirm Delete dialog-->
+    <v-dialog v-model="dialogRemoveUser.open" persistent max-width="400">
+      <v-card>
+        <v-card-title class="headline">Please confirm</v-card-title>
+        <v-card-text>Are you want to delete <strong>{{dialogRemoveUser.name}}</strong>?</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" text @click="dialogRemoveUser.open = false">Cancel</v-btn>
+          <v-btn color="red darken-1" text @click="deleteUser(dialogRemoveUser.entityId)">Confirm</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -92,7 +104,7 @@
 <script>
   import Vue from 'vue'
   import {mapGetters, mapState} from "vuex";
-  
+
   export default {
   name: 'Users',
   computed: {
@@ -108,6 +120,11 @@
       emailRules: [ v => /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(String(v).toLowerCase()) || 'Invalid Email address' ],
       userRoles: ['provider admin', 'provider analyst', 'client manager', 'client analyst', 'participant'],
       activeUser: null,
+      dialogRemoveUser: {
+        open: false,
+        entityId: null,
+        name: '',
+      }
     }
   },
   methods: {
@@ -125,12 +142,12 @@
           'role': 'provider admin'
         }])
       }
-  
+
       if (this.user_ids.length === 0) {
         this.$store.commit('ProjectEditor/setUserIds', [this.user_id])
       }
       this.setValues(this, this.activeProject);
-  
+
       await this.$store.dispatch('saveProject', this.activeProject).then(function (project) {
         if (!project['error'] && window.location.pathname !== '/Projecteditor/' + project.entity_id) {
           _this.$store.commit('ProjectEditor/setEditMode', 'Edit');
@@ -168,22 +185,27 @@
       this.$store.commit('ProjectEditor/setUserRole', user.role);
       this.userEditMode = 'Edit'
     },
+    openDeleteUserConfirmationDialog(item) {
+      this.dialogRemoveUser.open = true;
+      this.dialogRemoveUser.entityId = item.user_id;
+      this.dialogRemoveUser.name = item.name;
+    },
     async deleteUser(user_id) {
-    
+
       for(let i=0; i < this.activeProject.users.length; i++){
         let user = this.activeProject.users[i]
-        if(user.user_id == user_id){
+        if(user.user_id === user_id){
           this.activeProject.users.splice(i, 1)
         }
       }
-    
+
       for(let i=0; i < this.activeProject.user_ids.length; i++){
-        if(user_id == this.activeProject.user_ids[i]){
+        if(user_id === this.activeProject.user_ids[i]){
           this.activeProject.user_ids.splice(i, 1)
         }
       }
-    
-      await this.$store.dispatch('saveProject', this.activeProject).then(function (project) {
+
+      await this.$store.dispatch('saveProject', this.activeProject).then((project) => {
         if (!project['error']) {
           Vue.notify({
             group: 'loggedIn',
@@ -191,6 +213,7 @@
             text: 'User deleted'
           })
         }
+        this.dialogRemoveUser = { open: false, entityId: null, name: '' };
       })
     },
     userRoleChange(e) {
@@ -214,7 +237,7 @@
           }
         }
       }
-    
+
       this.userDialog = false
       await this.$store.dispatch('saveProject', this.activeProject).then(function (project) {
         if (!project['error']) {
