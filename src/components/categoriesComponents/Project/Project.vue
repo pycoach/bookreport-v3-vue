@@ -12,13 +12,13 @@
         <v-toolbar >
           <div>
              <div class="project-title">{{project.name}}</div>
-           <div class="project-last-edited">Last edited at 12/19/2019</div>
+           <div class="project-last-edited">Last edited at {{$moment(project.changed_on).format('LT MM/DD/YYYY')}}</div>
           </div>
-          
+
               <v-menu @click.native.stop.prevent offset-y >
                 <template v-slot:activator="{ on }">
                   <v-btn @click.stop icon style="margin-left: auto"
-                    
+
                     v-on="on"
                   >      <img src="../../../assets/icons/menu-icon.svg" alt="">
                   </v-btn>
@@ -34,7 +34,7 @@
                   <v-list-item
                     :key="1"
                     @click.stop="apiDelete(project.entity_id)"
-                     > 
+                     >
                      <i class="pe-7s-trash fs-18 delete-button mr-2"  style="color: #A9A9A9"></i>
                     <v-list-item-title color="red">Delete project</v-list-item-title>
                   </v-list-item>
@@ -67,28 +67,28 @@
         </v-container>
         <v-divider></v-divider>
            <v-container fluid class="users-block">
-             <div class="mt-3">Users</div> 
+             <div class="mt-3">Users</div>
              <v-row >
-              
+
              <v-col cols="12" sm="12" class="d-flex" >
-               
-               <div> 
+
+               <div>
                   <img  src="../../../assets/placeholders/userpic.svg" alt="">
                </div>
                <div>
                   <div class="users-block__name">{{project.users[0].name}}</div>
                   <div class="users-block__role">{{project.users[0].role}}</div>
-               </div> 
+               </div>
              </v-col>
            </v-row>
         </v-container>
-              
+
       </v-card>
       </v-col>
     </v-row>
   </div>
 
-  
+
 </template>
 
 <script>
@@ -101,7 +101,7 @@ export default {
 
       filteredProjects() {
         return this.projects.filter(project => {
-              
+
              return project.name.toLowerCase().indexOf(this.search.toLowerCase()) > -1
         })
     },
@@ -109,24 +109,21 @@ export default {
     search() {
       return this.$parent.search
     }
-  
+
   },
   data() {
     return {
-        
+
     }
   },
-
-  created() {    
+  created() {
     this.$store.dispatch('loadProjects', this.user.entity_id);
   },
-  
   methods: {
-  
+
     apiDelete(id) {
       this.$store.dispatch('deleteProject', id)
     },
-    
   }
 }
 </script>

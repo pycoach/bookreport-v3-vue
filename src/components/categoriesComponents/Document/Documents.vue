@@ -11,7 +11,7 @@
                 <v-text-field
                   class="card-search"
                   @input="onSearch"
-                  v-model="searchQuery" 
+                  v-model="searchQuery"
                   placeholder="Find Documents"
                 >
                 </v-text-field>
@@ -42,8 +42,8 @@
           >
             <template v-slot:body="{ items }">
               <tbody>
-                <tr 
-                  v-for="item in items" 
+                <tr
+                  v-for="item in items"
                   :key="item.entity_id"
                   @click.stop="handlePreviewFile(item)"
                 >
@@ -70,8 +70,8 @@
               </tbody>
             </template>
           </v-data-table>
-          <v-pagination 
-            v-model="options.page" 
+          <v-pagination
+            v-model="options.page"
             :length="Math.ceil( getDocumentsCount / options.itemsPerPage || 1)"
             :total-visible="4"
           />
@@ -110,7 +110,6 @@
 </template>
 
 <script>
-import moment from 'moment';
 import {mapGetters} from 'vuex';
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
 import * as far from '@fortawesome/fontawesome-free-regular/index';
@@ -191,9 +190,9 @@ export default {
     onSearch(value) {
       if (this.timer) clearTimeout(this.timer);
       this.timer = setTimeout(() => {
-        this.$store.dispatch('ProjectDocuments/loadDocuments', { 
-          project_id: this.activeProject.entity_id, 
-          basic: value 
+        this.$store.dispatch('ProjectDocuments/loadDocuments', {
+          project_id: this.activeProject.entity_id,
+          basic: value
         })
       }, 500);
     },
@@ -204,7 +203,7 @@ export default {
       EventBus.$emit('onUploadClick')
     },
     formatDate (value){
-      return moment(value).format('L')
+      return this.$moment(value).format('L')
     },
     getIcon (extension) {
       let ext = extension.toLowerCase();
