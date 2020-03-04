@@ -1,20 +1,23 @@
 <template>
   <div class="v-data-table disable-hover theme--light">
-    <SnippetsList 
+    <div v-for="topic in topics">
+      {{topic.name}}-{{topic.snippet_ids}}
+    </div>
+    <sheet-snippet-list 
       :snippets="sheetSnippets"
       :processing="isProcessingNewSnippet"
       @mouseenter="highlightCells($event.from, $event.to)"
       @mouseleave="removeHighlights('remove')"
       @handleDelete="handleSnippetDelete"
     />
-    <RowRange
+    <sheet-row-range
       :rowMode="rowMode"
       :rowsCount="rows"
       :firstRows="firstRows"
       :lastRows="lastRows"
       @change="handleRowRangeChange"
     />
-    <ColumnSelector
+    <sheet-column-selector
       :headings="headings"
       @onChange="changeColumns"
     />
@@ -63,7 +66,7 @@
             </tr>
             <template v-if="!showAllRows">
               <!-- Paginator -->
-              <RowsPaginator
+              <sheet-paginator
                 :rowsCount="rows"
                 :isFetching="isFetching"
                 :firstRows="firstRows"
@@ -106,17 +109,17 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+  import {mapGetters, mapState} from 'vuex';
 import RowsPaginator from './RowsPaginator';
 import RowRange from './RowRange';
 import SnippetsList from './SnippetsList'
 export default {
   name: 'WorkSheet',
   components: {
-    RowsPaginator,
-    RowRange,
-    SnippetsList,
-    'ColumnSelector': () => import('./ColumnSelector')
+    'sheet-paginator': RowsPaginator,
+    'sheet-row-range': RowRange,
+    'sheet-snippet-list': SnippetsList,
+    'sheet-column-selector': () => import('./ColumnSelector')
   },
   props: ['sheetName', 'projectId', 'fileId', 'columns', 'rows', 'activeTab'],
   data: () => ({
@@ -138,6 +141,7 @@ export default {
   }),
   computed: {
     ...mapState('ExcelServices', ['sheetData', 'isLoadingSheetData', 'allSnippets', 'showSnippetsList']),
+    ...mapGetters(['topics']),
     columnsComputed () {
       return this.shownColumns.length ? Math.max(...this.shownColumns) - Math.min(...this.shownColumns) + 1 : this.columns
     },

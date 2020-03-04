@@ -36,7 +36,7 @@
         </v-btn>
       </v-list-item-action>
     </template>
-    <Topics />
+    <snippet-topics :snippet-id="snippet.entity_id" />
   </v-list-group>
 </template>
 
@@ -46,7 +46,7 @@ export default {
   name: 'SnippetListItem',
   props: ['snippet'],
   components: {
-    'Topics': () => import('./SnippetListItemTopic')
+    'snippet-topics': () => import('./SnippetListItemTopic')
   },
   data: () => ({
     isDeleting: false
@@ -69,9 +69,32 @@ export default {
 
 <style lang="scss">
   .snippets-group {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    &:last-child {
+      border-bottom: none;
+    }
     .v-list-item--active::before {
       background: currentColor;
       opacity: 0.16;
+    }
+    &.v-list-group--active {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+    .v-tabs-items {
+      background: transparent;
+    }
+    .v-item-group {
+      overflow-y: hidden;
+    }
+    .v-tab {
+      font-size: 0.7rem;
+      font-weight: 600;
+      align-items: center !important;
+      padding: 12px;
+    }
+    .v-slide-group__next, .v-slide-group__prev {
+      flex: 0 1 35px;
+      min-width: 35px;
     }
   }
 </style>
