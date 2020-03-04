@@ -152,9 +152,7 @@ export default {
     deleteTrade(id) {
       this.$store.dispatch('deleteTrade', id)
               .then(() => {
-                this.dialogRemoveTrade.open = false;
-                this.dialogRemoveTrade.entityId = null;
-                this.dialogRemoveTrade.name = '';
+                this.dialogRemoveTrade = { open: false, entityId: null, name: '' };
               })
               .catch(console.error)
     },

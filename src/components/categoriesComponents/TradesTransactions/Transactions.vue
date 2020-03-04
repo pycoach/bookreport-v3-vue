@@ -196,9 +196,7 @@ export default {
     deleteTransaction(id) {
       this.$store.dispatch('deleteTransaction', id)
               .then(() => {
-                this.dialogRemoveTransaction.open = false;
-                this.dialogRemoveTransaction.entityId = null;
-                this.dialogRemoveTransaction.name = '';
+                this.dialogRemoveTransaction = { open: false, entityId: null, name: '' };
               })
               .catch(console.error)
     },
