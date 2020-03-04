@@ -14,7 +14,7 @@
           </v-text-field>
         </v-card-title>
         <v-spacer />
-        <v-btn  
+        <v-btn
           class="ml-5 btn-primary btn-primary--small"
           @click="addTrade"
         >
@@ -35,7 +35,7 @@
             <td style="width: 40%">{{ trade.name }}</td>
             <td style="width: 60%">{{ trade.description && trade.description.length > 25 ? trade.description.slice(0, 25) + '...' : trade.description || '' }}</td>
             <td>
-              <v-btn icon @click.stop="deleteTrade(trade.entity_id)">
+              <v-btn icon @click.stop="openDeleteTradeConfirmationDialog(trade)">
                 <img class="close-icon" src="../../../assets/icons/trash.svg" alt="" />
               </v-btn>
             </td>
@@ -44,7 +44,7 @@
         </template>
       </v-simple-table>
     </v-card>
-    
+
     <!--Dialog-->
     <v-dialog persistent v-model="dialog" max-width="500">
       <v-card>
@@ -52,19 +52,19 @@
         <v-container grid-list-xl fluid >
           <v-layout row wrap>
             <v-flex xs12 md12>
-              <v-text-field 
+              <v-text-field
                 label="Name*"
                 v-model="tradeName"
               />
             </v-flex>
             <v-flex xs12 md12>
-              <v-textarea 
+              <v-textarea
                 label="Description"
                 v-model="tradeDescription"
                 outlined
                 auto-grow
                 rows="4"
-                row-height="30" 
+                row-height="30"
               />
             </v-flex>
           </v-layout>
@@ -74,15 +74,27 @@
           <v-btn color="primary" text @click="cancelTrade">
             Cancel
           </v-btn>
-          <v-btn 
-            class="ml-5 btn-primary btn-primary--small" 
-            text 
+          <v-btn
+            class="ml-5 btn-primary btn-primary--small"
+            text
             @click="saveTrade"
             :loading="isLoading"
             :disabled="isLoading || !canSave()"
           >
             Save
           </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+<!--    Confirm Delete dialog-->
+    <v-dialog v-model="dialogRemoveTrade.open" persistent max-width="400">
+      <v-card>
+        <v-card-title class="headline">Please confirm</v-card-title>
+        <v-card-text>Are you want to delete <strong>{{dialogRemoveTrade.name}}</strong>?</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" text @click="dialogRemoveTrade.open = false">Cancel</v-btn>
+          <v-btn color="red darken-1" text @click="deleteTrade(dialogRemoveTrade.entityId)">Confirm</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -109,7 +121,12 @@ export default {
       tradeEditMode: 'Create',
       tradeSearch: '',
       activeTrade: {},
-      isLoading: false
+      isLoading: false,
+      dialogRemoveTrade: {
+        open: false,
+        entityId: null,
+        name: '',
+      }
     }
   },
   methods: {
@@ -134,6 +151,17 @@ export default {
     },
     deleteTrade(id) {
       this.$store.dispatch('deleteTrade', id)
+              .then(() => {
+                this.dialogRemoveTrade.open = false;
+                this.dialogRemoveTrade.entityId = null;
+                this.dialogRemoveTrade.name = '';
+              })
+              .catch(console.error)
+    },
+    openDeleteTradeConfirmationDialog(trade) {
+      this.dialogRemoveTrade.open = true;
+      this.dialogRemoveTrade.entityId = trade.entity_id;
+      this.dialogRemoveTrade.name = trade.name;
     },
     async saveTrade() {
       const self = this;

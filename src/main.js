@@ -9,6 +9,8 @@ import AuthService from './auth/AuthService'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
 import vueMoment from 'vue-moment'
 
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
 // Importing all css styles
 import './lib/globalCss'
 
@@ -29,7 +31,15 @@ router.beforeEach((to, from, next) => {
   } else {
     next()
   }
-})
+});
+router.beforeResolve((to, from, next) => {
+    // If this isn't an initial page load.
+    if (to.name) {
+        // Start the route progress bar.
+        NProgress.start()
+    }
+    next()
+});
 
 router.afterEach((to, from) => {
 	setTimeout(() => {
@@ -46,12 +56,14 @@ router.afterEach((to, from) => {
 			miniLayout.scrollTop = 0;
 		}
 	}, 200);
-})
+    // Complete the animation of the route progress bar.
+    NProgress.done()
+});
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
-Vue.use(Notifications, { velocity })
-Vue.use( CKEditor )
+Vue.use(Notifications, { velocity });
+Vue.use( CKEditor );
 
 Vue.use(vueMoment);
 
@@ -60,4 +72,4 @@ new Vue({
   store,
   vuetify,
   render: h => h(App)
-}).$mount('#app')
+}).$mount('#app');
