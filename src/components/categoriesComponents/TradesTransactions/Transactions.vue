@@ -12,7 +12,7 @@
             v-model="transactionSearch"
           />
         </v-card-title>
-        <v-btn  
+        <v-btn
           class="ml-5 btn-primary btn-primary--small  "
           @click="addTransaction"
         >
@@ -34,7 +34,7 @@
             <td v-if="!transaction.description" style="width: 60%"></td>
             <td v-else style="width: 60%">{{ transaction.description.length > 25 ? transaction.description.slice(0, 25) + '...' : transaction.description }}</td>
             <td>
-              <v-btn icon @click.stop="deleteTransaction(transaction.entity_id)">
+              <v-btn icon @click.stop="openDeleteTransactionConfirmationDialog(transaction)">
                 <img class="close-icon" src="../../../assets/icons/trash.svg" alt="">
               </v-btn>
             </td>
@@ -60,7 +60,7 @@
         </template>
       </v-list> -->
     </v-card>
-    
+
     <!--Dialog-->
     <v-dialog persistent v-model="dialog" max-width="500">
       <v-card>
@@ -68,13 +68,13 @@
         <v-container grid-list-xl fluid >
           <v-layout row wrap>
             <v-flex xs12 md12>
-              <v-text-field 
+              <v-text-field
                 label="Name*"
-                v-model="transactionName" 
+                v-model="transactionName"
               />
             </v-flex>
             <v-flex xs12 md12>
-              <v-textarea 
+              <v-textarea
                 label="Description"
                 v-model="transactionDescription"
                 outlined
@@ -100,15 +100,27 @@
           <v-btn color="primary" text @click="closeTransaction">
             CANCEL
           </v-btn>
-          <v-btn 
-            class="ml-5 btn-primary btn-primary--small" 
-            text 
+          <v-btn
+            class="ml-5 btn-primary btn-primary--small"
+            text
             @click="saveTransaction"
             :loading="isLoading"
             :disabled="isLoading || !canSave()"
           >
             SAVE
           </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <!--    Confirm Delete dialog-->
+    <v-dialog v-model="dialogRemoveTransaction.open" persistent max-width="400">
+      <v-card>
+        <v-card-title class="headline">Please confirm</v-card-title>
+        <v-card-text>Are you want to delete <strong>{{dialogRemoveTransaction.name}}</strong>?</v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" text @click="dialogRemoveTransaction.open = false">Cancel</v-btn>
+          <v-btn color="red darken-1" text @click="deleteTransaction(dialogRemoveTransaction.entityId)">Confirm</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -137,7 +149,12 @@ export default {
       transactionEditMode: 'Create',
       transactionSearch: '',
       activeTransaction: {},
-      isLoading: false
+      isLoading: false,
+      dialogRemoveTransaction: {
+        open: false,
+        entityId: null,
+        name: '',
+      }
     }
   },
   methods: {
@@ -178,6 +195,17 @@ export default {
     },
     deleteTransaction(id) {
       this.$store.dispatch('deleteTransaction', id)
+              .then(() => {
+                this.dialogRemoveTransaction.open = false;
+                this.dialogRemoveTransaction.entityId = null;
+                this.dialogRemoveTransaction.name = '';
+              })
+              .catch(console.error)
+    },
+    openDeleteTransactionConfirmationDialog(transaction) {
+      this.dialogRemoveTransaction.open = true;
+      this.dialogRemoveTransaction.entityId = transaction.entity_id;
+      this.dialogRemoveTransaction.name = transaction.name;
     },
     closeTransaction() {
       this.transactionName = ''
