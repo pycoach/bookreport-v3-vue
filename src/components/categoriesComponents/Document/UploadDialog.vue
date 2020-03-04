@@ -61,7 +61,6 @@
 
 <script>
 import { EventBus } from '../../../components/categoriesComponents/Document/eventBus.js';
-import moment from 'moment'
 import Dropzone from '../../../components/categoriesComponents/Dropzone/VueDropzone';
 import {mapGetters, mapState} from "vuex";
 export default {
@@ -118,10 +117,9 @@ export default {
     async uploadFiles () {
       let files = this.$refs.dropzone.dropzone.files;
       if (files.length === 0) return;
-      const now = new Date();
       let newUploadSet = {
-        'start_time_utc': moment.utc(now).format(),
-        'start_time_local': moment(now).format()
+        'start_time_utc': this.$moment.utc().format(),
+        'start_time_local': this.$moment().format()
       };
       if (this.$route.params.id) newUploadSet['project_id'] = this.$route.params.id;
       newUploadSet['files'] = files.map(file => {return file['name']});

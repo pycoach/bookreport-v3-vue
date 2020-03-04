@@ -57,7 +57,7 @@ function handleDocumentLoad(context, response) {
     context.commit('apiError', documents['error'])
   } else {
     context.commit('setDocuments', documents.files);
-    context.commit('setFilesCount', documents.total_files.value);
+    context.commit('setFilesCount', documents.total_files && documents.total_files.value);
     context.commit('setFilterByUploadSet', documents.file_count_by_uploadset);
     context.commit('setFilterByTrade', documents.file_count_by_trade);
     context.commit('setFilterByTransaction', documents.file_count_by_transaction);
