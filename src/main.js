@@ -7,6 +7,8 @@ import Notifications from 'vue-notification'
 import velocity from 'velocity-animate'
 import AuthService from './auth/AuthService'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
+import vueMoment from 'vue-moment'
+
 import NProgress from 'nprogress'
 import 'nprogress/nprogress.css'
 // Importing all css styles
@@ -62,6 +64,8 @@ Vue.config.productionTip = false;
 
 Vue.use(Notifications, { velocity });
 Vue.use( CKEditor );
+
+Vue.use(vueMoment);
 
 new Vue({
   router,
