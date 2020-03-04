@@ -20,7 +20,7 @@
             </v-list-item-content>
             <v-btn
             icon
-            v-if="item.user_id !== user.user_id"
+            v-if="hasUserRemoveAccess(item, user.user_id)"
             @click.stop="openDeleteUserConfirmationDialog(item)"
             >
               <img class="close-icon" src="../../../assets/icons/trash.svg" alt="">
@@ -124,12 +124,13 @@
         open: false,
         entityId: null,
         name: '',
-      }
+      },
+      loggedUserRoleForProject: {}
     }
   },
   methods: {
     canSave() {
-      if(this.userEditMode == 'Edit') return true
+      if(this.userEditMode === 'Edit') return true;
       return /^[^.\s]/.test(this.username) && /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i.test(String(this.useremail).toLowerCase())
     },
     async saveProject(e) {
@@ -186,9 +187,7 @@
       this.userEditMode = 'Edit'
     },
     openDeleteUserConfirmationDialog(item) {
-      this.dialogRemoveUser.open = true;
-      this.dialogRemoveUser.entityId = item.user_id;
-      this.dialogRemoveUser.name = item.name;
+      this.dialogRemoveUser = { open: true, entityId: item.user_id, name: item.name };
     },
     async deleteUser(user_id) {
 
@@ -248,6 +247,36 @@
           })
         }
       })
+    },
+    hasUserRemoveAccess(item, user_id) {
+      if (item.user_id === user_id) {
+        return false
+      }
+
+      let hasAccess = false;
+      switch (this.loggedUserRoleForProject.role) {
+        case 'provider admin':
+          hasAccess = true;
+          break;
+        case 'provider analyst':
+          break;
+        case 'client manager':
+          if (item.role === 'client analyst') {
+            hasAccess = true;
+          }
+          break;
+        case 'client analyst':
+          break;
+        case 'participant':
+          break;
+      }
+      return hasAccess;
+    }
+  },
+  created(){
+    const _loggedUserRoleForProject = this.users.filter(user => user.user_id === this.user.user_id);
+    if(_loggedUserRoleForProject[0] !== undefined && _loggedUserRoleForProject[0]['role']) {
+      this.loggedUserRoleForProject = _loggedUserRoleForProject[0];
     }
   },
   watch: {
