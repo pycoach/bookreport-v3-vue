@@ -30,12 +30,12 @@
       :ripple="false"
       class="base-y-padding top-custom-tabs" >
       <v-tab :disabled="activeProjectIsLoading">Overview</v-tab>
-      <v-tab :disabled="activeProjectIsLoading">Trades and transactions</v-tab>
-      <v-tab :disabled="activeProjectIsLoading">Documents</v-tab>
-      <v-tab :disabled="activeProjectIsLoading">Reports</v-tab>
-      <v-tab :disabled="activeProjectIsLoading">Workesheet</v-tab>
-      <v-tab :disabled="activeProjectIsLoading">Topic</v-tab>
-      <v-tab :disabled="activeProjectIsLoading">Users</v-tab>
+      <v-tab :disabled="activeProjectIsLoading || id=='new'">Trades and transactions</v-tab>
+      <v-tab :disabled="activeProjectIsLoading || id=='new'">Documents</v-tab>
+      <v-tab :disabled="activeProjectIsLoading || id=='new'">Reports</v-tab>
+      <v-tab :disabled="activeProjectIsLoading || id=='new'">Workesheet</v-tab>
+      <v-tab :disabled="activeProjectIsLoading || id=='new'">Topic</v-tab>
+      <v-tab :disabled="activeProjectIsLoading || id=='new'">Users</v-tab>
   
       <v-tab-item key="1" class="overview">
         <v-row class="mb-6">
