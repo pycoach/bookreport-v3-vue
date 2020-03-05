@@ -40,7 +40,7 @@
 </template>
 
 <script>
-import {EventBus} from "../EventBus";
+import {EventBus} from "../../../EventBus";
 export default {
   name: 'TopicItem',
   props: ['topic', 'snippetId', 'deleteonly'],

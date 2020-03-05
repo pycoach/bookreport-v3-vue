@@ -52,7 +52,7 @@
         </v-card>
       </div>
     </v-scroll-x-transition>
-    <view-topic-dialog />
+    <topic-view-dialog />
   </div>
 </template>
 
@@ -64,7 +64,7 @@ export default {
   props: ['snippets', 'processing'],
   components: {
     'snippet-list-item': SnippetListItem,
-    'view-topic-dialog': () => import('./ViewTopic')
+    'topic-view-dialog': () => import('./Topics/TopicViewDialog')
   },
   computed: {
     ...mapState('WorkSheet', ['showSnippetsList', 'isLoadingSheetData']),

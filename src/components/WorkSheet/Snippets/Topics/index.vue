@@ -12,10 +12,10 @@
       <v-tab>All Topics</v-tab>
       <v-tab>New Topic</v-tab>
       <v-tab-item key="1">
-        <snippet-topics :snippet-id="snippetId" />
+        <topic-list-snippet :snippet-id="snippetId" />
       </v-tab-item>
       <v-tab-item key="2">
-        <all-topics :snippet-id="snippetId" />
+        <topic-list-all :snippet-id="snippetId" />
       </v-tab-item>
       <v-tab-item key="3">
         <v-list class="text-center">
@@ -39,15 +39,15 @@
 </template>
 
 <script>
-import SnippetTopics from './SnippetTopics';
-import AllTopics from './AllTopics';
+import TopicListSnippet from './TopicListSnippet';
+import TopicListAll from './TopicListAll';
 export default {
   name: 'SnippetListItemTopic',
   props: ['snippetId'],
   components: {
-    SnippetTopics,
-    AllTopics,
-    'add-topic': () => import('../categoriesComponents/Topic/AddTopic')
+    TopicListSnippet,
+    TopicListAll,
+    'add-topic': () => import('../../../categoriesComponents/Topic/AddTopic')
   },
   data: () => ({
     activeTab: 0

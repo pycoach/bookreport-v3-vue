@@ -106,17 +106,17 @@
 </template>
 
 <script>
-  import {mapGetters, mapState} from 'vuex';
-import RowsPaginator from './RowsPaginator';
-import RowRange from './RowRange';
-import SnippetsList from './SnippetsList'
+import {mapGetters, mapState} from 'vuex';
+import SheetPaginator from './SheetPaginator';
+import SheetRowRange from './SheetRowRange';
+import SnippetList from './Snippets/SnippetList'
 export default {
   name: 'WorkSheet',
   components: {
-    'sheet-paginator': RowsPaginator,
-    'sheet-row-range': RowRange,
-    'sheet-snippet-list': SnippetsList,
-    'sheet-column-selector': () => import('./ColumnSelector')
+    SheetPaginator,
+    SheetRowRange,
+    'sheet-snippet-list': SnippetList,
+    'sheet-column-selector': () => import('./SheetColumnSelector')
   },
   props: ['sheetName', 'projectId', 'fileId', 'columns', 'rows', 'activeTab'],
   data: () => ({
@@ -138,7 +138,6 @@ export default {
   }),
   computed: {
     ...mapState('WorkSheet', ['sheetData', 'isLoadingSheetData', 'allSnippets', 'showSnippetsList']),
-    ...mapGetters(['topics']),
     columnsComputed () {
       return this.shownColumns.length ? Math.max(...this.shownColumns) - Math.min(...this.shownColumns) + 1 : this.columns
     },

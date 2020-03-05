@@ -30,7 +30,7 @@
 
 <script>
 import {mapGetters} from 'vuex';
-import { EventBus } from '../EventBus.js';
+import { EventBus } from '../../../EventBus.js';
 import TopicItem from './TopicItem';
 export default {
   name: 'SnippetTopics',

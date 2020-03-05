@@ -46,7 +46,7 @@ export default {
   name: 'SnippetListItem',
   props: ['snippet'],
   components: {
-    'snippet-topics': () => import('./SnippetListItemTopic')
+    'snippet-topics': () => import('./Topics')
   },
   data: () => ({
     isDeleting: false
