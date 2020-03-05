@@ -13,8 +13,8 @@
           >
           </v-text-field>
         </v-card-title>
-        <v-btn 
-          v-show="userRole == 'provider admin'" 
+        <v-btn
+          v-show="userRole == 'provider admin'"
           :disabled="topic_types.length == 0"
           class="ml-5 btn-primary btn-primary--small"
           @click="addTopic">
@@ -135,9 +135,9 @@
           <v-btn  color="primary" text @click="cancelTopic">
             Cancel
           </v-btn>
-          <v-btn  
-          class="ml-5 btn-primary btn-primary--small"  
-          text 
+          <v-btn
+          class="ml-5 btn-primary btn-primary--small"
+          text
           :disabled="!canSave() || saving"
           :loading="saving"
           @click="saveTopic">
@@ -152,9 +152,13 @@
 <script>
 import {mapGetters, mapState} from 'vuex';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import CKEditor from '@ckeditor/ckeditor5-vue'
 
 export default {
   name: 'Topics',
+  components:{
+    'ckeditor': CKEditor.component
+  },
   computed: {
     ...mapGetters(['activeProject', 'topic_types', 'topics', 'trades', 'transactions']),
     ...mapState('ProjectEditor', ['userRole']),
@@ -197,14 +201,14 @@ export default {
     addTopic() {
       this.topicEditMode = 'Create';
       this.topicDialog = true;
-    
+
       let newTopic = {
         'project_id': this.activeProject.entity_id,
         'snippet_ids': []
-      };      
-      
-      Object.assign(this.activeTopic, newTopic);      
-      
+      };
+
+      Object.assign(this.activeTopic, newTopic);
+
       this.topicName = '';
       this.topicTrade = '';
       this.topicTransaction = '';
@@ -216,11 +220,11 @@ export default {
       Object.assign(this.selectedTopicType, this.topic_types[0])
       this.topicTypeChanged()
     },
-  
+
     editTopic(topic) {
       this.topicEditMode = 'Edit';
       this.topicDialog = true;
-    
+
       Object.assign(this.activeTopic, topic);
       this.topicName = topic['name'];
       this.topicTrade = topic['trade'];
@@ -230,13 +234,13 @@ export default {
       this.topicSnippetsIds = topic['snippet_ids'];
 
       for(let i = 0; i < this.topic_types.length; i++){
-        if (topic['topic_type_id'] == this.topic_types[i].entity_id){
-          Object.assign(this.selectedTopicType, this.topic_types[i])        
+        if (topic['topic_type_id'] === this.topic_types[i].entity_id){
+          Object.assign(this.selectedTopicType, this.topic_types[i])
         }
-      }    
+      }
       this.topicVariables = topic['variables']
     },
-  
+
     deleteTopic(id) {
       this.$store.dispatch('deleteTopic', id)
     },
@@ -251,7 +255,7 @@ export default {
       topic['transaction'] = this.topicTransaction;
       topic['document'] = this.topicDocumentType;
       topic['template'] = this.topicTemplate;
-    
+
       let variables = [];
       for(let i = 0;i < this.topicVariables.length; i++){
         let variable = {
@@ -278,11 +282,11 @@ export default {
       if(this.topicTemplate){
         let topicTemplate = this.topicTemplate
         for(let i = 0; i < this.topicVariables.length; i++){
-        let topicVariable = this.topicVariables[i] 
+        let topicVariable = this.topicVariables[i]
           topicTemplate = topicTemplate.replace('%%' + topicVariable.name + '%%', topicVariable.value)
         }
         this.topicTemplatePreview = topicTemplate
-      }      
+      }
     },
     changeTopicVariables(){
       this.updateTemplatePreview()
@@ -290,7 +294,7 @@ export default {
     topicTypeChanged() {
       this.topicName = this.selectedTopicType.name + ' for ' + this.topicTransaction;
       this.topicTemplate = this.selectedTopicType.template;
-    
+
       this.topicVariables = [];
       for(let i = 0; i < this.selectedTopicType.variables.length; i++){
         let variable_type = this.selectedTopicType.variables[i];
@@ -312,11 +316,11 @@ export default {
       if(this.selectedTopicType){
         this.topicName = this.selectedTopicType.name + ' for ' + this.topicTransaction
       }
-      
+
     },
     topicTemplate() {
       this.updateTemplatePreview()
-    }    
+    }
   }
 }
 </script>

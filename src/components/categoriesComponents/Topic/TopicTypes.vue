@@ -14,7 +14,7 @@
           </v-text-field>
         </v-card-title>
         <v-spacer></v-spacer>
-        <v-btn 
+        <v-btn
           class="ml-5 btn-primary btn-primary--small"
           @click="addTopicType"
         >
@@ -52,19 +52,19 @@
         <v-container grid-list-xl fluid >
           <v-layout row wrap>
             <v-flex xs12 md4 py-0>
-              <v-text-field 
-                label="Name*"                
+              <v-text-field
+                label="Name*"
                 v-model="topicTypeName"
               />
             </v-flex>
             <v-flex xs12 md8 py-0>
-              <v-textarea 
+              <v-textarea
                 label="Description"
-                v-model="topicTypeDescription"                
+                v-model="topicTypeDescription"
                 outlined
                 auto-grow
                 rows="2"
-                row-height="10" 
+                row-height="10"
               />
             </v-flex>
             <v-flex xs12 md12 py-0>
@@ -129,19 +129,19 @@
         </v-container>
         <v-card-actions >
           <v-spacer></v-spacer>
-          <v-btn 
-            color="primary" 
-            text 
+          <v-btn
+            color="primary"
+            text
             @click="cancelTopicType"
-             class="ml-5 btn-primary-outline btn-primary-outline--small" 
+             class="ml-5 btn-primary-outline btn-primary-outline--small"
           >
             Cancel
           </v-btn>
-          <v-btn 
+          <v-btn
             :disabled="!canSave() || topicTypeVariables.length == 1 || saving"
-            class="ml-5 btn-primary btn-primary--small" 
+            class="ml-5 btn-primary btn-primary--small"
             :loading="saving"
-            text 
+            text
             @click="saveTopicType"
           >
             SAVE
@@ -155,9 +155,13 @@
 <script>
 import {mapGetters} from "vuex";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
+import CKEditor from '@ckeditor/ckeditor5-vue'
 
 export default {
   name: 'TopicTypes',
+  components:{
+    'ckeditor': CKEditor.component
+  },
   computed: {
     ...mapGetters(['activeProject', 'topic_types']),
     filteredTopicTypes() {
@@ -208,7 +212,7 @@ export default {
     addTopicType() {
       this.topicTypeEditMode = 'Create';
       this.topicTypeDialog = true;
-    
+
       let newTopicType = {
         'project_id': this.activeProject.entity_id
       };
@@ -229,11 +233,11 @@ export default {
 
       Object.assign(this.activeTopicTypeVariable, {});
     },
-  
+
     editTopicType(topicType) {
       this.topicTypeEditMode = 'Edit';
       this.topicTypeDialog = true;
-    
+
       Object.assign(this.activeTopicType, topicType);
       this.topicTypeName = topicType['name'];
       this.topicTypeDescription = topicType['description'];
@@ -263,8 +267,8 @@ export default {
         }
       }
       this.activeTopicType['variables'] = this.topicTypeVariables;
-      this.activeTopicType['template'] = this.topicTypeTemplate;      
-      
+      this.activeTopicType['template'] = this.topicTypeTemplate;
+
       this.saving = true
       let ret = await this.$store.dispatch('saveTopicType', this.activeTopicType).then((data) => {
         if(!data['error'])return true
@@ -275,7 +279,7 @@ export default {
         this.topicTypeDialog = false
         Object.assign(this.activeTopicType, {})
       }
-      this.saving = false  
+      this.saving = false
     },
     cancelTopicType() {
       this.topicTypeDialog = false;
@@ -288,34 +292,34 @@ export default {
     },
     addTopicTypeVariable() {
       if(this.activeTopicTypeVariable.name && this.activeTopicTypeVariable.data_type){
-      
+
         this.activeTopicTypeVariable.edit = false;
         this.topicTypeVariables.splice(this.topicTypeVariables.length-1, 0, this.activeTopicTypeVariable);
         this.activeTopicTypeVariable = {}
       }
-    
+
     },
-  
+
     clearTopicTypeVariable() {
       this.activeTopicTypeVariable = {}
     },
     editTopicTypeVariable(variable) {
       Object.assign(this.activeTopicTypeVariable, variable);
-    
+
       for(let i = 0; i < this.topicTypeVariables.length; i ++){
         this.topicTypeVariables[i].edit = this.topicTypeVariables[i].name === variable.name;
       }
     },
-  
+
     deleteTopicTypeVariable(variable) {
       for(let i = 0; i < this.topicTypeVariables.length; i ++){
         if(this.topicTypeVariables[i].name === variable.name){
           this.topicTypeVariables.splice(i, 1)
         }
       }
-    
+
     },
-  
+
     saveTopicTypeVariable(variable) {
       for(let i = 0; i < this.topicTypeVariables.length; i ++){
         if(this.topicTypeVariables[i].name === variable.name){
@@ -326,7 +330,7 @@ export default {
       this.topicTypeVariables[this.topicTypeVariables.length-1].edit = true;
       this.activeTopicTypeVariable = {}
       this.updateTemplatePreview()
-    },  
+    },
     cancelTopicTypeVariable(variable) {
       for(let i = 0; i < this.topicTypeVariables.length; i ++){
         if(this.topicTypeVariables[i].id === variable.id){
@@ -336,10 +340,10 @@ export default {
       this.topicTypeVariables[this.topicTypeVariables.length-1].edit = true;
       this.activeTopicTypeVariable = {}
     },
-    updateTemplatePreview(){      
+    updateTemplatePreview(){
       let topicTypeTemplate = this.topicTypeTemplate
       for(let i = 0; i < this.topicTypeVariables.length; i++){
-       let topicTypeVariable = this.topicTypeVariables[i]        
+       let topicTypeVariable = this.topicTypeVariables[i]
         topicTypeTemplate = topicTypeTemplate.replace('%%' + topicTypeVariable.name + '%%', topicTypeVariable.example_value)
       }
       this.topicTypePreview = topicTypeTemplate

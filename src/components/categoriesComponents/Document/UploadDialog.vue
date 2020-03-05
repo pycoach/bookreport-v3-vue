@@ -69,7 +69,7 @@ export default {
     Dropzone,
   },
   computed: {
-    ...mapGetters(['activeProject', 'user']),
+    ...mapGetters(['activeProject', 'user', 'trades', 'transactions']),
     ...mapGetters('ProjectDocuments', ['searchLastPayload']),
     ...mapState('ProjectEditor', ['user_id']),
     selectedTradeList () {
@@ -174,6 +174,14 @@ export default {
       this.selectedDocumentTrades = [];
       this.$refs.dropzone.dropzone.removeAllFiles(true);
       this.uploading = false
+    },
+  },
+  watch:{
+    fileDialog() {
+      if (this.fileDialog) {
+        this.documentTrades = [...this.trades].map(trade => trade.name);
+        this.documentTransactions = [...this.transactions].map(trade => trade.name);
+      }
     }
   }
 }
