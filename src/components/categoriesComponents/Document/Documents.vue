@@ -11,7 +11,7 @@
                 <v-text-field
                   class="card-search"
                   @input="onSearch"
-                  v-model="searchQuery" 
+                  v-model="searchQuery"
                   placeholder="Find Documents"
                 >
                 </v-text-field>
@@ -19,7 +19,7 @@
                 <v-btn fab small text disabled>
                   <v-icon>file_download</v-icon>
                 </v-btn>
-                <v-btn fab small text :disabled="!filesSelected" @click="deleteDocuments">
+                <v-btn fab small text :disabled="!filesSelectedForDelete" @click="deleteDocuments">
                   <v-icon>delete</v-icon>
                 </v-btn>
                 <v-btn class="btn-primary btn-primary--small ml-3" @click="handleUploadDialog">
@@ -42,8 +42,8 @@
           >
             <template v-slot:body="{ items }">
               <tbody>
-                <tr 
-                  v-for="item in items" 
+                <tr
+                  v-for="item in items"
                   :key="item.entity_id"
                   @click.stop="handlePreviewFile(item)"
                 >
@@ -70,8 +70,8 @@
               </tbody>
             </template>
           </v-data-table>
-          <v-pagination 
-            v-model="options.page" 
+          <v-pagination
+            v-model="options.page"
             :length="Math.ceil( getDocumentsCount / options.itemsPerPage || 1)"
             :total-visible="4"
           />
@@ -110,7 +110,6 @@
 </template>
 
 <script>
-import moment from 'moment';
 import {mapGetters} from 'vuex';
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
 import * as far from '@fortawesome/fontawesome-free-regular/index';
@@ -130,13 +129,17 @@ export default {
   computed: {
     ...mapGetters(['activeProject', 'user']),
     ...mapGetters('ProjectDocuments', ['searchOptions', 'searchLastPayload', 'getDocuments', 'getDocumentsCount', 'documentsLoading']),
-    getSelected () {
-      let selected;
-      return selected = this.selected.map(item => item.entity_id);
+    getSelectedFilesForDelete () {
+      let selectedFileIds = [];
+      this.selected.forEach(item => {
+        if(item.archived === false && !selectedFileIds.includes(item.entity_id)){
+          selectedFileIds.push(item.entity_id);
+        }
+      });
+      return selectedFileIds;
     },
-    filesSelected () {
-      let selected = this.selected.map(item => item.Name);
-      return selected.length > 0
+    filesSelectedForDelete () {
+      return  this.selected.some(item => item.archived === false);
     }
   },
   data () {
@@ -191,9 +194,9 @@ export default {
     onSearch(value) {
       if (this.timer) clearTimeout(this.timer);
       this.timer = setTimeout(() => {
-        this.$store.dispatch('ProjectDocuments/loadDocuments', { 
-          project_id: this.activeProject.entity_id, 
-          basic: value 
+        this.$store.dispatch('ProjectDocuments/loadDocuments', {
+          project_id: this.activeProject.entity_id,
+          basic: value
         })
       }, 500);
     },
@@ -204,7 +207,7 @@ export default {
       EventBus.$emit('onUploadClick')
     },
     formatDate (value){
-      return moment(value).format('L')
+      return this.$moment(value).format('L')
     },
     getIcon (extension) {
       let ext = extension.toLowerCase();
@@ -253,13 +256,13 @@ export default {
       }
     },
     deleteDocuments () {
-      const selectedFileIds = this.getSelected;
+      const selectedFileIds = this.getSelectedFilesForDelete;
       if (!selectedFileIds) return;
       this.deleteDialog = true;
     },
     async confirmDelete () {
       let promises = [];
-      const selectedDocumentIds = this.getSelected;
+      const selectedDocumentIds = this.getSelectedFilesForDelete;
       this.isDeleting = true
       let self = this;
       function deleteRequest(id) {

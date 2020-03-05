@@ -1,6 +1,5 @@
-import Vue from 'vue'
-import api from 'Api'
-import moment from "moment";
+import api from 'Api';
+import moment from 'moment';
 
 const URL = '/search';
 
@@ -57,7 +56,7 @@ function handleDocumentLoad(context, response) {
     context.commit('apiError', documents['error'])
   } else {
     context.commit('setDocuments', documents.files);
-    context.commit('setFilesCount', documents.total_files.value);
+    context.commit('setFilesCount', documents.total_files && documents.total_files.value);
     context.commit('setFilterByUploadSet', documents.file_count_by_uploadset);
     context.commit('setFilterByTrade', documents.file_count_by_trade);
     context.commit('setFilterByTransaction', documents.file_count_by_transaction);
@@ -84,6 +83,9 @@ const actions = {
     // Delete the property when the value is empty
     for (let key in newPayload) {
       if (key !== 'file_size' && key !== 'page_size' && (newPayload[key] === '' || newPayload[key] === null)) delete newPayload[key]
+    }
+    if (newPayload['include_archive'] === undefined) {
+      newPayload['include_archive'] = false;
     }
     context.commit('setLastPayload', newPayload);
     context.commit('setLoading', true);

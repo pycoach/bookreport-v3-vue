@@ -56,11 +56,14 @@
 
 <script>
 import {mapGetters, mapState} from 'vuex';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import CKEditor from '@ckeditor/ckeditor5-vue'
 
 export default {
   name: 'Topics',
   components: {
-    'add-topic': () => import('./AddTopic')
+    'add-topic': () => import('./AddTopic'),
+    'ckeditor': CKEditor.component
   },
   computed: {
     ...mapGetters(['topic_types', 'topics']),

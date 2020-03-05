@@ -1,4 +1,5 @@
 import axios from 'axios'
+import NProgress from 'nprogress'
 
 function responseSuccess(response) {
   return response;
@@ -23,7 +24,19 @@ export default () => {
     baseURL: process.env.VUE_APP_ROOT_API,
     headers: headers,
     crossdomain: true
-  })
+  });
+
+  // before a request is made start the nprogress
+  axiosInstance.interceptors.request.use(config => {
+    NProgress.start();
+    return config
+  });
+
+// before a response is returned stop nprogress
+  axiosInstance.interceptors.response.use(response => {
+    NProgress.done();
+    return response
+  });
 
   axiosInstance.interceptors.response.use(
     response => responseSuccess(response), error =>
