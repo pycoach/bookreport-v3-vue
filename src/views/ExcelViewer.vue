@@ -90,7 +90,7 @@ export default {
     WorkSheet
   },
   computed: {
-    ...mapState('ExcelServices', ['workbookSummary', 'isLoading', 'showSnippetsList'])
+    ...mapState('WorkSheet', ['workbookSummary', 'isLoading', 'showSnippetsList'])
   },
   data: () => ({
     tabs: 0,
@@ -103,7 +103,7 @@ export default {
   },
   methods: {
     requestWorkbookSummary () {
-      this.$store.dispatch('ExcelServices/loadWorkbookSummary', this.file_id)
+      this.$store.dispatch('WorkSheet/loadWorkbookSummary', this.file_id)
     },
     handleCellSelect (id) {
       id ? this.isSelecting = true : this.isSelecting = false;
@@ -120,7 +120,7 @@ export default {
       this.$refs.workSheet[0].resetSelection()
     },
     toggleSnippetsList () {
-      this.$store.commit('ExcelServices/TOGGLE_SNIPPETS_LIST')
+      this.$store.commit('WorkSheet/TOGGLE_SNIPPETS_LIST')
     },
     toggleRowRangeDialog () {
       EventBus.$emit('toggleRowRangeDialog')

@@ -1,20 +1,20 @@
 <template>
   <div class="v-data-table disable-hover theme--light">
-    <SnippetsList 
+    <sheet-snippet-list 
       :snippets="sheetSnippets"
       :processing="isProcessingNewSnippet"
       @mouseenter="highlightCells($event.from, $event.to)"
       @mouseleave="removeHighlights('remove')"
       @handleDelete="handleSnippetDelete"
     />
-    <RowRange
+    <sheet-row-range
       :rowMode="rowMode"
       :rowsCount="rows"
       :firstRows="firstRows"
       :lastRows="lastRows"
       @change="handleRowRangeChange"
     />
-    <ColumnSelector
+    <sheet-column-selector
       :headings="headings"
       @onChange="changeColumns"
     />
@@ -63,7 +63,7 @@
             </tr>
             <template v-if="!showAllRows">
               <!-- Paginator -->
-              <RowsPaginator
+              <sheet-paginator
                 :rowsCount="rows"
                 :isFetching="isFetching"
                 :firstRows="firstRows"
@@ -106,17 +106,17 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import RowsPaginator from './RowsPaginator';
-import RowRange from './RowRange';
-import SnippetsList from './SnippetsList'
+import {mapGetters, mapState} from 'vuex';
+import SheetPaginator from './SheetPaginator';
+import SheetRowRange from './SheetRowRange';
+import SnippetList from './Snippets/SnippetList'
 export default {
   name: 'WorkSheet',
   components: {
-    RowsPaginator,
-    RowRange,
-    SnippetsList,
-    'ColumnSelector': () => import('./ColumnSelector')
+    SheetPaginator,
+    SheetRowRange,
+    'sheet-snippet-list': SnippetList,
+    'sheet-column-selector': () => import('./SheetColumnSelector')
   },
   props: ['sheetName', 'projectId', 'fileId', 'columns', 'rows', 'activeTab'],
   data: () => ({
@@ -137,7 +137,7 @@ export default {
     isComputingSnippets: false
   }),
   computed: {
-    ...mapState('ExcelServices', ['sheetData', 'isLoadingSheetData', 'allSnippets', 'showSnippetsList']),
+    ...mapState('WorkSheet', ['sheetData', 'isLoadingSheetData', 'allSnippets', 'showSnippetsList']),
     columnsComputed () {
       return this.shownColumns.length ? Math.max(...this.shownColumns) - Math.min(...this.shownColumns) + 1 : this.columns
     },
@@ -274,7 +274,7 @@ export default {
         file_id: this.fileId,
         sheet: this.activeTab
       };
-      return this.$store.dispatch('ExcelServices/loadSheetData', payload)
+      return this.$store.dispatch('WorkSheet/loadSheetData', payload)
     },
     requestSheetDataDetailed (e) {
       const { firstRows, lastRows } = e;
@@ -290,7 +290,7 @@ export default {
         first_rows: firstRows,
         last_rows: lastRows
       };
-      return this.$store.dispatch('ExcelServices/loadSheetDataDetailed', payload).then(() => {
+      return this.$store.dispatch('WorkSheet/loadSheetDataDetailed', payload).then(() => {
         this.firstRows = firstRows;
         this.lastRows = lastRows;
         this.scrappingCells();
@@ -310,7 +310,7 @@ export default {
         file_id: this.fileId,
         sheet: this.activeTab,
       };
-      return this.$store.dispatch('ExcelServices/loadSheetDataAll', payload).then(() => {
+      return this.$store.dispatch('WorkSheet/loadSheetDataAll', payload).then(() => {
         this.scrappingCells();
         this.renderSnippets();
         this.showAllRows = true;
@@ -329,7 +329,7 @@ export default {
         sheetName: this.sheetName,
         ...this.selectedCells
       };
-      this.$store.dispatch('ExcelServices/addSnippet', payload).then((res) => {
+      this.$store.dispatch('WorkSheet/addSnippet', payload).then((res) => {
         this.allSnippets.push(res);
         this.renderSnippets()
       }).finally(() => {
@@ -342,7 +342,7 @@ export default {
         return
       }
       this.isComputingSnippets = true;
-      this.$store.dispatch('ExcelServices/loadSnippets', { file_id: this.fileId }).then(() => {
+      this.$store.dispatch('WorkSheet/loadSnippets', { file_id: this.fileId }).then(() => {
         this.renderSnippets()
       }).finally(() => {
         this.isComputingSnippets = false

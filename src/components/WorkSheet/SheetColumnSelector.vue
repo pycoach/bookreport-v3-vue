@@ -5,13 +5,14 @@
   >
     <v-card>
       <v-card-title class="headline">Choose Columns to Display</v-card-title>
-      <v-container grid-list-xl fluid>
+      <v-container grid-list-xl fluid class="py-4">
         <v-checkbox
           v-for="(heading, i) in headings"
           :key="i"
           v-model="selected"
           :label="heading"
           :value="heading"
+          hide-details
           color="primary"
           class="ma-0"
         />

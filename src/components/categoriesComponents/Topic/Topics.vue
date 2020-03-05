@@ -6,16 +6,16 @@
           <div class="vertical-divider vertical-divider--small"></div>
           <img class="mr-3" src="../../../assets/search.svg" height="17px" alt="">
           <v-text-field
-                  class="card-search"
-                  label="Find Topics"
-                  placeholder="Find Topics"
-                  v-model="topicSearch"
+            class="card-search"
+            label="Find Topics"
+            placeholder="Find Topics"
+            v-model="topicSearch"
           >
           </v-text-field>
         </v-card-title>
-        <v-btn
-          v-show="userRole == 'provider admin'"
-          :disabled="topic_types.length == 0"
+        <v-btn 
+          v-show="userRole === 'provider admin'" 
+          :disabled="topic_types.length === 0"
           class="ml-5 btn-primary btn-primary--small"
           @click="addTopic">
           + Add
@@ -41,126 +41,28 @@
           </tbody>
 
           <tbody v-else>
-          <tr v-for="(topic, index) in filteredTopics" :key="topic.entity_id">
-            <td style="width: 100%">{{ topic.name }}</td>
-          </tr>
+            <tr v-for="(topic, index) in filteredTopics" :key="topic.entity_id">
+              <td style="width: 100%">{{ topic.name }}</td>
+            </tr>
           </tbody>
 
         </template>
       </v-simple-table>
     </v-card>
     <!--Dialog-->
-    <v-dialog persistent v-model="topicDialog" max-width="80%"   class="dialog-window" >
-      <v-card>
-        <v-card-title class="headline">{{topicEditMode}} Topic</v-card-title>
-        <v-container grid-list-xl fluid >
-          <v-layout row wrap>
-            <v-flex xs12 md6 py-0>
-              <v-select label="Topic Type"
-                        v-model="selectedTopicType"
-                        item-text="name"
-                        return-object
-                        :items="topic_types"
-              >
-              </v-select>
-            </v-flex>
-            <v-flex xs12 md6 py-0>
-              <v-text-field label="Topic Name"
-                            v-model="topicName"
-              >
-              </v-text-field>
-            </v-flex>
-            <v-flex xs12 md6 py-0>
-              <v-select label="Trade"
-                        v-model="topicTrade"
-                        item-text="name"
-                        :items="trades"
-              >
-              </v-select>
-            </v-flex>
-            <v-flex xs12 md6 py-0>
-              <v-select label="Transaction"
-                        v-model="topicTransaction"
-                        item-text="name"
-                        :items="transactions"
-              >
-              </v-select>
-            </v-flex>
-            <v-flex xs12 md6 py-0>
-              <v-select label="Document"
-                        v-model="topicDocumentType"
-                        item-text="name"
-                        :items="documentTypes"
-              >
-              </v-select>
-            </v-flex>
-
-            <v-flex xs12 md6 py-0>
-              <table class="topictype-table" style="width:100%;">
-                <tr>
-                  <th>Name</th>
-                  <th>Value</th>
-                </tr>
-                <tr v-for="(item, index) in topicVariables" :key="index">
-                  <td>
-                    <div>{{item.name}}</div>
-                  </td>
-                  <td>
-                    <v-text-field v-model="topicVariables[index].value" :label="item.place_holder" @change="changeTopicVariables"></v-text-field>
-                  </td>
-                </tr>
-              </table>
-            </v-flex>
-
-            <v-flex xs12 md12>
-              <v-tabs grow v-model="topicTab">
-                <v-tab>Template</v-tab>
-                <v-tab>Preview</v-tab>
-              </v-tabs>
-
-              <v-divider/>
-              <v-tabs-items v-model="topicTab">
-                <v-tab-item key="topic-1">
-                  <ckeditor :editor="editor" v-model="topicTemplate" :config="editorConfig" />
-                </v-tab-item>
-                <v-tab-item key="topic-2">
-                  <div class="tiptap-vuetify-editor__content" v-html="topicTemplatePreview"/>
-                </v-tab-item>
-              </v-tabs-items>
-            </v-flex>
-          </v-layout>
-        </v-container>
-        <v-card-actions >
-          <v-spacer></v-spacer>
-          <v-btn  color="primary" text @click="cancelTopic">
-            Cancel
-          </v-btn>
-          <v-btn
-          class="ml-5 btn-primary btn-primary--small"
-          text
-          :disabled="!canSave() || saving"
-          :loading="saving"
-          @click="saveTopic">
-            Save
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+    <add-topic ref="addTopicDialog" />
   </v-col>
 </template>
 
 <script>
 import {mapGetters, mapState} from 'vuex';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import CKEditor from '@ckeditor/ckeditor5-vue'
-
 export default {
   name: 'Topics',
-  components:{
-    'ckeditor': CKEditor.component
+  components: {
+    'add-topic': () => import('./AddTopic')
   },
   computed: {
-    ...mapGetters(['activeProject', 'topic_types', 'topics', 'trades', 'transactions']),
+    ...mapGetters(['topic_types', 'topics']),
     ...mapState('ProjectEditor', ['userRole']),
     filteredTopics() {
       return this.topics.filter(topic => {
@@ -170,157 +72,22 @@ export default {
   },
   data() {
     return {
-      topicName: '',
-      topicTrade: '',
-      topicTransaction: '',
-      topicDocumentType: '',
-      topicTemplate: '',
-      topicTemplatePreview: '',
-      topicVariables: [],
-      topicSnippetsIds: [],
-      selectedTopicType: {},
-      topicDialog: false,
-      topicEditMode: 'Create',
-      topicSearch:'',
-      activeTopic: {},
-      topicTab: null,
-      saving: false,
-      documentTypes: ["Fund - Financial","Fund - Memo", "Investment - Financial", "Investment - Legal",
-        "Investment - Memo", "Investment - Value Model"],
-      editor: ClassicEditor,
-      editorData: '<p>Content of the editor.</p>',
-      editorConfig: {
-        // The configuration of the editor.
-      }
+      topicSearch:''
     }
   },
   methods: {
-    canSave() {
-      return /^[^.\s]/.test(this.topicName)
-    },
     addTopic() {
-      this.topicEditMode = 'Create';
-      this.topicDialog = true;
-
-      let newTopic = {
-        'project_id': this.activeProject.entity_id,
-        'snippet_ids': []
-      };
-
-      Object.assign(this.activeTopic, newTopic);
-
-      this.topicName = '';
-      this.topicTrade = '';
-      this.topicTransaction = '';
-      this.topicDocumentType = '';
-      this.topicTemplate = '';
-      this.topicTemplatePreview = '';
-      this.topicVariables = []
-
-      Object.assign(this.selectedTopicType, this.topic_types[0])
-      this.topicTypeChanged()
+      this.$refs.addTopicDialog.addTopic()
     },
-
     editTopic(topic) {
-      this.topicEditMode = 'Edit';
-      this.topicDialog = true;
-
-      Object.assign(this.activeTopic, topic);
-      this.topicName = topic['name'];
-      this.topicTrade = topic['trade'];
-      this.topicTransaction = topic['transaction'];
-      this.topicDocumentType = topic['document'];
-      this.topicTemplate = topic['template'];
-      this.topicSnippetsIds = topic['snippet_ids'];
-
-      for(let i = 0; i < this.topic_types.length; i++){
-        if (topic['topic_type_id'] === this.topic_types[i].entity_id){
-          Object.assign(this.selectedTopicType, this.topic_types[i])
-        }
-      }
-      this.topicVariables = topic['variables']
+      this.$refs.addTopicDialog.editTopic(topic)
     },
-
     deleteTopic(id) {
-      this.$store.dispatch('deleteTopic', id)
+      this.$refs.addTopicDialog.deleteTopic(id)
     },
     cancelTopic() {
-      this.topicDialog=false
+      this.$refs.addTopicDialog.cancelTopic()
     },
-    async saveTopic() {
-      let topic = Object.assign({}, this.activeTopic);
-      topic['topic_type_id'] = this.selectedTopicType.entity_id;
-      topic['name'] = this.topicName;
-      topic['trade'] = this.topicTrade;
-      topic['transaction'] = this.topicTransaction;
-      topic['document'] = this.topicDocumentType;
-      topic['template'] = this.topicTemplate;
-
-      let variables = [];
-      for(let i = 0;i < this.topicVariables.length; i++){
-        let variable = {
-          'name': this.topicVariables[i].name,
-          'data_type': this.topicVariables[i].data_type,
-          'value': this.topicVariables[i].value,
-        };
-        variables.push(variable)
-      }
-      topic['variables'] = variables;
-
-      this.saving = true
-      let ret = await this.$store.dispatch('saveTopic', topic).then((data) => {
-        if(!data['error'])return true
-        return false
-      })
-
-      if (ret){
-        this.topicDialog = false;
-      }
-      this.saving = false
-    },
-    updateTemplatePreview() {
-      if(this.topicTemplate){
-        let topicTemplate = this.topicTemplate
-        for(let i = 0; i < this.topicVariables.length; i++){
-        let topicVariable = this.topicVariables[i]
-          topicTemplate = topicTemplate.replace('%%' + topicVariable.name + '%%', topicVariable.value)
-        }
-        this.topicTemplatePreview = topicTemplate
-      }
-    },
-    changeTopicVariables(){
-      this.updateTemplatePreview()
-    },
-    topicTypeChanged() {
-      this.topicName = this.selectedTopicType.name + ' for ' + this.topicTransaction;
-      this.topicTemplate = this.selectedTopicType.template;
-
-      this.topicVariables = [];
-      for(let i = 0; i < this.selectedTopicType.variables.length; i++){
-        let variable_type = this.selectedTopicType.variables[i];
-        let variable = {
-          'name': variable_type.name,
-          'data_type':variable_type.data_type,
-          'place_holder': 'ex: ' + variable_type.example_value,
-          'value': ''
-        };
-        this.topicVariables.push(variable)
-      }
-    },
-  },
-  watch: {
-    selectedTopicType() {
-      this.topicTypeChanged()
-    },
-    topicTransaction() {
-      if(this.selectedTopicType){
-        this.topicName = this.selectedTopicType.name + ' for ' + this.topicTransaction
-      }
-
-    },
-    topicTemplate() {
-      this.updateTemplatePreview()
-    }
   }
 }
 </script>

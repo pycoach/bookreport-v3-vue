@@ -109,7 +109,7 @@ const mutations = {
   },
   topicSuccess(state, topic_type) {
     for (let i = 0; i < state.topics.length; i++) {
-      if (state.topics[i].entity_id == topic_type.entity_id) {
+      if (state.topics[i].entity_id === topic_type.entity_id) {
         state.topics.splice(i, 1)
       }
     }
@@ -122,7 +122,7 @@ const mutations = {
   },
   topicDeleted(state, id) {
     for (let i = 0; i < state.topics.length; i++) {
-      if (state.topics[i].entity_id == id) {
+      if (state.topics[i].entity_id === id) {
         state.topics.splice(i, 1)
         Vue.notify({
           group: 'loggedIn',
