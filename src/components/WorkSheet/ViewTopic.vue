@@ -12,7 +12,7 @@
               <strong>Topic Type</strong>
             </div>
             <v-text-field 
-              :value="topic.topic_type_id"
+              :value="topicTypeName && topicTypeName.name"
               readonly
               disabled
               hide-details 
@@ -94,13 +94,22 @@
 </template>
 
 <script>
-import { EventBus } from '../EventBus.js'; 
+import { mapGetters } from "vuex";
+import { EventBus } from '../EventBus.js';
 export default {
   name: 'ViewTopic',
   data: () => ({
     show: false,
     topic: {}
   }),
+  computed: {
+    ...mapGetters(['topic_types']),
+    topicTypeName () {
+      if (this.topic_types) {
+        return this.topic_types.find((type) => type.entity_id === this.topic.topic_type_id)
+      }
+    }
+  },
   mounted () {
     EventBus.$on('handleSnippetTopicView', ((topic) => {
       this.show = !this.show;

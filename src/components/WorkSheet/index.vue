@@ -1,8 +1,5 @@
 <template>
   <div class="v-data-table disable-hover theme--light">
-    <div v-for="topic in topics">
-      {{topic.name}}-{{topic.snippet_ids}}
-    </div>
     <sheet-snippet-list 
       :snippets="sheetSnippets"
       :processing="isProcessingNewSnippet"
@@ -140,7 +137,7 @@ export default {
     isComputingSnippets: false
   }),
   computed: {
-    ...mapState('ExcelServices', ['sheetData', 'isLoadingSheetData', 'allSnippets', 'showSnippetsList']),
+    ...mapState('WorkSheet', ['sheetData', 'isLoadingSheetData', 'allSnippets', 'showSnippetsList']),
     ...mapGetters(['topics']),
     columnsComputed () {
       return this.shownColumns.length ? Math.max(...this.shownColumns) - Math.min(...this.shownColumns) + 1 : this.columns
@@ -278,7 +275,7 @@ export default {
         file_id: this.fileId,
         sheet: this.activeTab
       };
-      return this.$store.dispatch('ExcelServices/loadSheetData', payload)
+      return this.$store.dispatch('WorkSheet/loadSheetData', payload)
     },
     requestSheetDataDetailed (e) {
       const { firstRows, lastRows } = e;
@@ -294,7 +291,7 @@ export default {
         first_rows: firstRows,
         last_rows: lastRows
       };
-      return this.$store.dispatch('ExcelServices/loadSheetDataDetailed', payload).then(() => {
+      return this.$store.dispatch('WorkSheet/loadSheetDataDetailed', payload).then(() => {
         this.firstRows = firstRows;
         this.lastRows = lastRows;
         this.scrappingCells();
@@ -314,7 +311,7 @@ export default {
         file_id: this.fileId,
         sheet: this.activeTab,
       };
-      return this.$store.dispatch('ExcelServices/loadSheetDataAll', payload).then(() => {
+      return this.$store.dispatch('WorkSheet/loadSheetDataAll', payload).then(() => {
         this.scrappingCells();
         this.renderSnippets();
         this.showAllRows = true;
@@ -333,7 +330,7 @@ export default {
         sheetName: this.sheetName,
         ...this.selectedCells
       };
-      this.$store.dispatch('ExcelServices/addSnippet', payload).then((res) => {
+      this.$store.dispatch('WorkSheet/addSnippet', payload).then((res) => {
         this.allSnippets.push(res);
         this.renderSnippets()
       }).finally(() => {
@@ -346,7 +343,7 @@ export default {
         return
       }
       this.isComputingSnippets = true;
-      this.$store.dispatch('ExcelServices/loadSnippets', { file_id: this.fileId }).then(() => {
+      this.$store.dispatch('WorkSheet/loadSnippets', { file_id: this.fileId }).then(() => {
         this.renderSnippets()
       }).finally(() => {
         this.isComputingSnippets = false

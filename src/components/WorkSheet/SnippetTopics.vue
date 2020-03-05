@@ -3,32 +3,41 @@
     nav
     dense
   >
-    <v-list-item-group color="primary">
-      <v-list-item
+    <v-list-item-group 
+      v-if="currentTopics.length" 
+      color="primary"
+    >
+      <topic-item
         v-for="topic in currentTopics"
         :key="topic.entity_id + String(snippetId)"
-        :ripple="false"
-        inactive
-      >
-        <v-list-item-content>
-          <v-list-item-title v-text="topic.name" />
-        </v-list-item-content>
-        <v-list-item-action class="my-0">
-          <v-btn icon small @click="viewTopic(topic)">
-            <v-icon size="medium" color="lighten-1">remove_red_eye</v-icon>
-          </v-btn>
-        </v-list-item-action>
-      </v-list-item>
+        :topic="topic"
+        :snippet-id="snippetId"
+        :deleteonly="true"
+      />
     </v-list-item-group>
+    <v-alert
+      v-else
+      type="warning"
+      color="purple"
+      text
+      dense
+      class="mt-4"
+    >
+      Topics Not found
+    </v-alert>
   </v-list>
 </template>
 
 <script>
 import {mapGetters} from 'vuex';
 import { EventBus } from '../EventBus.js';
+import TopicItem from './TopicItem';
 export default {
   name: 'SnippetTopics',
   props: ['snippetId'],
+  components: {
+    TopicItem
+  },
   computed: {
     ...mapGetters(['topics']),
     currentTopics () {

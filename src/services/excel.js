@@ -152,5 +152,5 @@ export default {
   getters,
   actions,
   mutations,
-  name: 'ExcelServices'
+  name: 'WorkSheet'
 }

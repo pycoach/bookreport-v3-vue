@@ -27,7 +27,7 @@
                   v-for="(snippet, index) in snippets"
                   :key="snippet.cell1 + snippet.cell2 + index"
                   :snippet="snippet"
-                  @handleDelete="deleteSnippet($event)"
+                  @handleDelete="deleteSnippet"
                   @mouseenter="$emit('mouseenter', { from: snippet.cell1, to: snippet.cell2 })"
                   @mouseleave="$emit('mouseleave', { from: snippet.cell1, to: snippet.cell2 })"
                 />
@@ -67,14 +67,14 @@ export default {
     'view-topic-dialog': () => import('./ViewTopic')
   },
   computed: {
-    ...mapState('ExcelServices', ['showSnippetsList', 'isLoadingSheetData']),
+    ...mapState('WorkSheet', ['showSnippetsList', 'isLoadingSheetData']),
   },
   mounted () {
     this.requestTopics()
   },
   methods: {
     toggleList () {
-      this.$store.commit('ExcelServices/TOGGLE_SNIPPETS_LIST')
+      this.$store.commit('WorkSheet/TOGGLE_SNIPPETS_LIST')
     },
     deleteSnippet (entityId) {
       this.$emit('handleDelete', entityId)

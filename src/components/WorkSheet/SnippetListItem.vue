@@ -57,7 +57,7 @@ export default {
       const payload = {
         entity_id: entityId
       };
-      this.$store.dispatch('ExcelServices/deleteSnippets', payload).then(() => {
+      this.$store.dispatch('WorkSheet/deleteSnippets', payload).then(() => {
         this.$emit('handleDelete', entityId)
       }).finally(() => {
         this.isDeleting = false
@@ -95,6 +95,10 @@ export default {
     .v-slide-group__next, .v-slide-group__prev {
       flex: 0 1 35px;
       min-width: 35px;
+    }
+    .v-alert {
+      font-weight: 500;
+      font-size: 13px;
     }
   }
 </style>
