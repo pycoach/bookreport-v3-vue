@@ -1,6 +1,5 @@
-import Vue from 'vue'
-import api from 'Api'
-import moment from "moment";
+import api from 'Api';
+import moment from 'moment';
 
 const URL = '/search';
 
@@ -84,6 +83,9 @@ const actions = {
     // Delete the property when the value is empty
     for (let key in newPayload) {
       if (key !== 'file_size' && key !== 'page_size' && (newPayload[key] === '' || newPayload[key] === null)) delete newPayload[key]
+    }
+    if (newPayload['include_archive'] === undefined) {
+      newPayload['include_archive'] = false;
     }
     context.commit('setLastPayload', newPayload);
     context.commit('setLoading', true);

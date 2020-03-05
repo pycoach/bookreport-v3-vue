@@ -19,7 +19,7 @@
                 <v-btn fab small text disabled>
                   <v-icon>file_download</v-icon>
                 </v-btn>
-                <v-btn fab small text :disabled="!filesSelected" @click="deleteDocuments">
+                <v-btn fab small text :disabled="!filesSelectedForDelete" @click="deleteDocuments">
                   <v-icon>delete</v-icon>
                 </v-btn>
                 <v-btn class="btn-primary btn-primary--small ml-3" @click="handleUploadDialog">
@@ -129,13 +129,17 @@ export default {
   computed: {
     ...mapGetters(['activeProject', 'user']),
     ...mapGetters('ProjectDocuments', ['searchOptions', 'searchLastPayload', 'getDocuments', 'getDocumentsCount', 'documentsLoading']),
-    getSelected () {
-      let selected;
-      return selected = this.selected.map(item => item.entity_id);
+    getSelectedFilesForDelete () {
+      let selectedFileIds = [];
+      this.selected.forEach(item => {
+        if(item.archived === false && !selectedFileIds.includes(item.entity_id)){
+          selectedFileIds.push(item.entity_id);
+        }
+      });
+      return selectedFileIds;
     },
-    filesSelected () {
-      let selected = this.selected.map(item => item.Name);
-      return selected.length > 0
+    filesSelectedForDelete () {
+      return  this.selected.some(item => item.archived === false);
     }
   },
   data () {
@@ -252,13 +256,13 @@ export default {
       }
     },
     deleteDocuments () {
-      const selectedFileIds = this.getSelected;
+      const selectedFileIds = this.getSelectedFilesForDelete;
       if (!selectedFileIds) return;
       this.deleteDialog = true;
     },
     async confirmDelete () {
       let promises = [];
-      const selectedDocumentIds = this.getSelected;
+      const selectedDocumentIds = this.getSelectedFilesForDelete;
       this.isDeleting = true
       let self = this;
       function deleteRequest(id) {
