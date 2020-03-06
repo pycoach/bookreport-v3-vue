@@ -6,24 +6,32 @@
       :item="snippet"
       :deletingSnippetIds="deletingSnippets"
     />
+    <topic-view-dialog />
   </div>
 </template>
 
 <script>
 import SnippetListItem from './SnippetListItem';
+import {mapGetters} from "vuex";
 export default {
   name: 'SnippetsList',
   props: ['snippets', 'deletingSnippets'],
   components: {
-    SnippetListItem
+    SnippetListItem,
+    'topic-view-dialog': () => import('../DocumentSnippetTopics/TopicViewDialog')
   },
   data () {
     return {
       snippetList: []
     }
   },
+  computed: {
+    ...mapGetters(['topics'])
+  },
   mounted () {
-    this.requestTopics()
+    if (!this.topics.length) {
+      this.requestTopics()
+    }
   },
   methods: {
     requestTopics () {

@@ -23,7 +23,7 @@
           x-small
           icon
           :disabled="isDeleting"
-          @click="showTopics = !showTopics"
+          @click="toggleTopics(item.entity_id)"
         >
           <v-icon>bookmark</v-icon>
         </v-btn>
@@ -56,7 +56,7 @@
       </div>
     </div>
     <v-expand-transition>
-      <div v-show="showTopics">
+      <div v-if="showTopics">
         <snippet-topics :snippet-id="item.entity_id" />
       </div>
     </v-expand-transition>
@@ -69,7 +69,7 @@ export default {
   name: 'SnippetItem',
   props: ['item', 'deletingSnippetIds'],
   components: {
-    'snippet-topics': () => import('../Topics/index')
+    'snippet-topics': () => import('../DocumentSnippetTopics')
   },
   data: () => {
     return {
@@ -78,7 +78,11 @@ export default {
     }
   },
   mounted () {
-    this.renderImage()
+    this.renderImage();
+    EventBus.$on('toggleDocumentFileTopics', ((entity_id) => {
+      if (this.item.entity_id === entity_id) return;
+      this.showTopics = false
+    }));
   },
   methods: {
     imageDataToImage (imageData) {
@@ -106,6 +110,10 @@ export default {
         EventBus.$emit('handleSnippetDelete', { entity_id, page_index });
         this.isDeleting = false
       })
+    },
+    toggleTopics (entity_id) {
+      EventBus.$emit('toggleDocumentFileTopics', entity_id);
+      this.showTopics = !this.showTopics
     },
     copyUrl (page_index) {
       let el = document.createElement('input'), text = window.location.origin;

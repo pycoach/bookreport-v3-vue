@@ -82,7 +82,7 @@
 <script>
 import { EventBus } from '@/components/EventBus';
 import {mapState} from 'vuex';
-import WorkSheet from '../components/categoriesComponents/Document/DocumentExcel/index'
+import WorkSheet from '../components/categoriesComponents/Document/DocumentExcel/Sheet'
 export default {
   name: 'ExcelViewer',
   props: ['project_id', 'file_id', 'file_name'],
