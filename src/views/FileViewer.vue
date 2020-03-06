@@ -58,7 +58,7 @@
               class="mx-auto snippet-skeleton"
             />
           </template>
-          <SnippetsList
+          <snippet-list
             v-else
             :snippets="allSnippets"
             :deletingSnippets="deletingSnippets"
@@ -78,11 +78,11 @@ import { mapState, mapGetters } from 'vuex';
 import { EventBus } from '../components/categoriesComponents/Document/Preview/eventBus' 
 import Konva from 'konva'
 import uuid from 'uuid'
-import SnippetsList from '../components/categoriesComponents/Document/Preview/SnippetsList';
+import SnippetList from '../components/categoriesComponents/Document/Preview/SnippetList';
 export default {
   name: 'fileViewer',
   components: {
-    SnippetsList
+    SnippetList
   },
   props: ['id', 'pageIndex'],
   computed: {
