@@ -80,9 +80,9 @@
 </template>
 
 <script>
-import { EventBus } from '../components/EventBus';
+import { EventBus } from '@/components/EventBus';
 import {mapState} from 'vuex';
-import WorkSheet from '../components/WorkSheet/index'
+import WorkSheet from '../components/categoriesComponents/Document/DocumentExcel/index'
 export default {
   name: 'ExcelViewer',
   props: ['project_id', 'file_id', 'file_name'],

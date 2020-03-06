@@ -113,7 +113,7 @@
 import {mapGetters} from 'vuex';
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
 import * as far from '@fortawesome/fontawesome-free-regular/index';
-import { EventBus } from '../../../components/categoriesComponents/Document/eventBus.js';
+import { EventBus } from '@/components/EventBus.js';
 import Vue from "vue";
 export default {
   name: 'Documents',

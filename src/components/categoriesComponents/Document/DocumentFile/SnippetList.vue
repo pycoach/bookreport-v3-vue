@@ -22,6 +22,14 @@ export default {
       snippetList: []
     }
   },
+  mounted () {
+    this.requestTopics()
+  },
+  methods: {
+    requestTopics () {
+      this.$store.dispatch('loadTopics', this.$route.params.project_id)
+    }
+  },
   watch: {
     snippets: function () {
       let list = this.snippets.slice();

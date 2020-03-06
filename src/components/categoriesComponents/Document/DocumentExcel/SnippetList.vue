@@ -64,7 +64,7 @@ export default {
   props: ['snippets', 'processing'],
   components: {
     'snippet-list-item': SnippetListItem,
-    'topic-view-dialog': () => import('./Topics/TopicViewDialog')
+    'topic-view-dialog': () => import('../Topics/TopicViewDialog')
   },
   computed: {
     ...mapState('WorkSheet', ['showSnippetsList', 'isLoadingSheetData']),

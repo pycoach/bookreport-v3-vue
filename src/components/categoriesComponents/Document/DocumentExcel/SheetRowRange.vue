@@ -91,7 +91,7 @@
 </template>
 
 <script>
-import { EventBus } from '../EventBus'; 
+import { EventBus } from '@/components/EventBus'; 
 export default {
   name: 'RowRange',
   props: ['rowMode', 'rowsCount', 'firstRows', 'lastRows'],

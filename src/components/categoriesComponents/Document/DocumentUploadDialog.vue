@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import { EventBus } from '../../../components/categoriesComponents/Document/eventBus.js';
+import { EventBus } from '@/components/EventBus.js';
 import Dropzone from '../../../components/categoriesComponents/Dropzone/VueDropzone';
 import {mapGetters, mapState} from "vuex";
 export default {

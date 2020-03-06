@@ -30,12 +30,12 @@
       :ripple="false"
       class="base-y-padding top-custom-tabs" >
       <v-tab :disabled="activeProjectIsLoading">Overview</v-tab>
-      <v-tab :disabled="activeProjectIsLoading || id=='new'">Trades and transactions</v-tab>
-      <v-tab :disabled="activeProjectIsLoading || id=='new'">Documents</v-tab>
-      <v-tab :disabled="activeProjectIsLoading || id=='new'">Reports</v-tab>
-      <v-tab :disabled="activeProjectIsLoading || id=='new'">Workesheet</v-tab>
-      <v-tab :disabled="activeProjectIsLoading || id=='new'">Topic</v-tab>
-      <v-tab :disabled="activeProjectIsLoading || id=='new'">Users</v-tab>
+      <v-tab :disabled="shouldDisableTab">Trades and transactions</v-tab>
+      <v-tab :disabled="shouldDisableTab">Documents</v-tab>
+      <v-tab :disabled="shouldDisableTab">Reports</v-tab>
+      <v-tab :disabled="shouldDisableTab">Workesheet</v-tab>
+      <v-tab :disabled="shouldDisableTab">Topic</v-tab>
+      <v-tab :disabled="shouldDisableTab">Users</v-tab>
   
       <v-tab-item key="1" class="overview">
         <v-row class="mb-6">
@@ -52,7 +52,6 @@
       </v-tab-item>
   
       <v-tab-item key="3">
-
         <template v-if="(filterType == 'show' && searchType == 'advanced') || (filterType == 'show' && searchType == 'hidden') || (filterType == 'hidden' && searchType == 'hidden')">  
            <Search/>
            <FiltersList />
@@ -61,9 +60,6 @@
            <FiltersList />
            <Search/>
         </template>
-      
-        
-        
         <Documents onPreviewExcel="previewExcel" />
         <UploadDialog />
         <PreviewDialog />
@@ -96,40 +92,26 @@
 <script>
 import { mapGetters, mapState } from 'vuex';
 import QuickEdit from 'vue-quick-edit';
-import Dropzone from '../../../components/categoriesComponents/Dropzone/VueDropzone';
-import Overview from '../../../components/categoriesComponents/Overview'
-import Description from '../../../components/categoriesComponents/Overview/Description'
-import Request from '../../../components/categoriesComponents/Overview/Request'
-import Trades from '../../../components/categoriesComponents/TradesTransactions/Trades'
-import Transactions from '../../../components/categoriesComponents/TradesTransactions/Transactions'
-import TopicTypes from '../../../components/categoriesComponents/Topic/TopicTypes'
-import Topics from '../../../components/categoriesComponents/Topic/Topics'
-import Users from '../../../components/categoriesComponents/Users/Users'
-import UploadDialog from '../../../components/categoriesComponents/Document/UploadDialog'
-import PreviewDialog from '../../../components/categoriesComponents/Document/PreviewDialog';
-import Search from "../../../components/categoriesComponents/Document/Search/Search";
-import FiltersList from "../../../components/categoriesComponents/Document/Filter";
-import Documents from "../../../components/categoriesComponents/Document/Documents";
-import Reports from "../../../components/categoriesComponents/Report/Reports";
+import Dropzone from '@/components/categoriesComponents/Dropzone/VueDropzone';
 export default {
   name: 'ProjectEditor',
-  components: { 
+  components: {
     QuickEdit,
-    Overview,
-    Description,
-    Request,
-    Trades,
-    Transactions,
-    TopicTypes,
-    Topics,
-    Users,
-    UploadDialog,
-    PreviewDialog,
     Dropzone,
-    Search,
-    FiltersList,
-    Documents,
-    Reports,
+    'Overview': () => import('@/components/categoriesComponents/Overview'),
+    'Description': () => import('@/components/categoriesComponents/Overview/Description'),
+    'Request': () => import('@/components/categoriesComponents/Overview/Request'),
+    'Trades': () => import('@/components/categoriesComponents/TradesTransactions/Trades'),
+    'Transactions': () => import('@/components/categoriesComponents/TradesTransactions/Transactions'),
+    'TopicTypes': () => import('@/components/categoriesComponents/Topic/TopicTypes'),
+    'Topics': () => import('@/components/categoriesComponents/Topic/Topics'),
+    'Users': () => import('@/components/categoriesComponents/Users/Users'),
+    'UploadDialog': () => import('@/components/categoriesComponents/Document/DocumentUploadDialog'),
+    'PreviewDialog': () => import('@/components/categoriesComponents/Document/DocumentFile/PreviewDialog'),
+    'Search': () => import('@/components/categoriesComponents/Document/DocumentSearch'),
+    'FiltersList': () => import('@/components/categoriesComponents/Document/DocumentFilter'),
+    'Documents': () => import('@/components/categoriesComponents/Document/Documents'),
+    'Reports': () => import('@/components/categoriesComponents/Report/Reports'),
   },
   props: ['id'],
   mounted() {
@@ -155,7 +137,10 @@ export default {
     ...mapGetters('ProjectDocuments', ['filterType']),
     ...mapGetters(['activeProject', 'user', 'activeProjectIsLoading']),
     ...mapGetters('ProjectDocuments', ['searchLastPayload']),
-    ...mapState('ProjectEditor', ['editMode', 'name', 'users', 'user_id', 'user_ids', 'description', 'clients'])
+    ...mapState('ProjectEditor', ['editMode', 'name', 'users', 'user_id', 'user_ids', 'description', 'clients']),
+    shouldDisableTab () {
+      return this.activeProjectIsLoading || this.id === 'new'
+    }
   },
   
   methods: {

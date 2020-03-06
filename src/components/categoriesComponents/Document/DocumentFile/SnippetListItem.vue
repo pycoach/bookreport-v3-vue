@@ -18,9 +18,19 @@
         From page {{item.page_index}}
       </v-btn>
       <div>
+        <v-btn
+          class="mr-1"
+          x-small
+          icon
+          :disabled="isDeleting"
+          @click="showTopics = !showTopics"
+        >
+          <v-icon>bookmark</v-icon>
+        </v-btn>
         <v-tooltip top>
           <template v-slot:activator="{ on }">
             <v-btn
+              class="mr-1"
               x-small
               icon
               :disabled="isDeleting"
@@ -45,17 +55,26 @@
         </v-btn>
       </div>
     </div>
+    <v-expand-transition>
+      <div v-show="showTopics">
+        <snippet-topics :snippet-id="item.entity_id" />
+      </div>
+    </v-expand-transition>
   </div>
 </template>
 
 <script>
-import { EventBus } from './eventBus.js'; 
+import { EventBus } from '@/components/EventBus.js'; 
 export default {
   name: 'SnippetItem',
   props: ['item', 'deletingSnippetIds'],
+  components: {
+    'snippet-topics': () => import('../Topics/index')
+  },
   data: () => {
     return {
-      isDeleting: false  
+      isDeleting: false,
+      showTopics: false
     }
   },
   mounted () {
@@ -90,7 +109,7 @@ export default {
     },
     copyUrl (page_index) {
       let el = document.createElement('input'), text = window.location.origin;
-      text = text + '/file/viewer/' + this.$route.params.id + '/' + page_index;
+      text = text + '/file/viewer/' + this.$route.params.project_id + '/' + this.$route.params.id + '/' + page_index;
       el.value = text;
       el.setAttribute('readonly', '');
       el.style.position = 'absolute';
@@ -147,6 +166,36 @@ export default {
       .v-skeleton-loader__image {
         height: 146px;
       }
+    }
+    .v-list-item.pa-4 {
+      padding: 0 !important;
+    }
+    .v-list-item--active::before {
+      background: currentColor;
+      opacity: 0.16;
+    }
+    &.v-list-group--active {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+    .v-tabs-items {
+      background: transparent;
+    }
+    .v-item-group {
+      overflow-y: hidden;
+    }
+    .v-tab {
+      font-size: 0.7rem;
+      font-weight: 600;
+      align-items: center !important;
+      padding: 12px;
+    }
+    .v-slide-group__next, .v-slide-group__prev {
+      flex: 0 1 35px;
+      min-width: 35px;
+    }
+    .v-alert {
+      font-weight: 500;
+      font-size: 13px;
     }
   }
 </style>

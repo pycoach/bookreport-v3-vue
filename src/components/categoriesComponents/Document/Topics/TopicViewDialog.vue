@@ -95,7 +95,7 @@
 
 <script>
 import { mapGetters } from "vuex";
-import { EventBus } from '../../../EventBus.js';
+import { EventBus } from '@/components/EventBus.js';
 export default {
   name: 'ViewTopic',
   data: () => ({

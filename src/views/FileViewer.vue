@@ -75,10 +75,10 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import { EventBus } from '../components/categoriesComponents/Document/Preview/eventBus' 
+import { EventBus } from '@/components/EventBus.js' 
 import Konva from 'konva'
 import uuid from 'uuid'
-import SnippetList from '../components/categoriesComponents/Document/Preview/SnippetList';
+import SnippetList from '@/components/categoriesComponents/Document/DocumentFile/SnippetList';
 export default {
   name: 'fileViewer',
   components: {
