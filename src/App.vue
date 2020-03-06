@@ -32,7 +32,7 @@ export default {
      data () {
   return {
       showVersion: true,
-      version: '3.0.2',
+      version: '3.0.3',
       transitionName: 'fade'
     }
   },
