@@ -1,25 +1,41 @@
 <template>
   <div>
-    <SnippetItem 
+    <snippet-list-item 
       v-for="snippet in snippetList" 
       :key="snippet.entity_id + snippet.x + snippet.y + snippet.width + snippet.height" 
       :item="snippet"
       :deletingSnippetIds="deletingSnippets"
     />
+    <topic-view-dialog />
   </div>
 </template>
 
 <script>
-import SnippetItem from './SnippetItem';
+import SnippetListItem from './SnippetListItem';
+import {mapGetters} from "vuex";
 export default {
   name: 'SnippetsList',
   props: ['snippets', 'deletingSnippets'],
   components: {
-    SnippetItem
+    SnippetListItem,
+    'topic-view-dialog': () => import('../DocumentSnippetTopics/TopicViewDialog')
   },
   data () {
     return {
       snippetList: []
+    }
+  },
+  computed: {
+    ...mapGetters(['topics'])
+  },
+  mounted () {
+    if (!this.topics.length) {
+      this.requestTopics()
+    }
+  },
+  methods: {
+    requestTopics () {
+      this.$store.dispatch('loadTopics', this.$route.params.project_id)
     }
   },
   watch: {

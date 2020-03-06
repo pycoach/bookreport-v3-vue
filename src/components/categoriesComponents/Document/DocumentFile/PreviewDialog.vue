@@ -76,14 +76,14 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import { EventBus } from './eventBus.js';
+import { EventBus } from '@/components/EventBus.js';
 export default {
   name: 'PreviewDialog',
   computed: {
     ...mapGetters('ProjectDocuments', ['getDocuments']),
     ...mapState('FilePreview', ['pageMap', 'image', 'pageStatuses', 'isLoadingPreview', 'isLoadingDocumentEvent']),
     url () {
-      return '/file/viewer/' + this.item.file_id + '/' + this.pageIndex
+      return '/file/viewer/' + this.item.project_id + '/' + this.item.file_id + '/' + this.pageIndex
     }
   },
   data() {

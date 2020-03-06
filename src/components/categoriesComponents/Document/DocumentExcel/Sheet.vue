@@ -109,7 +109,7 @@
 import {mapGetters, mapState} from 'vuex';
 import SheetPaginator from './SheetPaginator';
 import SheetRowRange from './SheetRowRange';
-import SnippetList from './Snippets/SnippetList'
+import SnippetList from './SnippetList'
 export default {
   name: 'WorkSheet',
   components: {

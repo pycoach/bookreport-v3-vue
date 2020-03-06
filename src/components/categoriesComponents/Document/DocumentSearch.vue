@@ -1,7 +1,7 @@
 <template>
   <v-btn  v-if="searchType == 'hidden'"  class="mr-3 mb- 2 btn-white "
           @click="onTypeChange('advanced')">
-          <img class="mr-3" src="../../../../assets/search.svg" height="17px" alt="" />
+          <img class="mr-3" src="../../../assets/search.svg" height="17px" alt="" />
           Advanced Search
   </v-btn>
   <v-layout v-else-if="searchType == 'advanced'" wrap>

@@ -126,7 +126,7 @@ const router =  new Router({
       }
     },
     {
-      path: '/file/viewer/:id/:pageIndex',
+      path: '/file/viewer/:project_id/:id/:pageIndex',
       name: 'fileviewer',
       component: FileViewer,
       meta: {

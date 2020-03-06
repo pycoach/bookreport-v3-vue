@@ -57,20 +57,23 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+  import {mapGetters, mapState} from 'vuex';
 import SnippetListItem from './SnippetListItem'
 export default {
   name: 'WorkSheetSnippetsList',
   props: ['snippets', 'processing'],
   components: {
-    'snippet-list-item': SnippetListItem,
-    'topic-view-dialog': () => import('./Topics/TopicViewDialog')
+    SnippetListItem,
+    'topic-view-dialog': () => import('../DocumentSnippetTopics/TopicViewDialog')
   },
   computed: {
     ...mapState('WorkSheet', ['showSnippetsList', 'isLoadingSheetData']),
+    ...mapGetters(['topics'])
   },
   mounted () {
-    this.requestTopics()
+    if (!this.topics.length) {
+      this.requestTopics()
+    }
   },
   methods: {
     toggleList () {

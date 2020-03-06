@@ -33,7 +33,7 @@
 </template>
 
 <script>
-import {EventBus} from "../EventBus";
+import {EventBus} from "@/components/EventBus";
 
 export default {
   name: 'ColumnSelector',

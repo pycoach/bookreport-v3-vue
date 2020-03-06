@@ -13,6 +13,7 @@ module.exports = {
         Api: path.resolve(__dirname, 'src/api/'),
         Components: path.resolve(__dirname, 'src/components/'),
         Views: path.resolve(__dirname, 'src/views/'),
+        '@': path.resolve(__dirname, 'src')
       },
       extensions: ['*', '.js', '.vue', '.json']
     },
